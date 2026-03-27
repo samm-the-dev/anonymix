@@ -1,6 +1,6 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Download, MoreVertical } from 'lucide-react';
+import { Download, Link, MoreVertical, Trash2 } from 'lucide-react';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './StatusBadge';
@@ -49,9 +49,10 @@ function getButtonVariant(status: TapeStatus, done: boolean) {
 
 interface SessionCardProps {
   session: SessionWithTape;
+  onDelete?: () => void;
 }
 
-export function SessionCard({ session }: SessionCardProps) {
+export function SessionCard({ session, onDelete }: SessionCardProps) {
   const navigate = useNavigate();
   const { activeTape, userActionDone, players } = session;
   const status = activeTape?.status ?? 'results';
@@ -61,6 +62,7 @@ export function SessionCard({ session }: SessionCardProps) {
     activeTape?.completedAt,
   );
   const [menuOpen, setMenuOpen] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -104,11 +106,36 @@ export function SessionCard({ session }: SessionCardProps) {
           {menuOpen && (
             <div className="absolute right-0 z-10 mt-1 w-40 rounded-lg border border-border bg-card py-1 shadow-lg">
               <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  const link = `${window.location.origin}/join/${session.id}`;
+                  if (navigator.share) {
+                    navigator.share({ title: `Join ${session.name} on Anonymix`, url: link });
+                  } else {
+                    navigator.clipboard?.writeText(link);
+                  }
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent"
+              >
+                <Link className="h-4 w-4" />
+                Invite
+              </button>
+              <button
                 onClick={handleExport}
                 className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent"
               >
                 <Download className="h-4 w-4" />
                 Export
+              </button>
+              <button
+                onClick={() => {
+                  setMenuOpen(false);
+                  setConfirmDelete(true);
+                }}
+                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-accent"
+              >
+                <Trash2 className="h-4 w-4" />
+                Delete
               </button>
             </div>
           )}
@@ -149,6 +176,16 @@ export function SessionCard({ session }: SessionCardProps) {
 
         {/* Action Button */}
         <button
+          onClick={() => {
+            const base = `/session/${session.id}`;
+            if (status === 'submitting') {
+              navigate(`${base}?action=submit`);
+            } else if (status === 'commenting') {
+              navigate(`${base}?action=comment`);
+            } else {
+              navigate(base);
+            }
+          }}
           className={cn(
             actionButtonVariants({ status: getButtonVariant(status, userActionDone) }),
           )}
@@ -156,6 +193,39 @@ export function SessionCard({ session }: SessionCardProps) {
           {getActionLabel(status, userActionDone)}
         </button>
       </div>
+
+      {/* Delete confirm dialog */}
+      {confirmDelete && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-card p-5">
+            <h3 className="font-display text-base font-semibold text-foreground">
+              Delete session?
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              <span className="font-medium text-foreground">{session.name}</span> and all its tapes,
+              submissions, and comments will be permanently deleted.
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setConfirmDelete(false)}
+                className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  await supabase.from('sessions').delete().eq('id', session.id);
+                  setConfirmDelete(false);
+                  onDelete?.();
+                }}
+                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

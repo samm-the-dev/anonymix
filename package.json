@@ -18,7 +18,9 @@
     "test:prototype:headed": "playwright test --project=prototype-mobile-14 --headed",
     "db:push": "supabase db push",
     "db:advisors": "bash scripts/db-advisors.sh",
-    "db:gen-types": "supabase gen types typescript --project-id mryuusvhdadbjpupzpol > src/lib/database.types.ts"
+    "db:gen-types": "supabase gen types typescript --project-id mryuusvhdadbjpupzpol > src/lib/database.types.ts",
+    "gen:icons": "node scripts/gen-icons.mjs",
+    "gen:og": "node scripts/gen-og.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

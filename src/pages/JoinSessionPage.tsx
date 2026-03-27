@@ -7,6 +7,7 @@ import { useTheme } from '@/hooks/useTheme';
 
 interface InviteData {
   sessionName: string;
+  description: string;
   adminName: string;
   memberCount: number;
   members: { avatar: string; avatarColor: string }[];
@@ -16,13 +17,14 @@ interface InviteData {
 export function JoinSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
-  const { player, user } = useAuthContext();
+  const { player } = useAuthContext();
   const { theme, toggleTheme } = useTheme();
 
   const [invite, setInvite] = useState<InviteData | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [isFirstTimer, setIsFirstTimer] = useState(false);
 
   useEffect(() => {
     if (!sessionId) return;
@@ -30,7 +32,7 @@ export function JoinSessionPage() {
     async function fetchInvite(sid: string) {
       const { data: session } = await supabase
         .from('sessions')
-        .select('name, admin_id, players:session_players(player_id, players(name, avatar, avatar_color))')
+        .select('name, description, admin_id, players:session_players(player_id, players(name, avatar, avatar_color))')
         .eq('id', sid)
         .single();
 
@@ -52,23 +54,49 @@ export function JoinSessionPage() {
         .eq('session_id', sid)
         .order('created_at');
 
-      const members = (session.players as unknown as { player_id: string; players: { name: string; avatar: string; avatar_color: string } }[]) ?? [];
+      const members = (session.players as unknown as { player_id: string; players: { name: string; avatar: string; avatar_color: string } | null }[]) ?? [];
 
       setInvite({
         sessionName: session.name,
+        description: session.description,
         adminName: admin?.name ?? 'Someone',
         memberCount: members.length,
-        members: members.map((m) => ({
-          avatar: m.players.avatar,
-          avatarColor: m.players.avatar_color,
-        })),
+        members: members
+          .filter((m) => m.players !== null)
+          .map((m) => ({
+            avatar: m.players!.avatar,
+            avatarColor: m.players!.avatar_color,
+          })),
         tapes: (tapes ?? []).map((t) => ({ title: t.title, prompt: t.prompt })),
       });
+
+      if (player) {
+        // Check if already a member of this session — redirect to session view
+        const { data: alreadyMember } = await supabase
+          .from('session_players')
+          .select('player_id')
+          .eq('session_id', sid)
+          .eq('player_id', player.id)
+          .single();
+
+        if (alreadyMember) {
+          navigate(`/session/${sid}`, { replace: true });
+          return;
+        }
+
+        // Check if user has any existing sessions (first-timer check)
+        const { count } = await supabase
+          .from('session_players')
+          .select('*', { count: 'exact', head: true })
+          .eq('player_id', player.id);
+        setIsFirstTimer((count ?? 0) === 0);
+      }
+
       setLoading(false);
     }
 
     fetchInvite(sessionId);
-  }, [sessionId]);
+  }, [sessionId, player, navigate]);
 
   async function handleJoin() {
     if (!player || !sessionId) return;
@@ -154,6 +182,11 @@ export function JoinSessionPage() {
         {invite.sessionName}
       </h1>
 
+      {/* Description */}
+      {invite.description && (
+        <p className="mt-1 text-center text-sm text-muted-foreground">{invite.description}</p>
+      )}
+
       {/* Member avatars */}
       <div className="mt-4 flex items-center justify-center">
         {invite.members.map((m, i) => (
@@ -190,14 +223,14 @@ export function JoinSessionPage() {
         </div>
       )}
 
-      {/* Explainer for context */}
-      {!user && (
-        <div className="mt-5 text-xs leading-relaxed text-muted-foreground">
+      {/* Explainer for first-timers */}
+      {isFirstTimer && (
+        <div className="mt-5 w-full text-center text-xs leading-relaxed text-muted-foreground">
           <p className="mb-1.5">For each Tape you'll:</p>
-          <ul className="ml-3 space-y-1">
-            <li>- Anonymously contribute to a playlist around the theme</li>
-            <li>- Comment on the playlist picks once you've listened</li>
-            <li>- See all submitters and comments once everyone has commented</li>
+          <ul className="inline-block list-disc space-y-1 pl-4 text-left">
+            <li>Anonymously contribute to a playlist around the theme</li>
+            <li>Comment on the playlist picks once you've listened</li>
+            <li>See all submitters and comments once comments are in</li>
           </ul>
         </div>
       )}

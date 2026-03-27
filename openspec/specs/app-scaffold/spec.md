@@ -1,11 +1,11 @@
 ## ADDED Requirements
 
-### Requirement: Vite + React + Convex project initialization
-The project SHALL initialize a Vite + React 19 + TypeScript application with Convex as the backend. The `src/` directory SHALL contain all client-side application code. The `convex/` directory SHALL contain all Convex backend code (schema, functions, seed data).
+### Requirement: Vite + React + Supabase project initialization
+The project SHALL be a Vite 7 + React 19 + TypeScript application with Supabase as the backend. The `src/` directory SHALL contain all client-side application code. The `supabase/` directory SHALL contain migrations, seed data, config, and advisor ignore list.
 
 #### Scenario: Dev server starts successfully
 - **WHEN** the developer runs `npm run dev`
-- **THEN** both the Vite dev server and Convex dev backend SHALL start, and the app SHALL be accessible in the browser
+- **THEN** the Vite dev server SHALL start and the app SHALL be accessible in the browser
 
 #### Scenario: TypeScript compilation
 - **WHEN** the developer runs `npm run build`
@@ -41,15 +41,43 @@ The app SHALL use Quicksand as the display font (headings, app title) and Nunito
 - **THEN** the app title and session card titles SHALL render in Quicksand, and body text SHALL render in Nunito Sans
 
 ### Requirement: App shell with routing
-The app SHALL render a shell with a header containing the app title ("Anonymix") and a React Router outlet for page content. Routes SHALL be defined for Session Home (`/`) and stub routes for future pages.
+The app SHALL render a Layout shell with a header (CassetteTape icon + "Anonymix" title, theme toggle), a React Router outlet for page content, and a fixed bottom navigation bar (Sessions + Profile). Auth-gated routing SHALL redirect unauthenticated users to the login page. Public routes (`/privacy`, `/terms`) SHALL be accessible without auth.
 
 #### Scenario: Root route renders Session Home
-- **WHEN** the user navigates to `/`
+- **WHEN** an authenticated user navigates to `/`
 - **THEN** the Session Home page SHALL render within the app shell
 
-#### Scenario: Unknown routes
+#### Scenario: Unknown routes redirect
 - **WHEN** the user navigates to an undefined route
-- **THEN** the app SHALL render a fallback (404 or redirect to `/`)
+- **THEN** the app SHALL redirect to `/`
+
+### Requirement: Supabase CLI integration
+The project SHALL include `supabase` as a dev dependency with npm scripts: `db:push` (push migrations), `db:advisors` (run advisor checks with filtering), `db:gen-types` (regenerate TypeScript types from remote schema).
+
+#### Scenario: Push migrations
+- **WHEN** the developer runs `npm run db:push`
+- **THEN** pending migrations SHALL be applied to the linked Supabase project
+
+### Requirement: Advisor check with ignore list
+The `db:advisors` script SHALL run Supabase advisors and filter out warnings listed in `supabase/advisor-ignore` (by cache_key). Non-ignored warnings SHALL cause a non-zero exit code.
+
+#### Scenario: Ignored warning filtered
+- **WHEN** `auth_leaked_password_protection` is in the ignore list
+- **THEN** the advisor script SHALL not report it
+
+### Requirement: Post-push advisor reminder hook
+A Claude Code PostToolUse hook SHALL fire after any Bash command containing `db:push` or `db push`, injecting a reminder to run `npm run db:advisors`.
+
+#### Scenario: Hook fires after push
+- **WHEN** a migration is pushed via `npx supabase db push`
+- **THEN** the hook SHALL inject a context reminder about running advisors
+
+### Requirement: Icon and OG banner generation
+The project SHALL include `gen:icons` (renders `public/favicon.svg` to ICO, 192px, 512px, and maskable PNG via Playwright) and `gen:og` (renders `public/og-banner.html` to 1200x630 PNG).
+
+#### Scenario: Generate icons
+- **WHEN** the developer runs `npm run gen:icons`
+- **THEN** favicon.ico, icon-192.png, icon-512.png, and icon-512-maskable.png SHALL be generated
 
 ### Requirement: Testing infrastructure
 The project SHALL configure Vitest for unit testing with jsdom environment and @testing-library/react. Playwright SHALL be configured for e2e testing.

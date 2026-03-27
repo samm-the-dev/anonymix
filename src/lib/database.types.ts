@@ -146,6 +146,7 @@ export interface Database {
           tape_id: string;
           player_id: string;
           song_name: string;
+          artist_name: string;
           created_at: string;
         };
         Insert: {
@@ -153,6 +154,7 @@ export interface Database {
           tape_id: string;
           player_id: string;
           song_name: string;
+          artist_name?: string;
           created_at?: string;
         };
         Update: {
@@ -160,6 +162,7 @@ export interface Database {
           tape_id?: string;
           player_id?: string;
           song_name?: string;
+          artist_name?: string;
         };
         Relationships: [
           {

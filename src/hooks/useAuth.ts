@@ -17,6 +17,7 @@ interface UseAuthResult extends AuthState {
   signInWithMagicLink: (email: string) => Promise<{ error: string | null }>;
   signOut: () => Promise<void>;
   createPlayer: (name: string, avatar: string, avatarColor: string) => Promise<void>;
+  updatePlayer: (name: string, avatar: string, avatarColor: string) => Promise<void>;
 }
 
 export function useAuth(): UseAuthResult {
@@ -78,7 +79,9 @@ export function useAuth(): UseAuthResult {
   const signInWithMagicLink = useCallback(async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: window.location.origin },
+      options: {
+        emailRedirectTo: window.location.origin + (localStorage.getItem('anonymix-pending-path') ?? ''),
+      },
     });
     return { error: error?.message ?? null };
   }, []);
@@ -121,5 +124,24 @@ export function useAuth(): UseAuthResult {
     [state.user],
   );
 
-  return { ...state, signInWithProvider, signInWithMagicLink, signOut, createPlayer };
+  const updatePlayer = useCallback(
+    async (name: string, avatar: string, avatarColor: string) => {
+      if (!state.player) return;
+
+      const { error } = await supabase
+        .from('players')
+        .update({ name, avatar, avatar_color: avatarColor })
+        .eq('id', state.player.id);
+
+      if (error) throw error;
+
+      setState((prev) => ({
+        ...prev,
+        player: prev.player ? { ...prev.player, name, avatar, avatarColor } : null,
+      }));
+    },
+    [state.player],
+  );
+
+  return { ...state, signInWithProvider, signInWithMagicLink, signOut, createPlayer, updatePlayer };
 }

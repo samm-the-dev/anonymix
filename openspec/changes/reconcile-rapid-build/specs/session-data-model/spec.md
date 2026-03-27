@@ -1,4 +1,4 @@
-## ADDED Requirements
+## MODIFIED Requirements
 
 ### Requirement: Session document schema
 The Supabase Postgres schema SHALL define a `sessions` table with the following columns: `id` (uuid, PK), `name` (text, not null), `description` (text, not null, default ''), `admin_id` (uuid, FK to players), `ended` (boolean, not null, default false), `created_at` (timestamptz). Session membership SHALL be tracked via a separate `session_players` join table with composite PK `(session_id, player_id)`.
@@ -36,38 +36,12 @@ The Supabase Postgres schema SHALL define a `submissions` table with: `id` (uuid
 - **WHEN** a player tries to insert a second submission for the same tape
 - **THEN** Postgres SHALL reject the insert with a unique violation
 
-### Requirement: Comment document schema
-The Supabase Postgres schema SHALL define a `comments` table with: `id` (uuid, PK), `tape_id` (uuid, FK to tapes, cascade delete), `player_id` (uuid, FK to players, cascade delete), `text` (text, not null), `created_at` (timestamptz).
-
-#### Scenario: Comment references tape and player
-- **WHEN** a comment is inserted
-- **THEN** it SHALL reference valid tape and player records
-
 ### Requirement: Query — list sessions for current user
-A client-side query SHALL first fetch session IDs where the current player is a member (via `session_players`), then fetch those sessions with their tapes, membership, and submission/comment status. Results SHALL be sorted by active tape deadline ascending (soonest deadline first, no-deadline sessions last).
+A client-side query SHALL first fetch session IDs where the current player is a member (via `session_players`), then fetch those sessions with their tapes, membership, and submission/comment status. Results SHALL be sorted by active tape deadline ascending.
 
 #### Scenario: Only member sessions returned
 - **WHEN** a user queries their sessions
 - **THEN** only sessions where they are in `session_players` SHALL be returned
-
-#### Scenario: Sessions sorted by deadline urgency
-- **WHEN** the user has sessions with tape deadlines of tomorrow, next week, and none
-- **THEN** the sessions SHALL be returned in order: tomorrow, next week, no deadline
-
-#### Scenario: Active tape selection
-- **WHEN** a session has tapes with statuses [results, submitting, results]
-- **THEN** the active tape SHALL be the one with status `submitting` (actionable over completed)
-
-### Requirement: Query — user action state per tape
-The query SHALL indicate whether the current user has completed the action for the active tape (submitted during submitting phase, commented during commenting phase).
-
-#### Scenario: User has not yet submitted
-- **WHEN** the active tape is in `submitting` status and the user has no submission
-- **THEN** the action state SHALL indicate `not done`
-
-#### Scenario: User has submitted
-- **WHEN** the active tape is in `submitting` status and the user has a submission
-- **THEN** the action state SHALL indicate `done`
 
 ### Requirement: Row-Level Security
 All tables SHALL have RLS enabled. Policies SHALL enforce: authenticated users can read any player/session/tape/session_players (for invite previews), but can only write to their own data. Session admins can delete sessions. Players can join sessions and manage their own submissions/comments. Helper functions `current_player_id()` and `is_session_member()` SHALL use `set search_path = ''` and `security definer`.
@@ -76,9 +50,8 @@ All tables SHALL have RLS enabled. Policies SHALL enforce: authenticated users c
 - **WHEN** a non-admin user tries to insert a tape into a session they don't admin
 - **THEN** the RLS policy SHALL reject the insert
 
-### Requirement: Dev seed data
-A seed script (`supabase/seed.sql`) SHALL populate the Supabase database with demo data covering all status variants: submitting (not done), submitting (done), commenting (not done), commenting (done), playlist_ready, and results. Seed data SHALL include multiple sessions with multiple players.
+## REMOVED Requirements
 
-#### Scenario: Seed data covers all status variants
-- **WHEN** the seed script runs after migrations
-- **THEN** the database SHALL contain sessions and tapes covering all 4 tape statuses and both user-action-done states
+### Requirement: Convex schema definitions
+**Reason**: Backend pivoted from Convex to Supabase. All Convex-specific schema definitions, query functions, and mutation functions are replaced by Supabase Postgres tables, RLS policies, and client-side queries.
+**Migration**: All data model behavior is now defined via Supabase migrations in `supabase/migrations/`. Client queries use `@supabase/supabase-js`.

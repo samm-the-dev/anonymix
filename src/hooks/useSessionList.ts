@@ -7,6 +7,7 @@ interface UseSessionListResult {
   sessions: SessionWithTape[] | undefined;
   loading: boolean;
   error: string | null;
+  refetch: () => void;
 }
 
 /**
@@ -185,5 +186,5 @@ export function useSessionList(): UseSessionListResult {
     };
   }, [fetchSessions]);
 
-  return { sessions, loading, error };
+  return { sessions, loading, error, refetch: fetchSessions };
 }

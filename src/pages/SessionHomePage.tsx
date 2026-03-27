@@ -44,7 +44,7 @@ function CollapsibleSection({ title, count, defaultExpanded, children }: Collaps
 
 export function SessionHomePage() {
   const navigate = useNavigate();
-  const { sessions, loading, error } = useSessionList();
+  const { sessions, loading, error, refetch } = useSessionList();
 
   if (loading) {
     return (
@@ -82,7 +82,7 @@ export function SessionHomePage() {
         {activeSessions.length > 0 ? (
           <div className="lg:grid lg:grid-cols-2">
             {activeSessions.map((session) => (
-              <SessionCard key={session.id} session={session} />
+              <SessionCard key={session.id} session={session} onDelete={refetch} />
             ))}
           </div>
         ) : (
@@ -101,7 +101,7 @@ export function SessionHomePage() {
           {completedSessions.length > 0 ? (
             <div className="lg:grid lg:grid-cols-2">
               {completedSessions.map((session) => (
-                <SessionCard key={session.id} session={session} />
+                <SessionCard key={session.id} session={session} onDelete={refetch} />
               ))}
             </div>
           ) : (
