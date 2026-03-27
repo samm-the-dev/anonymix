@@ -192,7 +192,7 @@ export function SessionViewPage() {
   );
 
   return (
-    <div className="flex flex-1 flex-col w-full max-w-[428px] self-center bg-background">
+    <div className="flex flex-1 flex-col bg-background">
       {/* Header */}
       <header className="relative flex items-center border-b border-border px-4 py-3">
         <button onClick={() => navigate('/')} className="w-8 text-muted-foreground hover:text-foreground">
