@@ -1,10 +1,11 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Copy, ExternalLink, Search, X } from 'lucide-react';
+import { ArrowLeft, Copy, ExternalLink, Search, Users, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
 import { StatusBadge } from '@/components/StatusBadge';
+import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
 
 interface TapeData {
@@ -33,7 +34,9 @@ export function SessionViewPage() {
   const [activeTapeIdx, setActiveTapeIdx] = useState(0);
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
   const [mySubmission, setMySubmission] = useState<SubmissionData | null>(null);
+  const [members, setMembers] = useState<{ id: string; name: string; avatar: string; avatarColor: string }[]>([]);
   const [loading, setLoading] = useState(true);
+  const [showMembers, setShowMembers] = useState(false);
 
   // Submission form
   const [showSearch, setShowSearch] = useState(false);
@@ -56,6 +59,22 @@ export function SessionViewPage() {
       .single();
 
     if (session) setSessionName(session.name);
+
+    // Fetch members
+    const { data: memberRows } = await supabase
+      .from('session_players')
+      .select('player_id, players(id, name, avatar, avatar_color)')
+      .eq('session_id', sessionId);
+
+    setMembers(
+      (memberRows ?? [])
+        .map((m) => {
+          const p = m.players as unknown as { id: string; name: string; avatar: string; avatar_color: string } | null;
+          if (!p) return null;
+          return { id: p.id, name: p.name, avatar: p.avatar, avatarColor: p.avatar_color };
+        })
+        .filter((p): p is { id: string; name: string; avatar: string; avatarColor: string } => p !== null),
+    );
 
     const { data: tapeRows } = await supabase
       .from('tapes')
@@ -173,7 +192,7 @@ export function SessionViewPage() {
   );
 
   return (
-    <div className="mx-auto min-h-screen max-w-[428px] bg-background">
+    <div className="flex flex-1 flex-col w-full max-w-[428px] self-center bg-background">
       {/* Header */}
       <header className="relative flex items-center border-b border-border px-4 py-3">
         <button onClick={() => navigate('/')} className="w-8 text-muted-foreground hover:text-foreground">
@@ -182,45 +201,48 @@ export function SessionViewPage() {
         <h1 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold">
           {sessionName}
         </h1>
-        <div className="ml-auto w-8" />
+        <button onClick={() => setShowMembers(true)} className="ml-auto w-8 text-muted-foreground hover:text-foreground">
+          <Users className="ml-auto h-5 w-5" />
+        </button>
       </header>
 
-      {/* Tape crate */}
-      {tapes.length > 1 && (
-        <div className="px-4 pt-3">
-          <div className="mx-auto max-w-[375px]">
-            {/* Spines above active */}
-            {Array.from({ length: Math.min(activeTapeIdx, 4) }, (_, i) => {
-              const idx = activeTapeIdx - (Math.min(activeTapeIdx, 4) - i);
-              const distance = activeTapeIdx - idx;
-              const width = Math.max(60, 100 - distance * distance * 0.5);
-              return (
-                <div
-                  key={`above-${idx}`}
-                  onClick={() => setActiveTapeIdx(idx)}
-                  className={cn(
-                    'mx-auto mb-1 flex cursor-pointer items-center justify-center rounded-lg bg-secondary transition-colors hover:bg-accent',
-                    distance >= 4 ? 'h-5' : distance >= 3 ? 'h-7' : 'h-9',
-                  )}
-                  style={{ width: `${width}%`, opacity: 0.5 }}
-                >
-                  {distance < 4 && (
-                    <span className="truncate px-3 font-display text-[11px] font-medium text-muted-foreground">
-                      {tapes[idx].title}
-                    </span>
-                  )}
-                </div>
-              );
-            })}
-            {activeTapeIdx > 0 && <div className="mb-2" />}
-          </div>
-        </div>
-      )}
+      {/* Crate centering — matches prototype: flex-1 flex items-center justify-center p-4 */}
+      <div className="flex flex-1 items-center justify-center p-4">
+        {/* Single crate container — matches prototype: w-full max-w-[375px] */}
+        <div className="w-full max-w-[375px]">
 
-      {activeTape && (
-        <div className="px-4 pt-2">
-          {/* Active tape card — state-specific content inside */}
-          <div className="mx-auto flex h-[260px] max-w-[375px] flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-md">
+          {/* Spines above active */}
+          {tapes.length > 1 && activeTapeIdx > 0 && (
+            <>
+              {Array.from({ length: Math.min(activeTapeIdx, 4) }, (_, i) => {
+                const idx = activeTapeIdx - (Math.min(activeTapeIdx, 4) - i);
+                const distance = activeTapeIdx - idx;
+                const width = Math.max(60, 100 - distance * distance * 0.5);
+                return (
+                  <div
+                    key={`above-${idx}`}
+                    onClick={() => setActiveTapeIdx(idx)}
+                    className={cn(
+                      'mx-auto mb-1 flex cursor-pointer items-center justify-center rounded-lg bg-secondary transition-colors hover:bg-accent',
+                      distance >= 4 ? 'h-5' : distance >= 3 ? 'h-7' : 'h-9',
+                    )}
+                    style={{ width: `${width}%`, opacity: 0.5 }}
+                  >
+                    {distance < 4 && (
+                      <span className="truncate px-3 font-display text-[11px] font-medium text-muted-foreground">
+                        {tapes[idx].title}
+                      </span>
+                    )}
+                  </div>
+                );
+              })}
+              <div className="mb-2" />
+            </>
+          )}
+
+          {/* Active tape card */}
+          {activeTape && (
+            <div className="flex h-[260px] flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-md">
             {/* Card header: tape number + status badge with countdown */}
             <div className="mb-3 flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
@@ -233,20 +255,12 @@ export function SessionViewPage() {
             <p className="font-display text-lg font-semibold leading-snug text-foreground">{activeTape.title}</p>
             <p className="mb-2 text-sm text-muted-foreground">{activeTape.prompt}</p>
 
-            {/* Spacer pushes action content to bottom */}
-            <div className="flex-1" />
+            <div className="flex-1"></div> {/* spacer */}
 
             {/* State-specific content */}
             {activeTape.status === 'submitting' && (
               <>
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-xs font-medium text-green-600 dark:text-green-400">
-                    {tapeSubmissions.length}/{tapes.length > 0 ? '?' : '0'} submitted
-                  </span>
-                </div>
-                <div className="mb-3 h-1 overflow-hidden rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-green-500 transition-all" style={{ width: `${tapeSubmissions.length > 0 ? 50 : 0}%` }} />
-                </div>
+                <SubmissionProgress submitted={tapeSubmissions.length} total={members.length || 1} />
                 {mySubmission ? (
                   <div className="flex items-center justify-between">
                     <div>
@@ -307,11 +321,12 @@ export function SessionViewPage() {
               </div>
             )}
           </div>
+          )}
 
           {/* Spines below active */}
-          {tapes.length > 1 && (
-            <div className="mx-auto max-w-[375px]">
-              {activeTapeIdx < tapes.length - 1 && <div className="mt-2" />}
+          {tapes.length > 1 && activeTapeIdx < tapes.length - 1 && (
+            <>
+              <div className="mt-2" />
               {Array.from(
                 { length: Math.min(tapes.length - activeTapeIdx - 1, 4) },
                 (_, i) => {
@@ -337,44 +352,85 @@ export function SessionViewPage() {
                   );
                 },
               )}
-            </div>
+            </>
           )}
 
-          {/* Playlist song list below crate (for playlist_ready / results) */}
-          {(activeTape.status === 'playlist_ready' || activeTape.status === 'results') &&
-            tapeSubmissions.length > 0 && (
-              <div className="mx-auto mt-4 max-w-[375px]">
-                <div className="mb-2 flex items-center justify-between">
-                  <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                    Playlist ({tapeSubmissions.length} songs)
-                  </span>
-                  <button
-                    onClick={copyPlaylist}
-                    className="flex items-center gap-1 text-xs text-primary hover:opacity-80"
+        </div>{/* end crate container */}
+      </div>{/* end crate centering wrapper */}
+
+      {/* Playlist song list below crate (for playlist_ready / results) */}
+      {activeTape &&
+        (activeTape.status === 'playlist_ready' || activeTape.status === 'results') &&
+        tapeSubmissions.length > 0 && (
+          <div className="mx-auto mt-4 w-full max-w-[375px] px-4">
+            <div className="mb-2 flex items-center justify-between">
+              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
+                Playlist ({tapeSubmissions.length} songs)
+              </span>
+              <button
+                onClick={copyPlaylist}
+                className="flex items-center gap-1 text-xs text-primary hover:opacity-80"
+              >
+                <Copy className="h-3 w-3" />
+                Copy for Tune My Music
+              </button>
+            </div>
+            <div className="space-y-2">
+              {tapeSubmissions.map((s) => (
+                <div key={s.id} className="rounded-lg border border-border bg-card px-3 py-2">
+                  <p className="font-display text-sm font-semibold text-foreground">{s.song_name}</p>
+                  {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
+                </div>
+              ))}
+            </div>
+            <a
+              href="https://www.tunemymusic.com"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent"
+            >
+              <ExternalLink className="h-4 w-4" />
+              Open Tune My Music
+            </a>
+          </div>
+        )}
+
+      {/* Members bottom sheet */}
+      {showMembers && (
+        <div className="fixed inset-0 z-50">
+          <div className="absolute inset-0 bg-black/40 transition-opacity" onClick={() => setShowMembers(false)} />
+          <div className="absolute inset-x-0 bottom-0 mx-auto max-h-[80vh] max-w-[428px] overflow-y-auto rounded-t-2xl bg-card">
+            <div className="flex items-center justify-between border-b border-border px-4 py-3">
+              <h2 className="font-display text-base font-semibold">Members</h2>
+              <button onClick={() => setShowMembers(false)} className="text-sm font-medium text-primary">
+                Done
+              </button>
+            </div>
+            <div className="px-4 py-2">
+              {members.map((m) => (
+                <div key={m.id} className="flex items-center gap-3 py-2">
+                  <div
+                    className="flex h-9 w-9 items-center justify-center rounded-full text-lg"
+                    style={{ backgroundColor: m.avatarColor + '22', borderColor: m.avatarColor, borderWidth: 2 }}
                   >
-                    <Copy className="h-3 w-3" />
-                    Copy for Tune My Music
-                  </button>
+                    {m.avatar}
+                  </div>
+                  <span className="text-sm font-medium text-foreground">{m.name}</span>
                 </div>
-                <div className="space-y-2">
-                  {tapeSubmissions.map((s) => (
-                    <div key={s.id} className="rounded-lg border border-border bg-card px-3 py-2">
-                      <p className="font-display text-sm font-semibold text-foreground">{s.song_name}</p>
-                      {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
-                    </div>
-                  ))}
-                </div>
-                <a
-                  href="https://www.tunemymusic.com"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent"
-                >
-                  <ExternalLink className="h-4 w-4" />
-                  Open Tune My Music
-                </a>
-              </div>
-            )}
+              ))}
+            </div>
+            <div className="px-4 pb-4">
+              <button
+                onClick={() => {
+                  navigator.clipboard?.writeText(`${window.location.origin}/join/${sessionId}`);
+                  setShowMembers(false);
+                }}
+                className="w-full rounded-xl border border-primary/20 py-2.5 text-sm font-medium text-primary hover:bg-primary/5"
+              >
+                Copy invite link
+              </button>
+            </div>
+          </div>
         </div>
       )}
 

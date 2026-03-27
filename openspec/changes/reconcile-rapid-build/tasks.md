@@ -45,4 +45,4 @@
 
 - [x] 8.1 Add CLAUDE.md rule requiring OpenSpec proposals before building new features
 - [x] 8.2 Remove `SessionStubPage.tsx` (replaced by `SessionViewPage.tsx`)
-- [ ] 8.3 Commit all spec changes and alignment fixes
+- [x] 8.3 Commit all spec changes and alignment fixes

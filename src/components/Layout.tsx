@@ -26,7 +26,7 @@ export function Layout() {
         </button>
       </header>
 
-      <main className="flex-1 pb-16">
+      <main className="flex flex-1 flex-col pb-16">
         <Outlet />
       </main>
 
