@@ -202,7 +202,7 @@ export function CreateSessionPage() {
   }
 
   return (
-    <div className="mx-auto flex h-screen max-w-[428px] flex-col bg-background">
+    <div className="flex h-screen flex-col bg-background">
       {/* Header */}
       <header className="shrink-0 relative flex items-center border-b border-border px-4 py-3">
         {step !== 'celebration' && (

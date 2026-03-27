@@ -43,7 +43,7 @@ export function ProfilePage() {
   }
 
   return (
-    <div className="mx-auto max-w-[428px] px-4 pt-6">
+    <div className="px-4 pt-6">
       {/* Avatar + Name */}
       <div className="flex flex-col items-center">
         <div

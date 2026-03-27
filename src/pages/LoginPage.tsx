@@ -34,7 +34,7 @@ export function LoginPage() {
         {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
       </button>
 
-      <div className="flex w-full max-w-[428px] flex-col items-center">
+      <div className="flex w-full max-w-sm flex-col items-center">
         <h1 className="font-display text-2xl font-bold text-foreground">Anonymix</h1>
 
         <p className="mt-6 mb-4 text-sm text-muted-foreground">

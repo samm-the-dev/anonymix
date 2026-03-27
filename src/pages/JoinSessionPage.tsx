@@ -163,7 +163,7 @@ export function JoinSessionPage() {
   const remainingTapes = invite.tapes.length - shownTapes.length;
 
   return (
-    <div className="relative mx-auto flex min-h-screen max-w-[428px] flex-col items-center justify-center px-6">
+    <div className="relative mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center px-6">
       <button
         onClick={toggleTheme}
         className="absolute top-4 right-4 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"

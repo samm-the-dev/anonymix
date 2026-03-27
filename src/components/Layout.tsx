@@ -26,7 +26,7 @@ export function Layout() {
         </button>
       </header>
 
-      <main className="mx-auto flex w-full max-w-[428px] flex-1 flex-col pb-16">
+      <main className="flex flex-1 flex-col pb-16">
         <Outlet />
       </main>
 

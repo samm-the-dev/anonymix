@@ -399,7 +399,7 @@ export function SessionViewPage() {
       {showMembers && (
         <div className="fixed inset-0 z-50">
           <div className="absolute inset-0 bg-black/40 transition-opacity" onClick={() => setShowMembers(false)} />
-          <div className="absolute inset-x-0 bottom-0 mx-auto max-h-[80vh] max-w-[428px] overflow-y-auto rounded-t-2xl bg-card">
+          <div className="absolute inset-x-0 bottom-0 mx-auto max-h-[80vh] max-w-lg overflow-y-auto rounded-t-2xl bg-card">
             <div className="flex items-center justify-between border-b border-border px-4 py-3">
               <h2 className="font-display text-base font-semibold">Members</h2>
               <button onClick={() => setShowMembers(false)} className="text-sm font-medium text-primary">

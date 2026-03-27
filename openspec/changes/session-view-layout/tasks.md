@@ -22,4 +22,4 @@
 ## 5. Verify & Commit
 
 - [x] 5.1 Type check, verify session view centering, verify home/profile unaffected
-- [ ] 5.2 Commit changes
+- [x] 5.2 Commit changes

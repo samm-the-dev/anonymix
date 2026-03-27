@@ -66,7 +66,7 @@ export function SessionHomePage() {
   const completedSessions = sessions.filter((s) => s.ended);
 
   return (
-    <div className="mx-auto max-w-[428px] lg:max-w-3xl">
+    <div>
       {/* Create Session FAB */}
       <div className="px-4 pt-4">
         <button
@@ -80,7 +80,7 @@ export function SessionHomePage() {
 
       <CollapsibleSection title="Active" count={activeSessions.length} defaultExpanded={true}>
         {activeSessions.length > 0 ? (
-          <div className="lg:grid lg:grid-cols-2">
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 px-4">
             {activeSessions.map((session) => (
               <SessionCard key={session.id} session={session} onDelete={refetch} />
             ))}
@@ -99,7 +99,7 @@ export function SessionHomePage() {
           defaultExpanded={false}
         >
           {completedSessions.length > 0 ? (
-            <div className="lg:grid lg:grid-cols-2">
+            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 px-4">
               {completedSessions.map((session) => (
                 <SessionCard key={session.id} session={session} onDelete={refetch} />
               ))}

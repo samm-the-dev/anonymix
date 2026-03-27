@@ -93,7 +93,7 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
   }
 
   return (
-    <div className="mx-4 mb-4 rounded-xl border border-border bg-card p-4 shadow-sm">
+    <div className="flex flex-col rounded-xl border border-border bg-card p-3 shadow-sm">
       {/* Card Header */}
       <div className="mb-1 flex items-center justify-between">
         <h3 className="font-display text-base font-semibold text-card-foreground">
@@ -143,10 +143,10 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
       </div>
 
       {/* Description */}
-      <p className="mb-3 text-sm text-muted-foreground">{session.description}</p>
+      <p className="mb-2 text-sm text-muted-foreground">{session.description}</p>
 
       {/* Avatar Row */}
-      <AvatarRow players={players} className="mb-3" />
+      <AvatarRow players={players} className="mb-2" />
 
       {/* Tape Title + Prompt (active sessions only) */}
       {activeTape && !session.ended && (
@@ -156,8 +156,14 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
         </>
       )}
 
+    
+      {/* Footer Border */}
+      <div className="mt-auto pt-3">
+        <div className="border-t border-border" />
+      </div>
+
       {/* Action Row */}
-      <div className="mt-4 flex items-center justify-between gap-2 border-t border-border pt-4">
+      <div className="flex items-center justify-between gap-1.5 pt-3">
         {/* View Button */}
         <button
           onClick={() => navigate(`/session/${session.id}`)}
@@ -167,10 +173,10 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
         </button>
 
         {/* Status + Deadline */}
-        <div className="flex min-w-0 items-center gap-1.5">
+        <div className="flex items-center gap-1">
           <StatusBadge status={status} />
           {deadline && (
-            <span className="truncate text-[11px] text-muted-foreground">{deadline}</span>
+            <span className="whitespace-nowrap text-[11px] text-muted-foreground">{deadline}</span>
           )}
         </div>
 
