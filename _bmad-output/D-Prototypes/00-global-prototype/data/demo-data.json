@@ -1,0 +1,17 @@
+{
+  "user": {
+    "id": "sam",
+    "name": "Sam",
+    "avatar": "S",
+    "avatarColor": "#3b82f6",
+    "email": "sam@example.com",
+    "platform": "spotify",
+    "platformName": "Spotify",
+    "platformUsername": "sammusic42",
+    "joinedAt": "2026-03-01",
+    "sessions": [
+      { "id": "comic-book-fuckery", "name": "Comic Book Fuckery", "role": "host" },
+      { "id": "playlist-pandamonium", "name": "Playlist Pandamonium", "role": "member" }
+    ]
+  }
+}

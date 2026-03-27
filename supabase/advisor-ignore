@@ -1,0 +1,3 @@
+# Supabase advisor warnings to suppress (one cache_key per line)
+# We use magic link auth, not passwords — this warning is irrelevant
+auth_leaked_password_protection

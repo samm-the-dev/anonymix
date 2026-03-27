@@ -1,0 +1,275 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tape Comments - Anonymix</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        /* Comments-specific styles */
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <!-- ================================================================
+         APP SHELL
+         ================================================================ -->
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white flex flex-col">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header class="px-4 py-3 border-b border-gray-200 relative flex items-center">
+            <a
+                id="commenting-back"
+                data-object-id="commenting-back"
+                href="session-view.html"
+                class="w-8 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+
+            <div class="absolute left-1/2 -translate-x-1/2 text-center">
+                <h1 id="commenting-title" data-object-id="commenting-title" class="text-sm font-semibold font-display">Loading...</h1>
+                <p id="commenting-session-name" class="text-[11px] text-gray-400"></p>
+            </div>
+
+            <div class="w-8 ml-auto"></div>
+        </header>
+
+        <!-- ============================================================
+             MAIN CONTENT
+             ============================================================ -->
+        <main class="flex-1 flex flex-col">
+
+            <!-- ========================================================
+                 TAPE INFO + DEADLINE
+                 ======================================================== -->
+            <div class="px-4 pt-4 pb-2">
+                <h2 id="comment-tape-name" class="text-lg font-semibold font-display text-gray-900 leading-snug"></h2>
+                <p id="comment-tape-desc" class="text-sm text-gray-400 mt-0.5"></p>
+                <p id="comment-deadline" class="text-xs font-medium text-amber-600 mt-1.5"></p>
+                <p class="text-sm text-gray-400 mt-3">Comment on a song that surprised you, a pick that nailed the theme, or just what you vibed with.</p>
+                <p class="text-sm text-gray-400 mt-2">If you're low on time or energy, feel free to just leave an emoji or nothing at all.</p>
+                <p class="text-sm text-gray-400 mt-2">No worries.</p>
+            </div>
+
+            <!-- Song rows + comments (Section 2) -->
+            <div id="song-list" class="flex-1 px-4 border-t border-gray-200">
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         ================================================================ -->
+    <script>
+        /**
+         * Page: Tape Comments
+         * Section 1: Header
+         * Section 2: Song list + comments
+         */
+
+        // ================================================================
+        // STATE
+        // ================================================================
+        let sessionData = null;
+        let tapeData = null;
+        let currentUser = null;
+        let allPlayers = null;
+        let comments = {}; // { playerId: commentText }
+
+        // ================================================================
+        // DATA LOADING
+        // ================================================================
+        async function loadCommentData() {
+            try {
+                const response = await fetch('data/demo-data.json');
+                const data = await response.json();
+
+                currentUser = data.currentUser;
+                allPlayers = data.players;
+
+                const params = new URLSearchParams(window.location.search);
+                const sessionId = params.get('session');
+                const tapeId = params.get('tape');
+
+                if (sessionId) {
+                    sessionData = data.sessions.find(s => s.id === sessionId);
+                }
+                if (!sessionData) {
+                    sessionData = data.sessions.find(s => !s.ended) || data.sessions[0];
+                }
+
+                if (tapeId) {
+                    tapeData = sessionData.tapes.find(t => t.id === tapeId);
+                }
+                if (!tapeData) {
+                    tapeData = sessionData.tapes.find(t => t.status === 'commenting') || sessionData.tapes[0];
+                }
+
+                // Init comments for each song (excluding current user's)
+                if (tapeData.submissions) {
+                    tapeData.submissions.forEach(s => {
+                        if (s.playerId !== currentUser) {
+                            comments[s.playerId] = '';
+                        }
+                    });
+                }
+
+                console.log('📦 Tape loaded for comments:', tapeData.title);
+                return tapeData;
+            } catch (error) {
+                console.error('❌ Failed to load comment data:', error);
+                return null;
+            }
+        }
+
+        // ================================================================
+        // HEADER + POOL RENDERING
+        // ================================================================
+        function formatCommentDeadline(deadline) {
+            if (!deadline) return '';
+            const ms = new Date(deadline) - Date.now();
+            if (ms < 0) return 'Commenting overdue';
+            const days = Math.floor(ms / 86400000);
+            const hours = Math.floor((ms % 86400000) / 3600000);
+            if (days > 0 && hours > 0) return `${days}d ${hours}h left to comment`;
+            if (days > 0) return `${days}d left to comment`;
+            if (hours > 0) return `${hours}h left to comment`;
+            return 'Due soon';
+        }
+
+        function renderHeader(tape, session) {
+            document.getElementById('commenting-title').textContent = `Tape ${tape.number} · Comment`;
+            document.getElementById('commenting-session-name').textContent = session.name;
+            document.getElementById('comment-tape-name').textContent = tape.title;
+            document.getElementById('comment-tape-desc').textContent = tape.prompt;
+            document.getElementById('comment-deadline').textContent = formatCommentDeadline(tape.deadline);
+        }
+
+        // ================================================================
+        // SONG LIST + COMMENTS (Section 2)
+        // ================================================================
+        function renderSongList(tape) {
+            const songs = tape.submissions
+                ? tape.submissions.filter(s => s.playerId !== currentUser)
+                : [];
+
+            const container = document.getElementById('song-list');
+
+            if (songs.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">No songs to comment on yet</p>';
+                return;
+            }
+
+            container.innerHTML = songs.map(song => `
+                <div class="py-3 border-b border-gray-100 last:border-0" data-song-player="${song.playerId}">
+                    <div class="flex items-center gap-3">
+                        <div class="w-12 h-12 rounded-lg bg-gray-200 flex-shrink-0"></div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-semibold text-gray-900">${song.song}</p>
+                            <p class="text-xs text-gray-400">${song.artist}</p>
+                        </div>
+                    </div>
+                    <textarea
+                        placeholder=""
+                        rows="2"
+                        class="w-full mt-2 px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400 placeholder:text-gray-300"
+                        onblur="saveComment('${song.playerId}', this.value)"
+                    ></textarea>
+                </div>
+            `).join('');
+
+            // Tape-level comment
+            container.innerHTML += `
+                <div class="py-3 border-b border-gray-100">
+                    <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-2">The Tape</p>
+                    <textarea
+                        rows="2"
+                        class="w-full px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-amber-400 focus:ring-1 focus:ring-amber-400"
+                        onblur="saveComment('_tape', this.value)"
+                    ></textarea>
+                </div>
+            `;
+
+            // Add submit button
+            container.innerHTML += `
+                <div class="py-4">
+                    <button
+                        id="submit-comments"
+                        data-object-id="submit-comments"
+                        onclick="handleSubmitComments()"
+                        class="w-full py-2.5 rounded-xl text-sm font-semibold text-white text-center bg-amber-500 hover:bg-amber-600 transition-colors"
+                    >
+                        Share comments
+                    </button>
+                </div>
+            `;
+        }
+
+        function saveComment(playerId, text) {
+            comments[playerId] = text.trim();
+            console.log(`💬 Comment for ${playerId}:`, comments[playerId] || '(empty)');
+        }
+
+        function handleSubmitComments() {
+            const filled = Object.values(comments).filter(c => c.length > 0);
+            console.log(`✅ Submitting ${filled.length} comments`);
+
+            // Show toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50';
+            toast.innerHTML = `
+                <svg class="w-5 h-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>Comments shared!</span>
+            `;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        async function init() {
+            console.log('📄 Tape Comments loaded');
+
+            const tape = await loadCommentData();
+            if (tape && sessionData) {
+                renderHeader(tape, sessionData);
+                renderSongList(tape);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

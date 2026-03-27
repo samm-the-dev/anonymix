@@ -1,0 +1,10 @@
+{
+  "currentUser": {
+    "id": "sam",
+    "name": "Sam"
+  },
+  "defaults": {
+    "submissionWindow": "2 days",
+    "commentWindow": "5 days"
+  }
+}

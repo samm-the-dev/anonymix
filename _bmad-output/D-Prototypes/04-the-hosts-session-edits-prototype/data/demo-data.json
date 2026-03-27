@@ -1,0 +1,27 @@
+{
+  "currentUser": "sam",
+  "session": {
+    "id": "comic-book-fuckery",
+    "name": "Comic Book Fuckery",
+    "description": "Marvel/DC character themes.",
+    "admin": "sam",
+    "submissionWindow": "2 days",
+    "commentWindow": "5 days",
+    "players": [
+      { "id": "sam", "name": "Sam", "avatar": "S", "avatarColor": "#3b82f6", "isHost": true },
+      { "id": "cristina", "name": "Cristina", "avatar": "C", "avatarColor": "#9ca3af" },
+      { "id": "brent", "name": "Brent", "avatar": "B", "avatarColor": "#8b5cf6" },
+      { "id": "jason", "name": "Jason", "avatar": "J", "avatarColor": "#eab308" },
+      { "id": "kelly", "name": "Kelly", "avatar": "K", "avatarColor": "#ec4899" }
+    ],
+    "tapes": [
+      { "number": 1, "name": "Two-Face aka Harvey Dent", "desc": "songs that start in one style/genre then switch halfway through", "status": "completed" },
+      { "number": 2, "name": "Magneto, Master of Magnetism", "desc": "polarizing \"love it or hate it\" songs", "status": "commenting" },
+      { "number": 3, "name": "The Flash aka Barry Allen", "desc": "fast and/or short songs", "status": "submitting" },
+      { "number": 4, "name": "Guilty pleasures", "desc": "songs you'd never admit to loving", "status": "upcoming" },
+      { "number": 5, "name": "Wolverine", "desc": "raw, aggressive, or primal energy", "status": "upcoming" },
+      { "number": 6, "name": "Spider-Man", "desc": "fun, youthful, upbeat bangers", "status": "upcoming" }
+    ],
+    "inviteLink": "anonymix.app/join/comic-book-fuckery"
+  }
+}

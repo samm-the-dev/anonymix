@@ -1,0 +1,16 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Bash",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "node -e \"let d='';process.stdin.on('data',c=>d+=c);process.stdin.on('end',()=>{const cmd=JSON.parse(d).tool_input?.command||'';if(/db[:\\s]push/.test(cmd))console.log(JSON.stringify({hookSpecificOutput:{hookEventName:'PostToolUse',additionalContext:'Reminder: run `npm run db:advisors` to check for new Supabase warnings.'}}))})\"",
+            "statusMessage": "Checking for db:push..."
+          }
+        ]
+      }
+    ]
+  }
+}

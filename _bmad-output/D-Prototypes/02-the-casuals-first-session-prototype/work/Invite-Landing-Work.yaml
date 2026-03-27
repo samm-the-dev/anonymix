@@ -1,0 +1,31 @@
+view: Invite Landing
+view_id: view-a
+scenario_steps: ["02.1"]
+device: mobile-only
+fidelity: gray-model
+
+constraints:
+  - No scroll on mobile — everything fits one screen
+  - Social proof over exposition
+  - Two content variants: new user (with explainer) vs existing user (with session detail)
+
+objects:
+  - id: session-header
+    description: Session name prominent at top
+  - id: invited-by
+    description: "Invited by [name]" context line
+  - id: member-avatars
+    description: Overlapping avatar circles of current members
+  - id: prompt-preview
+    description: First few tape prompts showing the vibe
+  - id: explainer
+    description: "New user only: brief 'what is Anonymix' one-liner"
+  - id: join-button
+    description: Single prominent CTA
+
+sections:
+  - number: 1
+    name: "Full invite landing page"
+    objects: [session-header, invited-by, member-avatars, prompt-preview, explainer, join-button]
+    description: "Complete page — session info, social proof, explainer, Join CTA. No scroll."
+    status: todo

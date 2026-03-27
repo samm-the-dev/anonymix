@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tape Submission - Anonymix</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        /* Submission-specific styles added in later sections */
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <!-- ================================================================
+         APP SHELL
+         ================================================================ -->
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white flex flex-col">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header class="px-4 py-3 border-b border-gray-200 relative flex items-center">
+            <!-- Back Button -->
+            <a
+                id="submission-back"
+                data-object-id="submission-back"
+                href="session-view.html"
+                class="w-8 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+
+            <!-- Title + Subtitle -->
+            <div class="absolute left-1/2 -translate-x-1/2 text-center">
+                <h1
+                    id="submission-title"
+                    data-object-id="submission-title"
+                    class="text-sm font-semibold font-display"
+                >
+                    Loading...
+                </h1>
+                <p id="submission-session-name" class="text-[11px] text-gray-400">
+                </p>
+            </div>
+
+            <!-- Spacer for balance -->
+            <div class="w-8 ml-auto"></div>
+        </header>
+
+        <!-- ============================================================
+             MAIN CONTENT
+             ============================================================ -->
+        <main class="flex-1 flex flex-col">
+
+            <!-- ========================================================
+                 PROMPT + DEADLINE
+                 ======================================================== -->
+            <div id="prompt-section" class="px-4 pt-5 pb-3">
+                <h2
+                    id="tape-name"
+                    data-object-id="tape-name"
+                    class="text-xl font-semibold font-display text-gray-900 leading-snug"
+                >
+                </h2>
+                <p
+                    id="tape-desc"
+                    data-object-id="tape-desc"
+                    class="text-sm text-gray-400 mt-1"
+                >
+                </p>
+                <p
+                    id="tape-deadline"
+                    data-object-id="tape-deadline"
+                    class="text-xs font-medium text-green-600 mt-2"
+                >
+                </p>
+            </div>
+
+            <!-- ========================================================
+                 SEARCH INPUT
+                 ======================================================== -->
+            <div class="px-4 mt-2">
+                <div class="relative flex items-center border border-gray-300 rounded-xl bg-white focus-within:border-blue-400 focus-within:ring-1 focus-within:ring-blue-400 transition-all">
+                    <!-- Search Icon -->
+                    <svg class="absolute left-3 w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M9 3.5a5.5 5.5 0 100 11 5.5 5.5 0 000-11zM2 9a7 7 0 1112.452 4.391l3.328 3.329a.75.75 0 11-1.06 1.06l-3.329-3.328A7 7 0 012 9z" clip-rule="evenodd"/>
+                    </svg>
+
+                    <!-- Input -->
+                    <input
+                        id="song-search"
+                        data-object-id="song-search"
+                        type="text"
+                        placeholder="Search for a song..."
+                        autocomplete="off"
+                        class="w-full pl-9 pr-9 py-2.5 text-sm rounded-xl outline-none bg-transparent"
+                    />
+
+                    <!-- Clear Button -->
+                    <button
+                        id="search-clear"
+                        data-object-id="search-clear"
+                        class="absolute right-3 w-4 h-4 text-gray-400 hover:text-gray-600 cursor-pointer hidden"
+                        onclick="clearSearch()"
+                    >
+                        <svg viewBox="0 0 20 20" fill="currentColor">
+                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.28 7.22a.75.75 0 00-1.06 1.06L8.94 10l-1.72 1.72a.75.75 0 101.06 1.06L10 11.06l1.72 1.72a.75.75 0 101.06-1.06L11.06 10l1.72-1.72a.75.75 0 00-1.06-1.06L10 8.94 8.28 7.22z" clip-rule="evenodd"/>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <!-- ========================================================
+                 AUTOCOMPLETE RESULTS
+                 ======================================================== -->
+            <div
+                id="autocomplete-results"
+                data-object-id="autocomplete-results"
+                class="mx-4 mt-1 border border-gray-200 rounded-xl bg-white shadow-lg overflow-hidden max-h-[280px] overflow-y-auto hidden"
+            >
+                <!-- Results rendered by JS -->
+            </div>
+
+            <!-- ========================================================
+                 SONG PREVIEW
+                 ======================================================== -->
+            <div id="song-preview" data-object-id="song-preview" class="hidden">
+                <div class="mx-4 mt-4 flex items-center gap-4">
+                    <div class="w-16 h-16 rounded-lg bg-gray-200 flex-shrink-0"></div>
+                    <div class="min-w-0">
+                        <p id="preview-title" class="text-base font-semibold text-gray-900"></p>
+                        <p id="preview-artist" class="text-sm text-gray-400"></p>
+                    </div>
+                </div>
+                <textarea
+                    id="submission-note"
+                    data-object-id="submission-note"
+                    rows="2"
+                    placeholder="Add some context, if you want."
+                    class="mx-4 mt-3 w-[calc(100%-2rem)] px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 placeholder:text-gray-300"
+                ></textarea>
+                <button
+                    id="submit-button"
+                    data-object-id="submit-button"
+                    onclick="handleSubmit()"
+                    class="mx-4 mt-3 w-[calc(100%-2rem)] py-2.5 rounded-xl text-sm font-semibold text-white text-center bg-green-500 hover:bg-green-600 transition-colors"
+                >
+                    Submit
+                </button>
+            </div>
+
+            <!-- ========================================================
+                 SUBMIT TOAST
+                 ======================================================== -->
+            <div id="submit-toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg flex items-center gap-2 z-50">
+                <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                </svg>
+                <span>Song submitted!</span>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         ================================================================ -->
+    <script>
+        /**
+         * Page: Tape Submission
+         * Section 1: Header + Prompt + Deadline
+         */
+
+        // ================================================================
+        // DATA LOADING
+        // ================================================================
+        let sessionData = null;
+        let tapeData = null;
+        let currentUser = null;
+        let allPlayers = null;
+        let songCatalog = [];
+
+        async function loadTapeData() {
+            try {
+                const response = await fetch('data/demo-data.json');
+                const data = await response.json();
+
+                currentUser = data.currentUser;
+                allPlayers = data.players;
+                songCatalog = data.songCatalog || [];
+
+                const params = new URLSearchParams(window.location.search);
+                const sessionId = params.get('session');
+                const tapeId = params.get('tape');
+
+                // Find session
+                if (sessionId) {
+                    sessionData = data.sessions.find(s => s.id === sessionId);
+                }
+                if (!sessionData) {
+                    sessionData = data.sessions.find(s => !s.ended) || data.sessions[0];
+                }
+
+                // Find tape
+                if (tapeId) {
+                    tapeData = sessionData.tapes.find(t => t.id === tapeId);
+                }
+                if (!tapeData) {
+                    // Default to first submitting tape
+                    tapeData = sessionData.tapes.find(t => t.status === 'submitting') || sessionData.tapes[0];
+                }
+
+                console.log('📦 Tape loaded:', tapeData.title, `(${tapeData.status})`);
+                return tapeData;
+            } catch (error) {
+                console.error('❌ Failed to load tape data:', error);
+                return null;
+            }
+        }
+
+        // ================================================================
+        // HEADER + PROMPT RENDERING
+        // ================================================================
+        function formatDeadlineCountdown(deadline) {
+            if (!deadline) return '';
+            const ms = new Date(deadline) - Date.now();
+            if (ms < 0) return 'Submission overdue';
+            const days = Math.floor(ms / 86400000);
+            const hours = Math.floor((ms % 86400000) / 3600000);
+            if (days > 0 && hours > 0) return `${days}d ${hours}h left to submit`;
+            if (days > 0) return `${days}d left to submit`;
+            if (hours > 0) return `${hours}h left to submit`;
+            return 'Due soon';
+        }
+
+        function renderPage(tape, session) {
+            // Header
+            document.getElementById('submission-title').textContent = `Tape ${tape.number} · Submit`;
+            document.getElementById('submission-session-name').textContent = session.name;
+
+            // Prompt
+            document.getElementById('tape-name').textContent = tape.title;
+            document.getElementById('tape-desc').textContent = tape.prompt;
+
+            // Deadline
+            document.getElementById('tape-deadline').textContent = formatDeadlineCountdown(tape.deadline);
+
+            // Check for existing submission
+            if (tape.submissions) {
+                const existing = tape.submissions.find(s => s.playerId === currentUser);
+                if (existing) {
+                    const input = document.getElementById('song-search');
+                    input.value = `${existing.song} — ${existing.artist}`;
+                    document.getElementById('search-clear').classList.remove('hidden');
+                    selectedSong = { title: existing.song, artist: existing.artist, available: true };
+                    showPreview(selectedSong);
+                    console.log('📀 Existing submission loaded:', existing.song);
+                }
+            }
+        }
+
+        // ================================================================
+        // SEARCH + AUTOCOMPLETE (Section 2)
+        // ================================================================
+        function filterSongs(query) {
+            if (!query || query.length < 2) return [];
+            const q = query.toLowerCase();
+            return songCatalog.filter(s =>
+                s.title.toLowerCase().includes(q) || s.artist.toLowerCase().includes(q)
+            );
+        }
+
+        function renderAutocomplete(results) {
+            const container = document.getElementById('autocomplete-results');
+
+            if (results.length === 0) {
+                container.classList.add('hidden');
+                return;
+            }
+
+            container.innerHTML = results.map((song, i) => {
+                const unavailable = !song.available;
+                const rowClasses = unavailable
+                    ? 'flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0 opacity-40 cursor-not-allowed'
+                    : 'flex items-center gap-3 px-3 py-2.5 border-b border-gray-100 last:border-0 hover:bg-gray-50 cursor-pointer';
+
+                const badge = unavailable
+                    ? `<span class="text-[10px] text-gray-400 flex-shrink-0 ml-auto">Not on ${song.unavailableOn}</span>`
+                    : '';
+
+                return `
+                    <div
+                        class="${rowClasses}"
+                        data-song-index="${i}"
+                        ${unavailable ? '' : `onclick="selectSong(${i}, this)"`}
+                    >
+                        <div class="w-10 h-10 rounded bg-gray-200 flex-shrink-0"></div>
+                        <div class="min-w-0">
+                            <p class="text-sm font-medium text-gray-900 truncate">${song.title}</p>
+                            <p class="text-xs text-gray-400 truncate">${song.artist}</p>
+                        </div>
+                        ${badge}
+                    </div>
+                `;
+            }).join('');
+
+            container.classList.remove('hidden');
+        }
+
+        function hideAutocomplete() {
+            document.getElementById('autocomplete-results').classList.add('hidden');
+        }
+
+        function clearSearch() {
+            const input = document.getElementById('song-search');
+            input.value = '';
+            input.focus();
+            document.getElementById('search-clear').classList.add('hidden');
+            hideAutocomplete();
+            hidePreview();
+        }
+
+        let selectedSong = null;
+
+        function selectSong(index, el) {
+            const results = filterSongs(document.getElementById('song-search').value);
+            selectedSong = results[index];
+            if (!selectedSong) return;
+
+            // Fill input
+            const input = document.getElementById('song-search');
+            input.value = `${selectedSong.title} — ${selectedSong.artist}`;
+            document.getElementById('search-clear').classList.remove('hidden');
+
+            // Hide autocomplete, show preview
+            hideAutocomplete();
+            showPreview(selectedSong);
+
+            console.log('🎵 Selected:', selectedSong.title, '—', selectedSong.artist);
+        }
+
+        function showPreview(song) {
+            document.getElementById('preview-title').textContent = song.title;
+            document.getElementById('preview-artist').textContent = song.artist;
+            document.getElementById('song-preview').classList.remove('hidden');
+        }
+
+        function hidePreview() {
+            document.getElementById('song-preview').classList.add('hidden');
+            selectedSong = null;
+        }
+
+        function handleSubmit() {
+            if (!selectedSong) return;
+            console.log('✅ Submitted:', selectedSong.title, '—', selectedSong.artist);
+
+            // Show toast
+            const toast = document.getElementById('submit-toast');
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2500);
+        }
+
+        function setupSearchListeners() {
+            const input = document.getElementById('song-search');
+            const clearBtn = document.getElementById('search-clear');
+
+            input.addEventListener('input', () => {
+                const query = input.value.trim();
+
+                // Toggle clear button
+                if (query.length > 0) {
+                    clearBtn.classList.remove('hidden');
+                } else {
+                    clearBtn.classList.add('hidden');
+                }
+
+                // Hide preview when typing (back to search mode)
+                hidePreview();
+
+                // Filter and render
+                const results = filterSongs(query);
+                renderAutocomplete(results);
+            });
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        async function init() {
+            console.log('📄 Tape Submission loaded');
+
+            const tape = await loadTapeData();
+            if (tape && sessionData) {
+                renderPage(tape, sessionData);
+                setupSearchListeners();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

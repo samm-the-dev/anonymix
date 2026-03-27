@@ -1,0 +1,304 @@
+{
+  "players": [
+    {
+      "id": "sam",
+      "name": "Sam",
+      "avatar": "S",
+      "avatarColor": "#3b82f6",
+      "platform": "spotify"
+    },
+    {
+      "id": "cristina",
+      "name": "Cristina",
+      "avatar": null,
+      "avatarImage": "cristina.jpg",
+      "platform": "spotify"
+    },
+    {
+      "id": "brent",
+      "name": "Brent",
+      "avatar": "B",
+      "avatarColor": "#8b5cf6",
+      "platform": "spotify"
+    },
+    {
+      "id": "jason",
+      "name": "Jason",
+      "avatar": "J",
+      "avatarColor": "#eab308",
+      "platform": "youtube_music"
+    },
+    {
+      "id": "kelly",
+      "name": "Kelly",
+      "avatar": null,
+      "avatarImage": "kelly.jpg",
+      "platform": "spotify"
+    }
+  ],
+
+  "currentUser": "sam",
+
+  "sessions": [
+    {
+      "id": "comic-book-fuckery",
+      "name": "Comic Book Fuckery",
+      "description": "Marvel/DC character themes.",
+      "visibility": "unlisted",
+      "pace": "accelerated",
+      "songsPerTape": 1,
+      "maxPlayers": 10,
+      "admin": "sam",
+      "players": ["sam", "cristina", "brent", "jason", "kelly"],
+      "tapes": [
+        {
+          "id": "cbf-tape-1",
+          "number": 1,
+          "title": "Two-Face aka Harvey Dent, member of Batman's Rogues Gallery",
+          "prompt": "songs that start in one style/genre then switch halfway through",
+          "status": "commenting",
+          "deadline": "2026-03-27T23:59:00Z",
+          "submissions": [
+            {
+              "playerId": "sam",
+              "song": "Paranoid Android",
+              "artist": "Radiohead",
+              "album": "OK Computer",
+              "platformId": "spotify:track:6LgJvl0Xdtc73RJ1mN1a7A"
+            },
+            {
+              "playerId": "cristina",
+              "song": "Bohemian Rhapsody",
+              "artist": "Queen",
+              "album": "A Night at the Opera",
+              "platformId": "spotify:track:4u7EnebtmKWzUH433cf5Qv"
+            },
+            {
+              "playerId": "brent",
+              "song": "Happiness Is a Warm Gun",
+              "artist": "The Beatles",
+              "album": "The White Album",
+              "platformId": "spotify:track:5HlpRdFnQnEFDUWbGELh9d"
+            },
+            {
+              "playerId": "jason",
+              "song": "A Day in the Life",
+              "artist": "The Beatles",
+              "album": "Sgt. Pepper's Lonely Hearts Club Band",
+              "platformId": "yt:dQw4w9WgXcQ"
+            },
+            {
+              "playerId": "kelly",
+              "song": "Nights",
+              "artist": "Frank Ocean",
+              "album": "Blonde",
+              "platformId": "spotify:track:7eqoqGkKe8gLPI2nBKZLFa"
+            }
+          ],
+          "comments": {
+            "cristina": { "sam": "The switch at 2:00 is *chef's kiss*" },
+            "kelly": {},
+            "jason": { "cristina": "obvious but honestly perfect for this prompt" }
+          },
+          "waitingForComments": ["sam", "brent"]
+        },
+        {
+          "id": "cbf-tape-2",
+          "number": 2,
+          "title": "Magneto, Master of Magnetism, leader of the Brotherhood of Mutants",
+          "prompt": "polarizing \"love it or hate it\" songs",
+          "status": "submitting",
+          "deadline": "2026-03-29T23:59:00Z",
+          "submissions": [
+            {
+              "playerId": "sam",
+              "song": "Dance Monkey",
+              "artist": "Tones and I",
+              "album": "The Kids Are Coming",
+              "platformId": "spotify:track:2XU0oxnq2qxCpomAAuJY8K"
+            }
+          ],
+          "waitingForSubmissions": ["cristina", "brent", "jason", "kelly"]
+        },
+        {
+          "id": "cbf-tape-3",
+          "number": 3,
+          "title": "The Flash aka Barry Allen, The Fastest Man Alive",
+          "prompt": "fast and/or short songs",
+          "status": "submitting",
+          "deadline": "2026-04-05T23:59:00Z",
+          "submissions": [],
+          "waitingForSubmissions": ["sam", "cristina", "brent", "jason", "kelly"]
+        },
+        {
+          "id": "cbf-tape-4",
+          "number": 4,
+          "title": "Guilty pleasures",
+          "prompt": "songs you'd never admit to loving",
+          "status": "upcoming",
+          "deadline": null,
+          "submissions": []
+        },
+        {
+          "id": "cbf-tape-5",
+          "number": 5,
+          "title": "Wolverine, The Best There Is at What He Does",
+          "prompt": "raw, aggressive, or primal energy",
+          "status": "upcoming",
+          "deadline": null,
+          "submissions": []
+        },
+        {
+          "id": "cbf-tape-6",
+          "number": 6,
+          "title": "Spider-Man, Your Friendly Neighborhood Web-Slinger",
+          "prompt": "fun, youthful, upbeat bangers",
+          "status": "upcoming",
+          "deadline": null,
+          "submissions": []
+        },
+        {
+          "id": "cbf-tape-7",
+          "number": 7,
+          "title": "Joker, Clown Prince of Crime",
+          "prompt": "unhinged, chaotic, or darkly funny songs",
+          "status": "upcoming",
+          "deadline": null,
+          "submissions": []
+        },
+        {
+          "id": "cbf-tape-8",
+          "number": 8,
+          "title": "Storm",
+          "prompt": "powerful, elemental, forces of nature",
+          "status": "upcoming",
+          "deadline": null,
+          "submissions": []
+        },
+        {
+          "id": "cbf-tape-9",
+          "number": 9,
+          "title": "Deadpool",
+          "prompt": "songs that don't take themselves seriously",
+          "status": "upcoming",
+          "deadline": null,
+          "submissions": []
+        }
+      ]
+    },
+    {
+      "id": "playlist-pandamonium",
+      "name": "Playlist Pandamonium",
+      "description": "Digging deep for hidden gems.",
+      "visibility": "unlisted",
+      "pace": "steady",
+      "songsPerTape": 1,
+      "maxPlayers": 20,
+      "admin": "brent",
+      "players": ["sam", "cristina", "brent", "jason", "kelly"],
+      "tapes": [
+        {
+          "id": "pp-tape-1",
+          "number": 1,
+          "title": "Guilty pleasures",
+          "prompt": "songs you love but would never admit to in public",
+          "status": "results",
+          "completedAt": "2025-12-15T00:00:00Z",
+          "submissions": [
+            { "playerId": "sam", "song": "MMMBop", "artist": "Hanson" },
+            { "playerId": "cristina", "song": "Barbie Girl", "artist": "Aqua" },
+            { "playerId": "brent", "song": "Cotton Eye Joe", "artist": "Rednex" },
+            { "playerId": "jason", "song": "Who Let the Dogs Out", "artist": "Baha Men" },
+            { "playerId": "kelly", "song": "Call Me Maybe", "artist": "Carly Rae Jepsen" }
+          ],
+          "comments": {
+            "sam": {
+              "cristina": "I KNEW someone would pick this 😂",
+              "kelly": "Okay but this is genuinely a perfect pop song",
+              "jason": "This brought me straight back to 2001"
+            },
+            "cristina": {
+              "sam": "I can't believe you admitted this",
+              "brent": "I'm crying, this is so good",
+              "kelly": "Carly deserves zero guilt, she's iconic"
+            },
+            "brent": {
+              "sam": "Respect for the deep cut",
+              "jason": "This is the one that got me",
+              "_tape": "Best tape so far, everyone went DEEP"
+            },
+            "jason": {
+              "cristina": "Peak guilty pleasure energy",
+              "brent": "I forgot this existed and now it's stuck in my head again"
+            },
+            "kelly": {
+              "sam": "HANSON?? I'm screaming",
+              "brent": "Okay this actually slaps though",
+              "cristina": "The commitment to the bit 🫡",
+              "_tape": "This round was unhinged in the best way"
+            }
+          },
+          "results": {
+            "ranking": ["kelly", "sam", "cristina", "jason", "brent"],
+            "revealed": true
+          }
+        },
+        {
+          "id": "pp-tape-2",
+          "number": 2,
+          "title": "One-hit wonders",
+          "prompt": "the artist had one great song and you never heard from them again",
+          "status": "results",
+          "completedAt": "2026-01-05T00:00:00Z",
+          "results": {
+            "ranking": ["brent", "cristina", "sam", "kelly", "jason"],
+            "revealed": true
+          }
+        },
+        {
+          "id": "pp-tape-3",
+          "number": 3,
+          "title": "Quirky pants",
+          "prompt": "songs that are unusual in song structure or lyrics that are a bit offbeat. Not novelty either, real songs.",
+          "status": "results",
+          "completedAt": "2026-01-28T00:00:00Z",
+          "results": {
+            "ranking": ["sam", "jason", "kelly", "brent", "cristina"],
+            "revealed": true
+          }
+        },
+        {
+          "id": "pp-tape-4",
+          "number": 4,
+          "title": "Wait, was that me?",
+          "prompt": "Songs that sound like a memory - that you're not sure is yours.",
+          "status": "results",
+          "completedAt": "2026-02-20T00:00:00Z",
+          "results": {
+            "ranking": ["cristina", "sam", "brent", "kelly", "jason"],
+            "revealed": true
+          }
+        }
+      ],
+      "ended": true
+    }
+  ],
+
+  "songCatalog": [
+    { "title": "Heroes", "artist": "David Bowie", "available": true },
+    { "title": "Heroes (We Could Be)", "artist": "Alesso ft. Tove Lo", "available": true },
+    { "title": "Hero", "artist": "Mariah Carey", "available": false, "unavailableOn": "YT Music" },
+    { "title": "Holding Out for a Hero", "artist": "Bonnie Tyler", "available": true },
+    { "title": "Hero", "artist": "Family of the Year", "available": true },
+    { "title": "Paranoid Android", "artist": "Radiohead", "available": true },
+    { "title": "Bohemian Rhapsody", "artist": "Queen", "available": true },
+    { "title": "Dance Monkey", "artist": "Tones and I", "available": true },
+    { "title": "Nights", "artist": "Frank Ocean", "available": true },
+    { "title": "A Day in the Life", "artist": "The Beatles", "available": true },
+    { "title": "Happiness Is a Warm Gun", "artist": "The Beatles", "available": true },
+    { "title": "Polarize", "artist": "Twenty One Pilots", "available": true },
+    { "title": "Love It If We Made It", "artist": "The 1975", "available": true },
+    { "title": "Controversial", "artist": "Prince", "available": false, "unavailableOn": "YT Music" },
+    { "title": "Hate Me", "artist": "Ellie Goulding", "available": true }
+  ]
+}

@@ -1,0 +1,10 @@
+node_modules/
+dist/
+.env.local
+.env.*.local
+*.log
+*.tsbuildinfo
+playwright-report/
+test-results/
+.claude/settings.local.json
+supabase/.temp/

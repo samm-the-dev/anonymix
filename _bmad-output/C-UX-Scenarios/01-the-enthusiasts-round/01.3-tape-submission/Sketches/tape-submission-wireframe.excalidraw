@@ -1,0 +1,418 @@
+{
+  "type": "excalidraw",
+  "version": 2,
+  "source": "https://excalidraw.com",
+  "elements": [
+
+    {
+      "id": "frame", "type": "rectangle",
+      "x": 0, "y": 0, "width": 375, "height": 812,
+      "strokeColor": "#1e1e1e", "backgroundColor": "#f8f9fa", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 0, "opacity": 100,
+      "groupIds": [], "roundness": { "type": 3, "value": 32 },
+      "seed": 100, "version": 1, "versionNonce": 100, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+
+    {
+      "id": "hdr-bg", "type": "rectangle",
+      "x": 0, "y": 0, "width": 375, "height": 72,
+      "strokeColor": "transparent", "backgroundColor": "#ffffff", "fillStyle": "solid",
+      "strokeWidth": 0, "roughness": 0, "opacity": 100,
+      "groupIds": ["hdr"], "roundness": null,
+      "seed": 101, "version": 1, "versionNonce": 101, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "hdr-back1", "type": "line",
+      "x": 20, "y": 30, "width": 8, "height": 8,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 0, "opacity": 100,
+      "groupIds": ["hdr"], "roundness": null,
+      "seed": 102, "version": 1, "versionNonce": 102, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[8, 0], [0, 8]], "lastCommittedPoint": [0, 8],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+    {
+      "id": "hdr-back2", "type": "line",
+      "x": 20, "y": 38, "width": 8, "height": 8,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 0, "opacity": 100,
+      "groupIds": ["hdr"], "roundness": null,
+      "seed": 103, "version": 1, "versionNonce": 103, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [8, 8]], "lastCommittedPoint": [8, 8],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+    {
+      "id": "hdr-tape", "type": "text",
+      "x": 140, "y": 26, "width": 95, "height": 16,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["hdr"], "roundness": null,
+      "seed": 104, "version": 1, "versionNonce": 104, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Tape 4 · Submit", "fontSize": 14, "fontFamily": 2,
+      "textAlign": "center", "verticalAlign": "top", "baseline": 14
+    },
+    {
+      "id": "hdr-session", "type": "text",
+      "x": 138, "y": 46, "width": 100, "height": 12,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["hdr"], "roundness": null,
+      "seed": 105, "version": 1, "versionNonce": 105, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Friday Night Jams", "fontSize": 10, "fontFamily": 2,
+      "textAlign": "center", "verticalAlign": "top", "baseline": 10
+    },
+    {
+      "id": "hdr-divider", "type": "line",
+      "x": 0, "y": 72, "width": 375, "height": 0,
+      "strokeColor": "#dee2e6", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": [], "roundness": null,
+      "seed": 108, "version": 1, "versionNonce": 108, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [375, 0]], "lastCommittedPoint": [375, 0],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+
+
+    {
+      "id": "prompt", "type": "text",
+      "x": 20, "y": 92, "width": 335, "height": 44,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": [], "roundness": null,
+      "seed": 200, "version": 1, "versionNonce": 200, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "A song that\nchanged your life", "fontSize": 18, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 18
+    },
+    {
+      "id": "prompt-deadline", "type": "text",
+      "x": 20, "y": 146, "width": 100, "height": 12,
+      "strokeColor": "#adb5bd", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": [], "roundness": null,
+      "seed": 201, "version": 1, "versionNonce": 201, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "1d 4h left to submit", "fontSize": 10, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 10
+    },
+
+
+    {
+      "id": "search-bg", "type": "rectangle",
+      "x": 20, "y": 176, "width": 335, "height": 44,
+      "strokeColor": "#1971c2", "backgroundColor": "#ffffff", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 0, "opacity": 100,
+      "groupIds": ["search"], "roundness": { "type": 3, "value": 8 },
+      "seed": 300, "version": 1, "versionNonce": 300, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "search-icon", "type": "text",
+      "x": 32, "y": 190, "width": 16, "height": 16,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["search"], "roundness": null,
+      "seed": 301, "version": 1, "versionNonce": 301, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "🔍", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "search-text", "type": "text",
+      "x": 54, "y": 192, "width": 50, "height": 14,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["search"], "roundness": null,
+      "seed": 302, "version": 1, "versionNonce": 302, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "heroes", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "search-cursor", "type": "line",
+      "x": 100, "y": 188, "width": 0, "height": 18,
+      "strokeColor": "#1971c2", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 2, "roughness": 0, "opacity": 100,
+      "groupIds": ["search"], "roundness": null,
+      "seed": 303, "version": 1, "versionNonce": 303, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [0, 18]], "lastCommittedPoint": [0, 18],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+    {
+      "id": "search-clear", "type": "text",
+      "x": 332, "y": 190, "width": 14, "height": 14,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["search"], "roundness": null,
+      "seed": 304, "version": 1, "versionNonce": 304, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "✕", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "center", "verticalAlign": "top", "baseline": 13
+    },
+
+
+    {
+      "id": "results-bg", "type": "rectangle",
+      "x": 20, "y": 228, "width": 335, "height": 340,
+      "strokeColor": "#dee2e6", "backgroundColor": "#ffffff", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results"], "roundness": { "type": 3, "value": 8 },
+      "seed": 400, "version": 1, "versionNonce": 400, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+
+    {
+      "id": "r1-art", "type": "rectangle",
+      "x": 36, "y": 242, "width": 40, "height": 40,
+      "strokeColor": "#dee2e6", "backgroundColor": "#e9ecef", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r1"], "roundness": { "type": 3, "value": 4 },
+      "seed": 410, "version": 1, "versionNonce": 410, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "r1-title", "type": "text",
+      "x": 88, "y": 244, "width": 200, "height": 16,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r1"], "roundness": null,
+      "seed": 411, "version": 1, "versionNonce": 411, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Heroes", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "r1-artist", "type": "text",
+      "x": 88, "y": 264, "width": 200, "height": 14,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r1"], "roundness": null,
+      "seed": 412, "version": 1, "versionNonce": 412, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "David Bowie", "fontSize": 11, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 11
+    },
+
+    {
+      "id": "r1-div", "type": "line",
+      "x": 36, "y": 294, "width": 303, "height": 0,
+      "strokeColor": "#f1f3f5", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results"], "roundness": null,
+      "seed": 413, "version": 1, "versionNonce": 413, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [303, 0]], "lastCommittedPoint": [303, 0],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+
+    {
+      "id": "r2-art", "type": "rectangle",
+      "x": 36, "y": 306, "width": 40, "height": 40,
+      "strokeColor": "#dee2e6", "backgroundColor": "#e9ecef", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r2"], "roundness": { "type": 3, "value": 4 },
+      "seed": 420, "version": 1, "versionNonce": 420, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "r2-title", "type": "text",
+      "x": 88, "y": 308, "width": 200, "height": 16,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r2"], "roundness": null,
+      "seed": 421, "version": 1, "versionNonce": 421, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Heroes (We Could Be)", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "r2-artist", "type": "text",
+      "x": 88, "y": 328, "width": 200, "height": 14,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r2"], "roundness": null,
+      "seed": 422, "version": 1, "versionNonce": 422, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Alesso ft. Tove Lo", "fontSize": 11, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 11
+    },
+
+    {
+      "id": "r2-div", "type": "line",
+      "x": 36, "y": 358, "width": 303, "height": 0,
+      "strokeColor": "#f1f3f5", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results"], "roundness": null,
+      "seed": 423, "version": 1, "versionNonce": 423, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [303, 0]], "lastCommittedPoint": [303, 0],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+
+    {
+      "id": "r3-art", "type": "rectangle",
+      "x": 36, "y": 370, "width": 40, "height": 40,
+      "strokeColor": "#dee2e6", "backgroundColor": "#e9ecef", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 40,
+      "groupIds": ["results", "r3"], "roundness": { "type": 3, "value": 4 },
+      "seed": 430, "version": 1, "versionNonce": 430, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "r3-title", "type": "text",
+      "x": 88, "y": 372, "width": 200, "height": 16,
+      "strokeColor": "#adb5bd", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r3"], "roundness": null,
+      "seed": 431, "version": 1, "versionNonce": 431, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Hero", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "r3-artist", "type": "text",
+      "x": 88, "y": 392, "width": 200, "height": 14,
+      "strokeColor": "#ced4da", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r3"], "roundness": null,
+      "seed": 432, "version": 1, "versionNonce": 432, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Mariah Carey", "fontSize": 11, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 11
+    },
+    {
+      "id": "r3-unavail", "type": "text",
+      "x": 272, "y": 380, "width": 70, "height": 12,
+      "strokeColor": "#ced4da", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r3"], "roundness": null,
+      "seed": 433, "version": 1, "versionNonce": 433, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Not on YT Music", "fontSize": 9, "fontFamily": 2,
+      "textAlign": "right", "verticalAlign": "top", "baseline": 9
+    },
+
+    {
+      "id": "r3-div", "type": "line",
+      "x": 36, "y": 422, "width": 303, "height": 0,
+      "strokeColor": "#f1f3f5", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results"], "roundness": null,
+      "seed": 434, "version": 1, "versionNonce": 434, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [303, 0]], "lastCommittedPoint": [303, 0],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+
+    {
+      "id": "r4-art", "type": "rectangle",
+      "x": 36, "y": 434, "width": 40, "height": 40,
+      "strokeColor": "#dee2e6", "backgroundColor": "#e9ecef", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r4"], "roundness": { "type": 3, "value": 4 },
+      "seed": 440, "version": 1, "versionNonce": 440, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "r4-title", "type": "text",
+      "x": 88, "y": 436, "width": 200, "height": 16,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r4"], "roundness": null,
+      "seed": 441, "version": 1, "versionNonce": 441, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Holding Out for a Hero", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "r4-artist", "type": "text",
+      "x": 88, "y": 456, "width": 200, "height": 14,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r4"], "roundness": null,
+      "seed": 442, "version": 1, "versionNonce": 442, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Bonnie Tyler", "fontSize": 11, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 11
+    },
+
+    {
+      "id": "r4-div", "type": "line",
+      "x": 36, "y": 486, "width": 303, "height": 0,
+      "strokeColor": "#f1f3f5", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results"], "roundness": null,
+      "seed": 443, "version": 1, "versionNonce": 443, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "points": [[0, 0], [303, 0]], "lastCommittedPoint": [303, 0],
+      "startBinding": null, "endBinding": null, "startArrowhead": null, "endArrowhead": null
+    },
+
+    {
+      "id": "r5-art", "type": "rectangle",
+      "x": 36, "y": 498, "width": 40, "height": 40,
+      "strokeColor": "#dee2e6", "backgroundColor": "#e9ecef", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r5"], "roundness": { "type": 3, "value": 4 },
+      "seed": 450, "version": 1, "versionNonce": 450, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "r5-title", "type": "text",
+      "x": 88, "y": 500, "width": 200, "height": 16,
+      "strokeColor": "#1e1e1e", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r5"], "roundness": null,
+      "seed": 451, "version": 1, "versionNonce": 451, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Hero", "fontSize": 13, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 13
+    },
+    {
+      "id": "r5-artist", "type": "text",
+      "x": 88, "y": 520, "width": 200, "height": 14,
+      "strokeColor": "#868e96", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["results", "r5"], "roundness": null,
+      "seed": 452, "version": 1, "versionNonce": 452, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Family of the Year", "fontSize": 11, "fontFamily": 2,
+      "textAlign": "left", "verticalAlign": "top", "baseline": 11
+    },
+
+
+    {
+      "id": "kb-bg", "type": "rectangle",
+      "x": 0, "y": 580, "width": 375, "height": 232,
+      "strokeColor": "transparent", "backgroundColor": "#e9ecef", "fillStyle": "solid",
+      "strokeWidth": 0, "roughness": 0, "opacity": 100,
+      "groupIds": ["kb"], "roundness": null,
+      "seed": 600, "version": 1, "versionNonce": 600, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0
+    },
+    {
+      "id": "kb-label", "type": "text",
+      "x": 150, "y": 680, "width": 75, "height": 14,
+      "strokeColor": "#adb5bd", "backgroundColor": "transparent", "fillStyle": "solid",
+      "strokeWidth": 1, "roughness": 0, "opacity": 100,
+      "groupIds": ["kb"], "roundness": null,
+      "seed": 601, "version": 1, "versionNonce": 601, "isDeleted": false,
+      "boundElements": null, "updated": 1, "link": null, "locked": false, "angle": 0,
+      "text": "Keyboard", "fontSize": 12, "fontFamily": 2,
+      "textAlign": "center", "verticalAlign": "top", "baseline": 12
+    }
+  ],
+  "appState": {
+    "viewBackgroundColor": "#ffffff",
+    "gridSize": null
+  },
+  "files": {}
+}

@@ -1,0 +1,25 @@
+{
+  "inviteSession": {
+    "id": "comic-book-fuckery",
+    "name": "Comic Book Fuckery",
+    "description": "Marvel/DC character themes.",
+    "invitedBy": "Sam",
+    "members": [
+      { "name": "Sam", "avatar": "S", "avatarColor": "#3b82f6" },
+      { "name": "Cristina", "avatar": null, "avatarColor": "#9ca3af" },
+      { "name": "Brent", "avatar": "B", "avatarColor": "#8b5cf6" },
+      { "name": "Jason", "avatar": "J", "avatarColor": "#eab308" }
+    ],
+    "recentTapes": [
+      { "name": "Two-Face aka Harvey Dent", "desc": "songs that start in one style/genre then switch halfway through" },
+      { "name": "Magneto, Master of Magnetism", "desc": "polarizing \"love it or hate it\" songs" },
+      { "name": "The Flash aka Barry Allen", "desc": "fast and/or short songs" },
+      { "name": "Guilty pleasures", "desc": "songs you'd never admit to loving" },
+      { "name": "Wolverine", "desc": "raw, aggressive, or primal energy" },
+      { "name": "Spider-Man", "desc": "fun, youthful, upbeat bangers" }
+    ],
+    "tapeCount": 6,
+    "playerCount": 4,
+    "maxPlayers": 10
+  }
+}

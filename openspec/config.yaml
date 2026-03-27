@@ -1,0 +1,24 @@
+schema: spec-driven
+
+context: |
+  Domain: Music sharing game app — themed submissions, anonymous voting, conversation
+  Tech stack: React 19, Vite 7, TypeScript, Tailwind CSS 4, React Router 7
+  Testing: Vitest (unit), Playwright (e2e)
+  UI: lucide-react icons, sonner toasts, class-variance-authority for variants
+  Styling: Tailwind utility-first, CSS variable theming, Quicksand (display) + Nunito Sans (body) fonts
+  Backend: Supabase (Postgres, real-time subscriptions, Edge Functions, Row-Level Security)
+  Auth: Supabase Auth — Google OAuth (first-class), Spotify OAuth (first-class social login). Separate OAuth flow for platform API scopes (playlist creation).
+  Hosting: Supabase Cloud free tier (self-hostable if needed later)
+  State: React hooks (no external state library yet)
+  Path alias: @/ → ./src/
+  Conventions: PascalCase components, colocated tests (.test.ts), conventional commits
+  Design artifacts: _bmad-output/ contains UX scenarios, page specs, and validated HTML prototypes
+  Terminology: Session (group), Tape (round), Prompt (theme), Submission (song pick)
+
+rules:
+  proposal:
+    - Reference the UX page spec and prototype when they exist
+    - Always include a "Non-goals" section
+  tasks:
+    - Break tasks into chunks that produce a testable increment
+    - Each task should reference the specific spec section it implements

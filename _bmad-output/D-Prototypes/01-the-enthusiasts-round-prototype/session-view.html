@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session View - Anonymix</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        @keyframes cardEnterDown {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes cardEnterUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .tape-card-enter-down {
+            animation: cardEnterDown 200ms ease-out;
+        }
+        .tape-card-enter-up {
+            animation: cardEnterUp 200ms ease-out;
+        }
+        /* Prevent text selection during swipe */
+        #tape-crate {
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: pan-x;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <!-- ================================================================
+         APP SHELL
+         ================================================================ -->
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white flex flex-col">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header id="session-view-header" class="px-4 py-3 border-b border-gray-200 relative flex items-center">
+            <!-- Back Button -->
+            <a
+                id="session-view-back"
+                data-object-id="session-view-back"
+                href="session-home.html"
+                class="w-8 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+
+            <!-- Session Name -->
+            <h1
+                id="session-view-title"
+                data-object-id="session-view-title"
+                class="text-lg font-semibold font-display absolute left-1/2 -translate-x-1/2"
+            >
+                Loading...
+            </h1>
+
+            <!-- Gear Icon (host only) -->
+            <button
+                id="session-view-gear"
+                data-object-id="session-view-gear"
+                class="ml-auto w-8 text-gray-400 hover:text-gray-600 transition-colors hidden"
+            >
+                <svg class="w-5 h-5 ml-auto" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M8.34 1.804A1 1 0 019.32 1h1.36a1 1 0 01.98.804l.295 1.473c.497.144.971.342 1.416.587l1.25-.834a1 1 0 011.262.125l.962.962a1 1 0 01.125 1.262l-.834 1.25c.245.445.443.919.587 1.416l1.473.295a1 1 0 01.804.98v1.361a1 1 0 01-.804.98l-1.473.295a6.95 6.95 0 01-.587 1.416l.834 1.25a1 1 0 01-.125 1.262l-.962.962a1 1 0 01-1.262.125l-1.25-.834a6.953 6.953 0 01-1.416.587l-.295 1.473a1 1 0 01-.98.804H9.32a1 1 0 01-.98-.804l-.295-1.473a6.957 6.957 0 01-1.416-.587l-1.25.834a1 1 0 01-1.262-.125l-.962-.962a1 1 0 01-.125-1.262l.834-1.25a6.957 6.957 0 01-.587-1.416l-1.473-.295A1 1 0 011 11.18V9.82a1 1 0 01.804-.98l1.473-.295c.144-.497.342-.971.587-1.416l-.834-1.25a1 1 0 01.125-1.262l.962-.962A1 1 0 015.38 3.53l1.25.834a6.957 6.957 0 011.416-.587l.295-1.473zM13 10a3 3 0 11-6 0 3 3 0 016 0z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+        </header>
+
+        <!-- ============================================================
+             MAIN CONTENT
+             ============================================================ -->
+        <main class="flex-1 flex items-center justify-center p-4">
+
+            <!-- ========================================================
+                 TAPE CRATE
+                 ======================================================== -->
+            <div
+                id="tape-crate"
+                data-object-id="tape-crate"
+                class="w-full max-w-[375px] relative"
+            >
+                <!-- Active tape card rendered by JS -->
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         ================================================================ -->
+    <script>
+        /**
+         * Page: Session View (Tape List)
+         * Sections 1-2: Header + Active Tape Card
+         */
+
+        // ================================================================
+        // DATA LOADING
+        // ================================================================
+        let sessionData = null;
+        let currentUser = null;
+        let allPlayers = null;
+        let activeTapeIndex = null;
+
+        async function loadSessionData() {
+            try {
+                const response = await fetch('data/demo-data.json');
+                const data = await response.json();
+
+                currentUser = data.currentUser;
+                allPlayers = data.players;
+
+                const params = new URLSearchParams(window.location.search);
+                const sessionId = params.get('session');
+
+                if (sessionId) {
+                    sessionData = data.sessions.find(s => s.id === sessionId);
+                }
+                if (!sessionData) {
+                    sessionData = data.sessions.find(s => !s.ended) || data.sessions[0];
+                }
+
+                // Find the active tape index
+                activeTapeIndex = sessionData.tapes.findIndex(t =>
+                    t.status === 'submitting' || t.status === 'commenting' || t.status === 'playlist_ready'
+                );
+                if (activeTapeIndex === -1) activeTapeIndex = sessionData.tapes.length - 1;
+
+                console.log('📦 Session loaded:', sessionData.name);
+                return sessionData;
+            } catch (error) {
+                console.error('❌ Failed to load session data:', error);
+                return null;
+            }
+        }
+
+        // ================================================================
+        // HEADER RENDERING (Section 1)
+        // ================================================================
+        function isHost(session, userId) {
+            return session.admin === userId;
+        }
+
+        function renderHeader(session, currentUserId) {
+            document.getElementById('session-view-title').textContent = session.name;
+
+            const gearBtn = document.getElementById('session-view-gear');
+            if (isHost(session, currentUserId)) {
+                gearBtn.classList.remove('hidden');
+            } else {
+                gearBtn.classList.add('hidden');
+            }
+        }
+
+        // ================================================================
+        // STATUS CONFIG (Section 2)
+        // ================================================================
+        const STATUS_CONFIG = {
+            submitting: {
+                label: 'Submitting',
+                badgeClasses: 'bg-green-100 text-green-700',
+                progressColor: 'bg-green-500',
+                progressTextColor: 'text-green-600'
+            },
+            commenting: {
+                label: 'Commenting',
+                badgeClasses: 'bg-amber-100 text-amber-700',
+                progressColor: 'bg-amber-500',
+                progressTextColor: 'text-amber-600'
+            },
+            playlist_ready: {
+                label: 'Playlist Ready',
+                badgeClasses: 'bg-blue-100 text-blue-700',
+                progressColor: 'bg-blue-500',
+                progressTextColor: 'text-blue-600'
+            },
+            results: {
+                label: 'Completed',
+                badgeClasses: 'bg-purple-100 text-purple-700',
+                progressColor: 'bg-purple-500',
+                progressTextColor: 'text-purple-600'
+            },
+            upcoming: {
+                label: 'Upcoming',
+                badgeClasses: 'bg-gray-100 text-gray-500',
+                progressColor: 'bg-gray-300',
+                progressTextColor: 'text-gray-400'
+            }
+        };
+
+        // ================================================================
+        // ACTIVE TAPE CARD (Section 2)
+        // ================================================================
+        function formatCountdown(deadline) {
+            if (!deadline) return '';
+            const ms = new Date(deadline) - Date.now();
+            if (ms < 0) return 'overdue';
+            const days = Math.floor(ms / 86400000);
+            const hours = Math.floor((ms % 86400000) / 3600000);
+            if (days > 0) return `${days}d`;
+            return `${hours}h`;
+        }
+
+        function getSubmissionForUser(tape, userId) {
+            if (!tape.submissions) return null;
+            return tape.submissions.find(s => s.playerId === userId) || null;
+        }
+
+        function getUserPlatform(userId) {
+            const player = allPlayers?.find(p => p.id === userId);
+            return player?.platform || 'spotify';
+        }
+
+        // ================================================================
+        // STATE-SPECIFIC CONTENT RENDERERS (Section 4)
+        // ================================================================
+        function renderSubmittingContent(tape, session, currentUserId) {
+            const totalPlayers = session.players.length;
+            const submitted = tape.submissions ? tape.submissions.length : 0;
+            const progressPct = totalPlayers > 0 ? (submitted / totalPlayers) * 100 : 0;
+            const config = STATUS_CONFIG.submitting;
+            const userSub = getSubmissionForUser(tape, currentUserId);
+
+            if (userSub) {
+                return `
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-medium ${config.progressTextColor}">${submitted}/${totalPlayers} submitted</span>
+                    </div>
+                    <div class="h-1 bg-gray-200 rounded-full overflow-hidden mb-3">
+                        <div class="h-full ${config.progressColor} rounded-full transition-all" style="width: ${progressPct}%"></div>
+                    </div>
+                    <span class="block text-[11px] text-gray-400 uppercase tracking-wide mb-0.5">Your pick</span>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm font-medium text-gray-900">${userSub.song} — ${userSub.artist}</span>
+                        <a href="#" class="text-sm font-medium text-blue-500 flex-shrink-0 ml-3">Change</a>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-medium ${config.progressTextColor}">${submitted}/${totalPlayers} submitted</span>
+                </div>
+                <div class="h-1 bg-gray-200 rounded-full overflow-hidden mb-4">
+                    <div class="h-full ${config.progressColor} rounded-full transition-all" style="width: ${progressPct}%"></div>
+                </div>
+                <button class="w-full py-2.5 rounded-xl text-sm font-semibold text-white text-center bg-green-500 hover:bg-green-600">
+                    Submit your pick
+                </button>
+            `;
+        }
+
+        function renderPlaylistReadyContent(tape, session, currentUserId) {
+            const platform = getUserPlatform(currentUserId);
+            const platformLabel = platform === 'youtube_music' ? 'YouTube Music' : 'Spotify';
+            const trackCount = session.players.length;
+
+            return `
+                <div class="text-center mt-2">
+                    <p class="text-sm text-gray-500 mb-1">${trackCount} songs ready to listen</p>
+                    <p class="text-xs text-gray-400 mb-4">Go listen, then come back to comment</p>
+                    <button class="w-full py-2.5 rounded-xl text-sm font-semibold text-white text-center bg-blue-500 hover:bg-blue-600">
+                        Open in ${platformLabel}
+                    </button>
+                </div>
+            `;
+        }
+
+        function renderCommentingContent(tape, session, currentUserId) {
+            const totalPlayers = session.players.length;
+            const commented = tape.comments ? Object.keys(tape.comments).length : 0;
+            const progressPct = totalPlayers > 0 ? (commented / totalPlayers) * 100 : 0;
+            const config = STATUS_CONFIG.commenting;
+            const hasCommented = tape.comments && tape.comments[currentUserId];
+
+            if (hasCommented) {
+                return `
+                    <div class="flex items-center gap-2 mb-1">
+                        <span class="text-xs font-medium ${config.progressTextColor}">${commented}/${totalPlayers} commented</span>
+                    </div>
+                    <div class="h-1 bg-gray-200 rounded-full overflow-hidden mb-3">
+                        <div class="h-full ${config.progressColor} rounded-full transition-all" style="width: ${progressPct}%"></div>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm text-gray-400 font-medium">Comments shared</span>
+                        <a href="#" class="text-sm font-medium text-blue-500">Change comments</a>
+                    </div>
+                `;
+            }
+
+            return `
+                <div class="flex items-center gap-2 mb-1">
+                    <span class="text-xs font-medium ${config.progressTextColor}">${commented}/${totalPlayers} commented</span>
+                </div>
+                <div class="h-1 bg-gray-200 rounded-full overflow-hidden mb-4">
+                    <div class="h-full ${config.progressColor} rounded-full transition-all" style="width: ${progressPct}%"></div>
+                </div>
+                <button class="w-full py-2.5 rounded-xl text-sm font-semibold text-white text-center bg-amber-500 hover:bg-amber-600">
+                    Leave comments
+                </button>
+            `;
+        }
+
+        function renderCompletedContent(tape, session, currentUserId) {
+            // Show top result if available
+            const ranking = tape.results?.ranking;
+            let winnerHtml = '';
+
+            if (ranking && ranking.length > 0) {
+                // Find the winner's submission
+                const winnerId = ranking[0];
+                const winnerSub = tape.submissions?.find(s => s.playerId === winnerId);
+                const winnerPlayer = allPlayers?.find(p => p.id === winnerId);
+
+                if (winnerSub && winnerPlayer) {
+                    winnerHtml = `
+                        <div class="mb-3">
+                            <span class="text-xs font-bold text-purple-500">#1</span>
+                            <span class="text-sm font-semibold text-gray-900 ml-1">${winnerSub.song} — ${winnerSub.artist}</span>
+                            <span class="text-xs text-gray-400 ml-1">by ${winnerPlayer.name}</span>
+                        </div>
+                    `;
+                }
+            }
+
+            return `
+                ${winnerHtml}
+                <button class="w-full py-2.5 rounded-xl text-sm font-semibold text-white text-center bg-purple-500 hover:bg-purple-600">
+                    See full results
+                </button>
+            `;
+        }
+
+        function renderUpcomingContent(tape, session, currentUserId) {
+            return `
+                <div class="text-center mt-2">
+                    <p class="text-sm text-gray-400">Coming soon</p>
+                </div>
+            `;
+        }
+
+        function renderCardContent(tape, session, currentUserId) {
+            switch (tape.status) {
+                case 'submitting': return renderSubmittingContent(tape, session, currentUserId);
+                case 'playlist_ready': return renderPlaylistReadyContent(tape, session, currentUserId);
+                case 'commenting': return renderCommentingContent(tape, session, currentUserId);
+                case 'results': return renderCompletedContent(tape, session, currentUserId);
+                default: return renderUpcomingContent(tape, session, currentUserId);
+            }
+        }
+
+        // ================================================================
+        // ACTIVE TAPE CARD (Section 2+4)
+        // ================================================================
+        function renderActiveTapeCard(tape, session, currentUserId) {
+            const config = STATUS_CONFIG[tape.status] || STATUS_CONFIG.upcoming;
+            const countdown = formatCountdown(tape.deadline);
+            const badgeText = countdown ? `${config.label} · ${countdown}` : config.label;
+            const content = renderCardContent(tape, session, currentUserId);
+
+            return `
+                <div
+                    class="bg-white rounded-2xl border border-gray-200 shadow-md p-4 w-full h-[260px] overflow-hidden"
+                    data-object-id="active-tape-card"
+                    data-tape-id="${tape.id}"
+                >
+                    <!-- Card Header -->
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Tape ${tape.number}</span>
+                        <span class="text-[11px] font-semibold px-2.5 py-0.5 rounded-full ${config.badgeClasses}">${badgeText}</span>
+                    </div>
+
+                    <!-- Prompt Title + Description -->
+                    <p class="text-lg font-semibold font-display text-gray-900 leading-snug">${tape.title}</p>
+                    <p class="text-sm text-gray-400 mb-2">${tape.prompt}</p>
+
+                    <!-- State-specific content -->
+                    ${content}
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // SPINE RENDERING (Section 3)
+        // ================================================================
+        function getSpineLabel(tape) {
+            const config = STATUS_CONFIG[tape.status] || STATUS_CONFIG.upcoming;
+            return `Tape ${tape.number} · ${config.label}`;
+        }
+
+        function calculateSpineStyle(distanceFromActive) {
+            // Perspective curve: gentle close, keeps narrowing
+            // d=1: 99.5%, d=2: 98%, d=3: 95.5%, d=4: 92%, d=5: 87.5%, d=6: 82%, d=7: 75.5%, d=8: 68%
+            const widthPct = Math.max(60, 100 - (distanceFromActive * distanceFromActive * 0.5));
+            const opacity = 0.5;
+
+            // Progressive height squish: 1-3 = full, 4 = half, 5 = third, 6+ = sliver
+            let heightClass = 'h-9';     // 36px — default
+            if (distanceFromActive === 4) heightClass = 'h-5';      // 20px — half
+            else if (distanceFromActive === 5) heightClass = 'h-3';  // 12px — third
+            else if (distanceFromActive >= 6) heightClass = 'h-1.5'; // 6px — sliver
+
+            // Hide label on squished spines
+            const showLabel = distanceFromActive <= 3;
+
+            return { widthPct, opacity, heightClass, showLabel };
+        }
+
+        function renderSpine(tape, distanceFromActive, tapeIndex) {
+            const { widthPct, opacity, heightClass, showLabel } = calculateSpineStyle(distanceFromActive);
+            const label = getSpineLabel(tape);
+            const mbClass = distanceFromActive >= 5 ? 'mb-0.5' : 'mb-1';
+
+            return `
+                <div
+                    class="mx-auto rounded-lg bg-gray-200 flex items-center justify-center ${heightClass} ${mbClass} cursor-pointer hover:bg-gray-300 transition-colors"
+                    style="width: ${widthPct}%; opacity: ${opacity}"
+                    data-tape-id="${tape.id}"
+                    data-tape-index="${tapeIndex}"
+                    onclick="navigateToTape(${tapeIndex})"
+                >
+                    ${showLabel ? `
+                    <span class="flex items-center w-full px-3 pointer-events-none overflow-hidden">
+                        <span class="text-[11px] font-semibold font-display text-gray-500 flex-shrink-0">Tape ${tape.number}</span>
+                        <span class="text-[11px] text-gray-400 truncate min-w-0 mx-1.5">${tape.title}</span>
+                        <span class="text-[10px] font-medium text-gray-400 flex-shrink-0 ml-auto">${(STATUS_CONFIG[tape.status] || STATUS_CONFIG.upcoming).label}</span>
+                    </span>
+                ` : ''}
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // CRATE RENDERING (Section 3)
+        // ================================================================
+        function renderCrate(session, currentUserId) {
+            const crate = document.getElementById('tape-crate');
+            const tapes = session.tapes;
+            const activeIdx = activeTapeIndex;
+
+            let html = '';
+
+            // Past spines (above active card) — max 4 nearest
+            const pastAll = tapes.slice(0, activeIdx);
+            const pastVisible = pastAll.slice(-9);
+            const pastOffset = activeIdx - pastVisible.length;
+            pastVisible.forEach((tape, i) => {
+                const tapeIndex = pastOffset + i;
+                const distance = pastVisible.length - i;
+                html += renderSpine(tape, distance, tapeIndex);
+            });
+
+            // Spacer before active card
+            if (pastVisible.length > 0) {
+                html += '<div class="mb-2"></div>';
+            }
+
+            // Active card
+            const activeTape = tapes[activeIdx];
+            if (activeTape) {
+                html += `<div id="active-card-wrapper">${renderActiveTapeCard(activeTape, session, currentUserId)}</div>`;
+            }
+
+            // Spacer after active card
+            const futureStart = activeIdx + 1;
+            const futureVisible = tapes.slice(futureStart, futureStart + 9);
+            if (futureVisible.length > 0) {
+                html += '<div class="mt-2"></div>';
+            }
+
+            // Future spines (below active card) — max 3, nearest first
+            futureVisible.forEach((tape, i) => {
+                const tapeIndex = futureStart + i;
+                const distance = i + 1;
+                html += renderSpine(tape, distance, tapeIndex);
+            });
+
+            crate.innerHTML = html;
+        }
+
+        // ================================================================
+        // CRATE-FLIP NAVIGATION (Section 5)
+        // ================================================================
+        let lastDirection = null;
+
+        function navigateToTape(newIndex) {
+            const tapes = sessionData.tapes;
+            const clamped = Math.max(0, Math.min(tapes.length - 1, newIndex));
+            if (clamped === activeTapeIndex) return;
+
+            lastDirection = clamped > activeTapeIndex ? 'up' : 'down';
+            activeTapeIndex = clamped;
+            renderCrate(sessionData, currentUser);
+
+            // Apply animation to the new active card
+            const wrapper = document.getElementById('active-card-wrapper');
+            if (wrapper) {
+                const animClass = lastDirection === 'up' ? 'tape-card-enter-up' : 'tape-card-enter-down';
+                wrapper.classList.add(animClass);
+                wrapper.addEventListener('animationend', () => {
+                    wrapper.classList.remove(animClass);
+                }, { once: true });
+            }
+
+            console.log(`🎵 Navigated to Tape ${tapes[clamped].number} (${tapes[clamped].status})`);
+        }
+
+        // Swipe handling
+        let touchStartY = null;
+
+        function setupSwipeListeners() {
+            const crate = document.getElementById('tape-crate');
+
+            crate.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            crate.addEventListener('touchend', (e) => {
+                if (touchStartY === null) return;
+                const touchEndY = e.changedTouches[0].clientY;
+                const deltaY = touchStartY - touchEndY;
+                touchStartY = null;
+
+                // Min 30px swipe
+                if (Math.abs(deltaY) < 30) return;
+
+                if (deltaY > 0) {
+                    // Swipe up → next tape
+                    navigateToTape(activeTapeIndex + 1);
+                } else {
+                    // Swipe down → previous tape
+                    navigateToTape(activeTapeIndex - 1);
+                }
+            }, { passive: true });
+        }
+
+        // Keyboard navigation
+        function setupKeyboardNav() {
+            document.addEventListener('keydown', (e) => {
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    navigateToTape(activeTapeIndex + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    navigateToTape(activeTapeIndex - 1);
+                }
+            });
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        async function init() {
+            console.log('📄 Session View loaded');
+
+            const session = await loadSessionData();
+            if (session) {
+                renderHeader(session, currentUser);
+                renderCrate(session, currentUser);
+                setupSwipeListeners();
+                setupKeyboardNav();
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

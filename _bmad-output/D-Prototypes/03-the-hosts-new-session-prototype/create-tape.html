@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Session - Anonymix</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <style>
+        @keyframes cardEnterUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        .card-enter {
+            animation: cardEnterUp 200ms ease-out;
+        }
+        @keyframes celebrate {
+            0% { transform: scale(0.8); opacity: 0; }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .celebrate-enter {
+            animation: celebrate 400ms ease-out;
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white flex flex-col">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header class="px-4 py-3 border-b border-gray-200 relative flex items-center">
+            <button id="back-button" onclick="handleBack()" class="w-8 text-gray-600 hover:text-gray-900 transition-colors">
+                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+                </svg>
+            </button>
+            <h1 id="header-title" class="text-sm font-semibold font-display absolute left-1/2 -translate-x-1/2">New Session</h1>
+            <div class="w-8 ml-auto"></div>
+        </header>
+
+        <!-- ============================================================
+             STEP 1: TAPE PROMPTS
+             ============================================================ -->
+        <main id="step-tapes" class="flex-1 flex flex-col">
+
+            <!-- Tape Crate -->
+            <div class="flex-1 flex items-center justify-center px-4">
+                <div id="tape-crate" class="w-full max-w-[375px] relative">
+                    <!-- Cards rendered by JS -->
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="px-4 pb-4 space-y-2">
+                <button
+                    id="next-details-btn"
+                    onclick="showStep('details')"
+                    class="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    Next: Session Details
+                </button>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             STEP 2: SESSION DETAILS
+             ============================================================ -->
+        <main id="step-details" class="flex-1 flex flex-col hidden">
+
+            <div class="px-4 pt-4 pb-2">
+                <p class="text-sm text-gray-400">Almost there — name your session.</p>
+            </div>
+
+            <div class="px-4 flex-1 space-y-4">
+                <!-- Session Name -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Session Name</label>
+                    <input
+                        id="session-name"
+                        type="text"
+                        placeholder="e.g. Comic Book Fuckery"
+                        oninput="validateDetails()"
+                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
+                    />
+                </div>
+
+                <!-- Description -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Description <span class="font-normal text-gray-300">optional</span></label>
+                    <input
+                        id="session-desc"
+                        type="text"
+                        placeholder="e.g. Marvel/DC character themes."
+                        class="w-full px-3 py-2.5 text-sm border border-gray-300 rounded-xl focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400"
+                    />
+                </div>
+
+                <!-- Timing -->
+                <div>
+                    <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5">Timing</label>
+                    <div class="flex gap-3">
+                        <div class="flex-1 px-3 py-2.5 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wide">Submit window</span>
+                            <p class="text-sm font-medium text-gray-700">2 days</p>
+                        </div>
+                        <div class="flex-1 px-3 py-2.5 bg-gray-50 rounded-xl border border-gray-200">
+                            <span class="text-[10px] text-gray-400 uppercase tracking-wide">Comment window</span>
+                            <p class="text-sm font-medium text-gray-700">5 days</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tape Summary -->
+                <div class="px-3 py-2.5 bg-gray-50 rounded-xl border border-gray-200">
+                    <span class="text-[10px] text-gray-400 uppercase tracking-wide">Tapes queued</span>
+                    <p id="tape-count-summary" class="text-sm font-medium text-gray-700">1 tape</p>
+                </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="px-4 pb-4 space-y-2">
+                <button
+                    onclick="showStep('tapes')"
+                    class="w-full py-2.5 rounded-xl text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-50 transition-colors"
+                >
+                    Back to tapes
+                </button>
+                <button
+                    id="create-btn"
+                    onclick="createSession()"
+                    class="w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors disabled:opacity-40 disabled:cursor-not-allowed"
+                    disabled
+                >
+                    Create Session
+                </button>
+            </div>
+        </main>
+
+        <!-- ============================================================
+             STEP 3: CELEBRATION
+             ============================================================ -->
+        <main id="step-celebration" class="flex-1 flex flex-col items-center justify-center px-6 hidden">
+
+            <div class="celebrate-enter text-center">
+                <p class="text-4xl mb-3">🎉</p>
+                <h2 class="text-xl font-bold font-display text-gray-900">Your session is live!</h2>
+                <p id="celebration-name" class="text-sm text-gray-400 mt-1"></p>
+                <p id="celebration-tapes" class="text-xs text-gray-400 mt-0.5"></p>
+            </div>
+
+            <!-- Invite Link -->
+            <div class="mt-6 w-full">
+                <label class="block text-xs font-semibold text-gray-500 uppercase tracking-wide mb-1.5 text-center">Invite Link</label>
+                <div class="flex items-center border border-gray-300 rounded-xl overflow-hidden">
+                    <input
+                        id="invite-link"
+                        type="text"
+                        readonly
+                        class="flex-1 px-3 py-2.5 text-sm text-gray-600 bg-gray-50 outline-none"
+                    />
+                    <button
+                        onclick="copyLink()"
+                        class="px-4 py-2.5 text-sm font-semibold text-green-600 hover:bg-green-50 transition-colors border-l border-gray-300"
+                    >
+                        Copy
+                    </button>
+                </div>
+            </div>
+
+            <button
+                onclick="shareLink()"
+                class="mt-3 w-full py-2.5 rounded-xl text-sm font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors"
+            >
+                Share with friends
+            </button>
+
+            <button
+                onclick="goToSession()"
+                class="mt-2 w-full py-2.5 rounded-xl text-sm font-medium text-gray-600 border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+                Go to session
+            </button>
+        </main>
+    </div>
+
+    <!-- Toast -->
+    <div id="toast" class="hidden fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50">
+        <span id="toast-message"></span>
+    </div>
+
+    <script>
+        /**
+         * Page: Create Tape (full session creation flow)
+         */
+
+        // ================================================================
+        // STATE
+        // ================================================================
+        let tapes = [{ name: '', desc: '' }];
+        let activeTapeIndex = 0;
+        let currentStep = 'tapes';
+
+        // ================================================================
+        // STEP NAVIGATION
+        // ================================================================
+        function showStep(step) {
+            document.getElementById('step-tapes').classList.toggle('hidden', step !== 'tapes');
+            document.getElementById('step-details').classList.toggle('hidden', step !== 'details');
+            document.getElementById('step-celebration').classList.toggle('hidden', step !== 'celebration');
+
+            currentStep = step;
+
+            if (step === 'tapes') {
+                document.getElementById('header-title').textContent = 'New Session';
+                renderCrate();
+            } else if (step === 'details') {
+                document.getElementById('header-title').textContent = 'Session Details';
+                document.getElementById('tape-count-summary').textContent =
+                    `${tapes.length} tape${tapes.length !== 1 ? 's' : ''}`;
+            } else if (step === 'celebration') {
+                document.getElementById('header-title').textContent = '';
+                document.getElementById('back-button').classList.add('hidden');
+            }
+        }
+
+        function handleBack() {
+            if (currentStep === 'details') {
+                showStep('tapes');
+            }
+        }
+
+        // ================================================================
+        // TAPE CARD RENDERING
+        // ================================================================
+        function renderTapeCard(tape, index) {
+            return `
+                <div class="bg-white rounded-2xl border border-gray-200 shadow-md p-4 w-full h-[260px] flex flex-col card-enter">
+                    <div class="flex items-center justify-between mb-3">
+                        <span class="text-xs font-semibold uppercase tracking-wider text-gray-400">Tape ${index + 1}</span>
+                        ${tapes.length > 1 ? `
+                            <button onclick="removeTape(${index})" class="text-xs text-red-400 hover:text-red-600">Remove</button>
+                        ` : ''}
+                    </div>
+                    <input
+                        type="text"
+                        placeholder="Tape name (e.g. Two-Face aka Harvey Dent)"
+                        value="${tape.name}"
+                        oninput="updateTape(${index}, 'name', this.value)"
+                        class="w-full px-3 py-2 text-sm font-semibold font-display border border-gray-200 rounded-lg mb-2 focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 placeholder:font-normal placeholder:text-gray-300"
+                    />
+                    <textarea
+                        placeholder="Description (e.g. songs that start in one style then switch)"
+                        oninput="updateTape(${index}, 'desc', this.value)"
+                        class="w-full flex-1 px-3 py-2 text-sm border border-gray-200 rounded-lg resize-none focus:outline-none focus:border-green-400 focus:ring-1 focus:ring-green-400 placeholder:text-gray-300"
+                    >${tape.desc}</textarea>
+                </div>
+            `;
+        }
+
+        function renderSpine(tape, index, distance) {
+            const widthPct = Math.max(60, 100 - (distance * distance * 0.5));
+
+            let heightClass = 'h-9';
+            let showLabel = true;
+            if (distance === 4) { heightClass = 'h-5'; showLabel = false; }
+            else if (distance === 5) { heightClass = 'h-3'; showLabel = false; }
+            else if (distance >= 6) { heightClass = 'h-1.5'; showLabel = false; }
+
+            const mbClass = distance >= 5 ? 'mb-0.5' : 'mb-1';
+            const label = tape.name || `Tape ${index + 1}`;
+
+            return `
+                <div
+                    class="mx-auto rounded-lg bg-gray-200 flex items-center justify-center ${heightClass} ${mbClass} cursor-pointer hover:bg-gray-300 transition-colors"
+                    style="width: ${widthPct}%; opacity: 0.5"
+                    onclick="navigateToTape(${index})"
+                >
+                    ${showLabel ? `<span class="text-[11px] font-medium font-display text-gray-500 truncate px-3">${label}</span>` : ''}
+                </div>
+            `;
+        }
+
+        function renderCrate() {
+            const crate = document.getElementById('tape-crate');
+            let html = '';
+
+            // Past spines — max 4 visible
+            const pastAll = [];
+            for (let i = 0; i < activeTapeIndex; i++) pastAll.push(i);
+            const pastVisible = pastAll.slice(-9);
+            pastVisible.forEach(i => {
+                const distance = activeTapeIndex - i;
+                html += renderSpine(tapes[i], i, distance);
+            });
+
+            if (activeTapeIndex > 0) html += '<div class="mb-2"></div>';
+
+            // Active card
+            html += renderTapeCard(tapes[activeTapeIndex], activeTapeIndex);
+
+            // Future spines — max 4 visible
+            const futureVisible = [];
+            for (let i = activeTapeIndex + 1; i < tapes.length && futureVisible.length < 9; i++) {
+                futureVisible.push(i);
+            }
+            if (futureVisible.length > 0) html += '<div class="mt-2"></div>';
+            futureVisible.forEach(i => {
+                const distance = i - activeTapeIndex;
+                html += renderSpine(tapes[i], i, distance);
+            });
+
+            // Add tape button
+            html += `
+                <button onclick="addTape()" class="w-full mt-3 py-2 rounded-xl text-sm font-medium text-gray-500 border border-dashed border-gray-300 hover:bg-gray-50 transition-colors">
+                    + Add another tape
+                </button>
+            `;
+
+            crate.innerHTML = html;
+            updateNextButton();
+        }
+
+        // ================================================================
+        // TAPE MANAGEMENT
+        // ================================================================
+        function updateTape(index, field, value) {
+            tapes[index][field] = value;
+            updateNextButton();
+        }
+
+        function addTape() {
+            tapes.push({ name: '', desc: '' });
+            activeTapeIndex = tapes.length - 1;
+            renderCrate();
+        }
+
+        function removeTape(index) {
+            if (tapes.length <= 1) return;
+            tapes.splice(index, 1);
+            if (activeTapeIndex >= tapes.length) activeTapeIndex = tapes.length - 1;
+            renderCrate();
+        }
+
+        function navigateToTape(index) {
+            activeTapeIndex = index;
+            renderCrate();
+        }
+
+        function updateNextButton() {
+            const hasPrompt = tapes.some(t => t.name.trim().length > 0);
+            document.getElementById('next-details-btn').disabled = !hasPrompt;
+        }
+
+        // ================================================================
+        // SESSION DETAILS
+        // ================================================================
+        function validateDetails() {
+            const name = document.getElementById('session-name').value.trim();
+            document.getElementById('create-btn').disabled = name.length === 0;
+        }
+
+        function createSession() {
+            const name = document.getElementById('session-name').value.trim();
+            const desc = document.getElementById('session-desc').value.trim();
+            const filledTapes = tapes.filter(t => t.name.trim().length > 0);
+
+            console.log('✅ Session created:', { name, desc, tapes: filledTapes });
+
+            // Populate celebration
+            document.getElementById('celebration-name').textContent = name;
+            document.getElementById('celebration-tapes').textContent =
+                `${filledTapes.length} tape${filledTapes.length !== 1 ? 's' : ''} queued`;
+            document.getElementById('invite-link').value =
+                `anonymix.app/join/${name.toLowerCase().replace(/\s+/g, '-')}`;
+
+            showStep('celebration');
+        }
+
+        // ================================================================
+        // CELEBRATION ACTIONS
+        // ================================================================
+        function copyLink() {
+            const link = document.getElementById('invite-link').value;
+            navigator.clipboard?.writeText(link);
+            showToast('Link copied!');
+        }
+
+        function shareLink() {
+            const link = document.getElementById('invite-link').value;
+            if (navigator.share) {
+                navigator.share({ title: 'Join my Anonymix session', url: link });
+            } else {
+                showToast('Share sheet (simulated)');
+            }
+        }
+
+        function goToSession() {
+            showToast('Going to session...');
+        }
+
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            document.getElementById('toast-message').textContent = message;
+            toast.classList.remove('hidden');
+            setTimeout(() => toast.classList.add('hidden'), 2500);
+        }
+
+        // ================================================================
+        // SWIPE + KEYBOARD NAVIGATION
+        // ================================================================
+        let touchStartY = null;
+
+        function setupSwipeListeners() {
+            const crate = document.getElementById('tape-crate');
+
+            crate.addEventListener('touchstart', (e) => {
+                touchStartY = e.touches[0].clientY;
+            }, { passive: true });
+
+            crate.addEventListener('touchend', (e) => {
+                if (touchStartY === null) return;
+                const deltaY = touchStartY - e.changedTouches[0].clientY;
+                touchStartY = null;
+                if (Math.abs(deltaY) < 30) return;
+
+                if (deltaY > 0 && activeTapeIndex < tapes.length - 1) {
+                    navigateToTape(activeTapeIndex + 1);
+                } else if (deltaY < 0 && activeTapeIndex > 0) {
+                    navigateToTape(activeTapeIndex - 1);
+                }
+            }, { passive: true });
+        }
+
+        function setupKeyboardNav() {
+            document.addEventListener('keydown', (e) => {
+                if (currentStep !== 'tapes') return;
+                if (e.target.tagName === 'INPUT') return;
+
+                if (e.key === 'ArrowDown' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    if (activeTapeIndex < tapes.length - 1) navigateToTape(activeTapeIndex + 1);
+                } else if (e.key === 'ArrowUp' || e.key === 'ArrowLeft') {
+                    e.preventDefault();
+                    if (activeTapeIndex > 0) navigateToTape(activeTapeIndex - 1);
+                }
+            });
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        function init() {
+            console.log('📄 Create Session loaded');
+            renderCrate();
+            setupSwipeListeners();
+            setupKeyboardNav();
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

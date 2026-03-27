@@ -1,0 +1,52 @@
+view: Tape Submission
+view_id: view-c
+scenario_steps: ["01.3"]
+device: mobile-only
+fidelity: gray-model
+
+objects:
+  - id: submission-header
+    description: "← back | 'Tape N · Submit' centered | session name subtitle"
+  - id: tape-prompt
+    description: Tape name + desc displayed prominently
+  - id: deadline
+    description: Countdown text, e.g. "1d 4h left to submit"
+  - id: search-input
+    description: Text input with search icon, clear button, triggers autocomplete
+  - id: autocomplete-results
+    description: Song list with album art placeholder, title, artist, availability
+  - id: song-preview
+    description: Selected song with album art, title, artist
+  - id: submit-button
+    description: Appears after song selected
+  - id: current-submission
+    description: Re-entry state showing current pick with clear/change
+
+sections:
+  - number: 1
+    name: "Header + prompt + deadline"
+    objects: [submission-header, tape-prompt, deadline]
+    description: "Page shell with back nav, tape info header, prompt name/desc, countdown"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 2
+    name: "Search input + autocomplete"
+    objects: [search-input, autocomplete-results]
+    description: "Search box with demo song autocomplete, album art placeholders, availability indicator"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 3
+    name: "Song selection + preview"
+    objects: [song-preview, submit-button]
+    description: "Tap result fills input, shows preview with album art, submit button appears"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 4
+    name: "Re-entry state + polish"
+    objects: [current-submission]
+    description: "Not needed — search page works for both fresh and change flows"
+    status: complete
+    completed: 2026-03-25

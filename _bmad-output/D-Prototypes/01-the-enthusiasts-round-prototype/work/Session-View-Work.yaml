@@ -1,0 +1,80 @@
+view: Session View (Tape List)
+view_id: view-b
+scenario_steps: ["01.2", "01.4"]
+device: mobile-only
+fidelity: gray-model
+
+tape_card_states:
+  - submitting
+  - playlist_ready
+  - commenting
+  - completed
+
+cassette_ratio: "335w x 260h (landscape)"
+
+objects:
+  - id: session-header
+    description: "← back | session name (centered) | gear icon (host only)"
+  - id: tape-crate
+    description: Vertical stack container with depth perspective
+  - id: past-spine
+    description: Thin, faded, progressively narrower rectangles above active card
+  - id: active-tape-card
+    description: Landscape cassette-ratio card with full tape detail
+  - id: card-header
+    description: "TAPE N (left) | status badge + deadline (right)"
+  - id: prompt-text
+    description: Tape prompt, 18px, left-aligned
+  - id: progress-bar
+    description: "X/Y submitted + thin progress bar"
+  - id: user-submission
+    description: "Your pick label, song + artist, Change link"
+  - id: wait-hint
+    description: "Waiting for N more"
+  - id: future-spine
+    description: Thin rectangles peeking below active card
+  - id: crate-flip
+    description: Scroll/swipe navigation between tapes with physical animation
+
+sections:
+  - number: 1
+    name: "Session header + crate shell"
+    objects: [session-header, tape-crate]
+    description: "Back nav, session name, gear icon, crate container with centered layout"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 2
+    name: "Active tape card — structure"
+    objects: [active-tape-card, card-header, prompt-text, progress-bar, user-submission, wait-hint]
+    description: "Cassette-ratio card with header, title/subtitle prompt, progress bar, submission. Wait hint removed."
+    status: complete
+    completed: 2026-03-25
+
+  - number: 3
+    name: "Tape spines + crate depth"
+    objects: [past-spine, future-spine]
+    description: "Past/future spines, gentle narrowing, uniform opacity, max 3 per side"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 4
+    name: "Tape card state variants"
+    objects: []
+    description: "Submitting (with/without submission), Playlist Ready, Commenting (before/after), Completed, Upcoming states"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 5
+    name: "Crate-flip interaction"
+    objects: [crate-flip]
+    description: "Tap/swipe/arrow navigation, card enter animation, progressive spine squish + narrowing"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 6
+    name: "Demo data + polish"
+    objects: []
+    description: "Data already wired up in earlier sections. No additional polish needed."
+    status: complete
+    completed: 2026-03-25

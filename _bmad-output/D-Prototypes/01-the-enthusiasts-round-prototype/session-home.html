@@ -1,0 +1,503 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Session Home - Anonymix</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        .section-content {
+            transition: max-height 0.2s ease-out, opacity 0.2s ease-out;
+            overflow: hidden;
+        }
+        .section-content.collapsed {
+            max-height: 0;
+            opacity: 0;
+        }
+        .chevron {
+            transition: transform 0.2s ease-out;
+        }
+        .chevron.collapsed {
+            transform: rotate(-90deg);
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <!-- ================================================================
+         APP SHELL
+         ================================================================ -->
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header class="px-4 py-3 border-b border-gray-200 relative flex items-center">
+            <div class="w-8"></div>
+            <h1 id="session-home-header-title" class="text-lg font-semibold font-display absolute left-1/2 -translate-x-1/2">Anonymix</h1>
+            <button
+                id="demo-toggle"
+                onclick="toggleDemoMode()"
+                class="ml-auto text-[10px] font-medium text-gray-400 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-50"
+            >
+                Demo
+            </button>
+        </header>
+
+        <!-- ============================================================
+             MAIN CONTENT
+             ============================================================ -->
+        <main>
+
+            <!-- ========================================================
+                 SECTION: Active Sessions
+                 ======================================================== -->
+            <section data-section="active">
+                <button
+                    id="session-home-section-active"
+                    data-object-id="session-home-section-active"
+                    data-expanded="true"
+                    onclick="toggleSection(this)"
+                    class="w-full flex items-center gap-2 px-4 py-3 bg-gray-50 text-sm font-semibold text-gray-700"
+                >
+                    <svg class="chevron w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Active</span>
+                    <span class="text-gray-400 font-normal" id="active-count">(0)</span>
+                </button>
+                <div id="active-content" class="section-content">
+                    <!-- Session cards rendered by JS -->
+                </div>
+            </section>
+
+            <!-- ========================================================
+                 SECTION: Completed Sessions
+                 ======================================================== -->
+            <section data-section="completed">
+                <button
+                    id="session-home-section-completed"
+                    data-object-id="session-home-section-completed"
+                    data-expanded="false"
+                    onclick="toggleSection(this)"
+                    class="w-full flex items-center gap-2 px-4 py-3 bg-gray-50 text-sm font-semibold text-gray-700 border-t border-gray-200"
+                >
+                    <svg class="chevron collapsed w-4 h-4 text-gray-400" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                    </svg>
+                    <span>Completed</span>
+                    <span class="text-gray-400 font-normal" id="completed-count">(0)</span>
+                </button>
+                <div id="completed-content" class="section-content collapsed">
+                    <!-- Session cards rendered by JS -->
+                </div>
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         ================================================================ -->
+    <script>
+        /**
+         * Page: Session Home
+         * Sections 1-3: Page Shell + Session Cards + Status Variants
+         */
+
+        // ================================================================
+        // SECTION TOGGLE (Section 1)
+        // ================================================================
+        function toggleSection(buttonEl) {
+            const isExpanded = buttonEl.dataset.expanded === 'true';
+            const section = buttonEl.closest('section');
+            const content = section.querySelector('.section-content');
+            const chevron = buttonEl.querySelector('.chevron');
+
+            if (isExpanded) {
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.offsetHeight;
+                content.classList.add('collapsed');
+                content.style.maxHeight = null;
+                chevron.classList.add('collapsed');
+                buttonEl.dataset.expanded = 'false';
+            } else {
+                content.classList.remove('collapsed');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                chevron.classList.remove('collapsed');
+                buttonEl.dataset.expanded = 'true';
+
+                content.addEventListener('transitionend', function handler() {
+                    content.style.maxHeight = null;
+                    content.removeEventListener('transitionend', handler);
+                });
+            }
+
+            console.log(`Section ${section.dataset.section}: ${isExpanded ? 'collapsed' : 'expanded'}`);
+        }
+
+        // ================================================================
+        // AVATAR RENDERING (Section 2)
+        // ================================================================
+        function renderAvatarRow(playerIds, players, adminId) {
+            const playerMap = {};
+            players.forEach(p => playerMap[p.id] = p);
+
+            return playerIds.map((id, i) => {
+                const player = playerMap[id];
+                if (!player) return '';
+
+                const marginClass = i === 0 ? '' : '-ml-2';
+                const bgColor = player.avatarColor || '#9ca3af';
+
+                let avatarInner;
+                if (player.avatarImage) {
+                    avatarInner = `<div class="w-full h-full rounded-full bg-gradient-to-br from-gray-300 to-gray-400"></div>`;
+                } else {
+                    avatarInner = `<span>${player.avatar}</span>`;
+                }
+
+                return `
+                    <div
+                        class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white border-2 border-white overflow-hidden ${marginClass}"
+                        style="background-color: ${bgColor}"
+                        title="${player.name}"
+                    >
+                        ${avatarInner}
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ================================================================
+        // STATUS CONFIG (Section 3)
+        // ================================================================
+        const STATUS_CONFIG = {
+            submitting: {
+                label: 'Submitting',
+                badgeClasses: 'bg-green-100 text-green-700',
+                btnClasses: 'bg-green-500 hover:bg-green-600 text-white',
+                btnMutedClasses: null, // "Change" stays active
+                actionLabel: 'Submit',
+                actionLabelDone: 'Change',
+                deadlinePrefix: 'due'
+            },
+            commenting: {
+                label: 'Commenting',
+                badgeClasses: 'bg-amber-100 text-amber-700',
+                btnClasses: 'bg-amber-500 hover:bg-amber-600 text-white',
+                btnMutedClasses: 'bg-white text-gray-400 border border-gray-200 cursor-default',
+                actionLabel: 'Comment',
+                actionLabelDone: 'Commented',
+                deadlinePrefix: 'due'
+            },
+            playlist_ready: {
+                label: 'Playlist Ready',
+                badgeClasses: 'bg-blue-100 text-blue-700',
+                btnClasses: 'bg-blue-500 hover:bg-blue-600 text-white',
+                btnMutedClasses: null, // "Listen" always active
+                actionLabel: 'Listen',
+                actionLabelDone: 'Listen',
+                deadlinePrefix: null
+            },
+            results: {
+                label: 'Completed',
+                badgeClasses: 'bg-purple-100 text-purple-700',
+                btnClasses: 'bg-purple-500 hover:bg-purple-600 text-white',
+                btnMutedClasses: null, // always active
+                actionLabel: 'Results',
+                actionLabelDone: 'Results',
+                deadlinePrefix: null
+            }
+        };
+
+        function formatDeadline(tape, status) {
+            const config = STATUS_CONFIG[status];
+
+            if (status === 'playlist_ready') return '';
+            if (status === 'results') {
+                if (tape.completedAt) {
+                    const days = Math.round((Date.now() - new Date(tape.completedAt)) / 86400000);
+                    if (days < 1) return 'today';
+                    if (days === 1) return 'yesterday';
+                    if (days < 30) return `${days} days ago`;
+                    const months = Math.round(days / 30);
+                    return `~${months} month${months > 1 ? 's' : ''} ago`;
+                }
+                return '';
+            }
+
+            if (tape.deadline) {
+                const days = Math.round((new Date(tape.deadline) - Date.now()) / 86400000);
+                if (days < 0) return `${config.deadlinePrefix} (overdue)`;
+                if (days === 0) return `${config.deadlinePrefix} today`;
+                if (days === 1) return `${config.deadlinePrefix} tomorrow`;
+                return `${config.deadlinePrefix} in ${days} days`;
+            }
+
+
+            return '';
+        }
+
+        function renderActionRow(session, tape, userActionTaken) {
+            const status = tape ? tape.status : 'results';
+            const config = STATUS_CONFIG[status];
+            const deadline = formatDeadline(tape || {}, status);
+
+            // Determine button state
+            const isDone = userActionTaken;
+            const actionLabel = isDone ? config.actionLabelDone : config.actionLabel;
+            const btnClasses = (isDone && config.btnMutedClasses)
+                ? config.btnMutedClasses
+                : config.btnClasses;
+
+            return `
+                <div class="flex items-center justify-between mt-4 pt-3 border-t border-gray-100 gap-2">
+                    <!-- View Session -->
+                    <button class="text-xs font-medium text-gray-500 border border-gray-300 rounded-full px-3 py-1.5 flex-shrink-0 hover:bg-gray-50">
+                        View
+                    </button>
+
+                    <!-- Status + Deadline -->
+                    <div class="flex items-center gap-1.5 min-w-0">
+                        <span class="text-[10px] font-semibold uppercase tracking-wide px-2 py-0.5 rounded-full flex-shrink-0 ${config.badgeClasses}">
+                            ${config.label}
+                        </span>
+                        <span class="text-[11px] text-gray-400 truncate">${deadline}</span>
+                    </div>
+
+                    <!-- Action Button -->
+                    <button class="text-xs font-semibold rounded-full px-3 py-1.5 flex-shrink-0 ${btnClasses}">
+                        ${actionLabel}
+                    </button>
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // SESSION CARD RENDERING (Section 2+3)
+        // ================================================================
+        function getActiveTape(session) {
+            if (!session.tapes || session.tapes.length === 0) return null;
+
+            const activeTape = session.tapes.find(t =>
+                t.status === 'submitting' || t.status === 'commenting' || t.status === 'playlist_ready'
+            );
+            return activeTape || session.tapes[session.tapes.length - 1];
+        }
+
+        function renderSessionCard(session, players, overrideTape, userActionTaken, showTape = true) {
+            const tape = overrideTape || getActiveTape(session);
+            const tapeTitle = showTape && tape ? tape.title : '';
+            const prompt = showTape && tape ? tape.prompt : '';
+            const avatars = renderAvatarRow(session.players, players, session.admin);
+            const actionRow = renderActionRow(session, tape, userActionTaken);
+
+            return `
+                <div
+                    class="mx-4 my-3 p-4 bg-white rounded-xl border border-gray-200 shadow-sm"
+                    data-object-id="session-card-${session.id}"
+                    data-session-id="${session.id}"
+                >
+                    <!-- Card Header -->
+                    <div class="flex items-center justify-between mb-1">
+                        <h3 class="text-base font-semibold font-display text-gray-900">${session.name}</h3>
+                        <svg class="w-5 h-5 text-gray-400 flex-shrink-0" viewBox="0 0 20 20" fill="currentColor">
+                            <circle cx="10" cy="4" r="1.5"/>
+                            <circle cx="10" cy="10" r="1.5"/>
+                            <circle cx="10" cy="16" r="1.5"/>
+                        </svg>
+                    </div>
+
+                    <!-- Session Description -->
+                    <p class="text-sm text-gray-400 mb-3">${session.description}</p>
+
+                    <!-- Avatar Row -->
+                    <div class="flex items-center mb-3">
+                        ${avatars}
+                    </div>
+
+                    <!-- Tape Title + Prompt (active sessions only) -->
+                    ${tapeTitle ? `<p class="text-sm font-medium text-gray-700">${tapeTitle}</p>
+                    <p class="text-sm text-gray-400">${prompt}</p>` : ''}
+
+                    <!-- Action Row -->
+                    ${actionRow}
+                </div>
+            `;
+        }
+
+        // ================================================================
+        // DEMO DATA: Generate 8 active variants (Section 3)
+        // ================================================================
+        function generateActiveVariants(baseSession, players) {
+            const cards = [];
+            const statuses = [
+                { status: 'submitting', done: false, deadline: '2026-03-29T23:59:00Z',
+                  title: 'Magneto, Master of Magnetism', prompt: 'polarizing "love it or hate it" songs' },
+                { status: 'submitting', done: true, deadline: '2026-03-29T23:59:00Z',
+                  title: 'Magneto, Master of Magnetism', prompt: 'polarizing "love it or hate it" songs' },
+                { status: 'commenting', done: false, deadline: '2026-03-27T23:59:00Z',
+                  title: 'Two-Face aka Harvey Dent', prompt: 'songs that start in one style/genre then switch halfway through' },
+                { status: 'commenting', done: true, deadline: '2026-03-27T23:59:00Z',
+                  title: 'Two-Face aka Harvey Dent', prompt: 'songs that start in one style/genre then switch halfway through' },
+                { status: 'playlist_ready', done: false, deadline: null,
+                  title: 'Guilty pleasures', prompt: 'songs you\'d never admit to loving' },
+                { status: 'results', done: false, deadline: null, completedAt: '2026-03-20T00:00:00Z',
+                  title: 'Spider-Man, Your Friendly Neighborhood Web-Slinger', prompt: 'fun, youthful, upbeat bangers' },
+            ];
+
+            // Sort by deadline ascending (nulls last)
+            statuses.sort((a, b) => {
+                if (!a.deadline && !b.deadline) return 0;
+                if (!a.deadline) return 1;
+                if (!b.deadline) return -1;
+                return new Date(a.deadline) - new Date(b.deadline);
+            });
+
+            for (const variant of statuses) {
+                const tape = {
+                    status: variant.status,
+                    title: variant.title,
+                    prompt: variant.prompt,
+                    deadline: variant.deadline,
+                    completedAt: variant.completedAt || null
+                };
+                cards.push(renderSessionCard(baseSession, players, tape, variant.done));
+            }
+
+            return cards;
+        }
+
+        // ================================================================
+        // DEMO MODE TOGGLE
+        // ================================================================
+        let demoMode = true;
+        let cachedData = null;
+
+        function toggleDemoMode() {
+            demoMode = !demoMode;
+            const btn = document.getElementById('demo-toggle');
+            btn.textContent = demoMode ? 'Demo' : 'Real';
+            btn.classList.toggle('bg-gray-100', demoMode);
+            if (cachedData) renderSessions(cachedData);
+            console.log(`🔀 ${demoMode ? 'Demo' : 'Real'} mode`);
+        }
+
+        // ================================================================
+        // DATA LOADING & RENDERING
+        // ================================================================
+        async function loadDemoData() {
+            try {
+                const response = await fetch('data/demo-data.json');
+                const data = await response.json();
+                cachedData = data;
+                console.log('📦 Demo data loaded:', data);
+                return data;
+            } catch (error) {
+                console.error('❌ Failed to load demo data:', error);
+                return null;
+            }
+        }
+
+        function renderSessions(data) {
+            const { sessions, players } = data;
+
+            const activeSessions = sessions.filter(s => !s.ended);
+            const completedSessions = sessions.filter(s => s.ended);
+            const activeContainer = document.getElementById('active-content');
+            const completedContainer = document.getElementById('completed-content');
+
+            if (demoMode) {
+                // Demo: show 6 status variant cards
+                const baseSession = activeSessions[0];
+                if (baseSession) {
+                    const cards = generateActiveVariants(baseSession, players);
+                    activeContainer.innerHTML = cards.join('');
+                    document.getElementById('active-count').textContent = `(${cards.length})`;
+                }
+            } else {
+                // Real: show actual sessions sorted by deadline
+                if (activeSessions.length > 0) {
+                    // Sort by active tape deadline ascending
+                    activeSessions.sort((a, b) => {
+                        const tapeA = getActiveTape(a);
+                        const tapeB = getActiveTape(b);
+                        const dA = tapeA?.deadline ? new Date(tapeA.deadline) : Infinity;
+                        const dB = tapeB?.deadline ? new Date(tapeB.deadline) : Infinity;
+                        return dA - dB;
+                    });
+
+                    // Determine user action state from real data
+                    activeContainer.innerHTML = activeSessions.map(s => {
+                        const tape = getActiveTape(s);
+                        const currentUser = data.currentUser;
+                        let done = false;
+                        if (tape) {
+                            if (tape.status === 'submitting') {
+                                done = tape.submissions?.some(sub => sub.playerId === currentUser);
+                            } else if (tape.status === 'commenting') {
+                                done = tape.comments?.[currentUser] != null;
+                            }
+                        }
+                        return renderSessionCard(s, players, null, done);
+                    }).join('');
+                } else {
+                    activeContainer.innerHTML = '<div class="px-4 py-8 text-center text-sm text-gray-400">No active sessions</div>';
+                }
+                document.getElementById('active-count').textContent = `(${activeSessions.length})`;
+            }
+
+            // Completed cards (same in both modes)
+            completedContainer.innerHTML = completedSessions.length > 0
+                ? completedSessions.map(s => renderSessionCard(s, players, null, true, false)).join('')
+                : '<div class="px-4 py-8 text-center text-sm text-gray-400">No completed sessions</div>';
+            document.getElementById('completed-count').textContent = `(${completedSessions.length})`;
+
+            console.log(`✅ Rendered in ${demoMode ? 'demo' : 'real'} mode`);
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        async function init() {
+            console.log('📄 Session Home loaded');
+
+            const activeContent = document.getElementById('active-content');
+            if (activeContent && !activeContent.classList.contains('collapsed')) {
+                activeContent.style.maxHeight = 'none';
+            }
+
+            const data = await loadDemoData();
+            if (data) {
+                renderSessions(data);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

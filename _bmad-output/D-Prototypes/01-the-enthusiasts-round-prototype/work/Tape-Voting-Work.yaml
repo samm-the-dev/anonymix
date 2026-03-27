@@ -1,0 +1,28 @@
+view: Tape Comments
+view_id: view-d
+scenario_steps: ["01.5"]
+device: mobile-only
+fidelity: gray-model
+
+objects:
+  - id: commenting-header
+    description: "← back | 'Tape N · Comment' centered | session subtitle"
+  - id: song-row
+    description: "Album art | title + artist (anonymous) | comment field"
+  - id: submit-comments
+    description: Submit button for sharing comments
+
+sections:
+  - number: 1
+    name: "Header + tape info"
+    objects: [commenting-header]
+    description: "Page shell, tape info, framing copy"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 2
+    name: "Song rows with comments + submit"
+    objects: [song-row, submit-comments]
+    description: "Anonymous song cards with comment fields, tape-level comment, share button. No points — resonance over ranking."
+    status: complete
+    completed: 2026-03-25

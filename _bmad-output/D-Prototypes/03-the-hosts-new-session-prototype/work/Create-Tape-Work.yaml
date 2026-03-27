@@ -1,0 +1,44 @@
+view: Create Tape
+view_id: view-a
+scenario_steps: ["03.1"]
+device: mobile-only
+fidelity: gray-model
+
+flow:
+  - Write first tape prompt
+  - Flip to add more tapes
+  - Session details (name, description, timing)
+  - Create → celebration + invite link
+
+objects:
+  - id: tape-prompt-card
+    description: Card with name + desc inputs for writing a tape prompt
+  - id: add-tape
+    description: Flip/button to add another tape card
+  - id: tape-crate
+    description: Crate-flip to navigate between created tapes
+  - id: session-details
+    description: Name, description (optional), timing settings
+  - id: create-button
+    description: Creates the session
+  - id: celebration
+    description: "You're live!" moment with invite link and share
+
+sections:
+  - number: 1
+    name: "Tape prompt cards + crate-flip"
+    objects: [tape-prompt-card, add-tape, tape-crate]
+    description: "Write prompts on tape cards, flip to add more"
+    status: todo
+
+  - number: 2
+    name: "Session details + create"
+    objects: [session-details, create-button]
+    description: "Name, description, timing defaults, create button"
+    status: todo
+
+  - number: 3
+    name: "Celebration + invite link"
+    objects: [celebration]
+    description: "You're live! moment, invite link, copy/share"
+    status: todo

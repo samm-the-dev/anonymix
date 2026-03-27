@@ -1,0 +1,22 @@
+view: Auth / Sign Up
+view_id: view-b
+scenario_steps: ["02.2"]
+device: mobile-only
+fidelity: gray-model
+
+objects:
+  - id: context-reminder
+    description: Session name reminder so they know what they're joining
+  - id: spotify-button
+    description: "Sign up with Spotify" OAuth button
+  - id: youtube-button
+    description: "Sign up with YouTube Music" OAuth button
+  - id: oauth-error
+    description: Error state if OAuth fails
+
+sections:
+  - number: 1
+    name: "Full auth page"
+    objects: [context-reminder, spotify-button, youtube-button, oauth-error]
+    description: "Session reminder, two platform buttons, error handling"
+    status: todo

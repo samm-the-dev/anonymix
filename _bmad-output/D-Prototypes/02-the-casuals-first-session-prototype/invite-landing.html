@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Join Session - Anonymix</title>
+
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white flex flex-col items-center justify-center px-6 relative">
+
+        <!-- Demo Toggle -->
+        <button
+            id="demo-toggle"
+            onclick="toggleUserType()"
+            class="absolute top-3 right-3 text-[10px] font-medium text-gray-400 border border-gray-200 rounded px-1.5 py-0.5 hover:bg-gray-50"
+        >
+            New User
+        </button>
+
+        <!-- Invited By -->
+        <p id="invited-by" data-object-id="invited-by" class="text-sm text-gray-400">
+        </p>
+
+        <!-- Session Name -->
+        <h1 id="session-name" data-object-id="session-name" class="text-2xl font-bold font-display text-gray-900 text-center mt-1">
+        </h1>
+
+        <!-- Member Avatars -->
+        <div id="member-avatars" data-object-id="member-avatars" class="flex items-center justify-center mt-4">
+        </div>
+
+        <!-- Prompt Preview -->
+        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mt-5 self-start">Tapes</p>
+        <div id="prompt-preview" data-object-id="prompt-preview" class="mt-1.5 space-y-1.5 w-full">
+        </div>
+
+        <!-- Explainer (new user only) -->
+        <div id="explainer" data-object-id="explainer" class="mt-5 text-xs text-gray-400 leading-relaxed">
+            <p class="mb-1.5">For each Tape you'll:</p>
+            <ul class="space-y-1 ml-3">
+                <li>- Anonymously contribute to a playlist around the theme</li>
+                <li>- Comment on the playlist picks once you've listened</li>
+                <li>- See all submitters and comments once everyone has commented</li>
+            </ul>
+        </div>
+
+        <!-- Join Buttons -->
+        <div id="platform-buttons" class="mt-6 w-full space-y-3">
+            <button
+                id="spotify-button"
+                data-object-id="spotify-button"
+                onclick="handleSpotifyAuth()"
+                class="w-full py-3 rounded-xl text-base font-semibold text-gray-900 text-center flex items-center justify-center gap-2.5 border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+                <svg class="w-5 h-5 text-[#1DB954]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 0C5.4 0 0 5.4 0 12s5.4 12 12 12 12-5.4 12-12S18.66 0 12 0zm5.521 17.34c-.24.359-.66.48-1.021.24-2.82-1.74-6.36-2.101-10.561-1.141-.418.122-.779-.179-.899-.539-.12-.421.18-.78.54-.9 4.56-1.021 8.52-.6 11.64 1.32.42.18.479.659.301 1.02zm1.44-3.3c-.301.42-.841.6-1.262.3-3.239-1.98-8.159-2.58-11.939-1.38-.479.12-1.02-.12-1.14-.6-.12-.48.12-1.021.6-1.141C9.6 9.9 15 10.561 18.72 12.84c.361.181.54.78.241 1.2zm.12-3.36C15.24 8.4 8.82 8.16 5.16 9.301c-.6.179-1.2-.181-1.38-.721-.18-.601.18-1.2.72-1.381 4.26-1.26 11.28-1.02 15.721 1.621.539.3.719 1.02.419 1.56-.299.421-1.02.599-1.559.3z"/>
+                </svg>
+                Join with Spotify
+            </button>
+
+            <button
+                id="youtube-button"
+                data-object-id="youtube-button"
+                onclick="handleYouTubeAuth()"
+                class="w-full py-3 rounded-xl text-base font-semibold text-gray-900 text-center flex items-center justify-center gap-2.5 border border-gray-300 hover:bg-gray-50 transition-colors"
+            >
+                <svg class="w-5 h-5 text-[#FF0000]" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                </svg>
+                Join with YouTube Music
+            </button>
+        </div>
+
+        <!-- Authenticated Join Button (hidden by default) -->
+        <button
+            id="join-button"
+            data-object-id="join-button"
+            onclick="handleJoin()"
+            class="mt-6 w-full py-3 rounded-xl text-base font-semibold text-white bg-green-500 hover:bg-green-600 transition-colors hidden"
+        >
+            Join Session
+        </button>
+
+        <!-- Footer (new user only) -->
+        <p id="platform-footer" class="text-xs text-gray-300 mt-4 text-center leading-relaxed">
+            Your platform determines where playlists are created.
+        </p>
+
+    </div>
+
+    <script>
+        /**
+         * Page: Invite Landing
+         */
+
+        async function loadInviteData() {
+            try {
+                const response = await fetch('data/demo-data.json');
+                const data = await response.json();
+                console.log('📦 Invite data loaded');
+                return data.inviteSession;
+            } catch (error) {
+                console.error('❌ Failed to load invite data:', error);
+                return null;
+            }
+        }
+
+        function renderInvitePage(session) {
+            // Session name
+            document.getElementById('session-name').textContent = session.name;
+
+            // Invited by
+            document.getElementById('invited-by').textContent = `${session.invitedBy} invited you to join`;
+
+            // Avatars
+            const avatarContainer = document.getElementById('member-avatars');
+            const avatarHtml = session.members.map((m, i) => {
+                const ml = i === 0 ? '' : '-ml-2';
+                return `
+                    <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-semibold text-white border-2 border-white ${ml}"
+                         style="background-color: ${m.avatarColor}">
+                        ${m.avatar || m.name.charAt(0)}
+                    </div>
+                `;
+            }).join('');
+            avatarContainer.innerHTML = avatarHtml + `<span class="text-xs text-gray-400 ml-2">${session.playerCount} members</span>`;
+
+            // Prompts — show first 3 with name/desc, "+X more" if more
+            const promptContainer = document.getElementById('prompt-preview');
+            const tapes = session.recentTapes || [];
+            const shown = tapes.slice(0, 3);
+            const remaining = tapes.length - shown.length;
+
+            promptContainer.innerHTML = shown.map(t => `
+                <div class="text-left">
+                    <p class="text-sm font-semibold font-display text-gray-700">${t.name}</p>
+                    <p class="text-xs text-gray-400">${t.desc}</p>
+                </div>
+            `).join('') + (remaining > 0
+                ? `<p class="text-xs text-gray-400 text-left">+${remaining} more</p>`
+                : '');
+        }
+
+        let isNewUser = true;
+
+        function toggleUserType() {
+            isNewUser = !isNewUser;
+            const toggle = document.getElementById('demo-toggle');
+            const platformButtons = document.getElementById('platform-buttons');
+            const joinButton = document.getElementById('join-button');
+            const footer = document.getElementById('platform-footer');
+            const explainer = document.getElementById('explainer');
+
+            if (isNewUser) {
+                toggle.textContent = 'New User';
+                platformButtons.classList.remove('hidden');
+                joinButton.classList.add('hidden');
+                footer.classList.remove('hidden');
+                explainer.classList.remove('hidden');
+            } else {
+                toggle.textContent = 'Returning';
+                platformButtons.classList.add('hidden');
+                joinButton.classList.remove('hidden');
+                footer.classList.add('hidden');
+                explainer.classList.add('hidden');
+            }
+        }
+
+        function handleJoin() {
+            console.log('✅ Join session (authenticated)');
+            showToast('Joining session...');
+        }
+
+        function handleSpotifyAuth() {
+            console.log('🎵 Join with Spotify');
+            showToast('Redirecting to Spotify...');
+        }
+
+        function handleYouTubeAuth() {
+            console.log('🎵 Join with YouTube Music');
+            showToast('Redirecting to YouTube Music...');
+        }
+
+        function showToast(message) {
+            const existing = document.getElementById('invite-toast');
+            if (existing) existing.remove();
+
+            const toast = document.createElement('div');
+            toast.id = 'invite-toast';
+            toast.className = 'fixed bottom-6 left-1/2 -translate-x-1/2 bg-gray-900 text-white px-6 py-3 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 2500);
+        }
+
+        async function init() {
+            console.log('📄 Invite Landing loaded');
+            const session = await loadInviteData();
+            if (session) renderInvitePage(session);
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

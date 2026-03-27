@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tape Reveal - Anonymix</title>
+
+    <!-- Tailwind CSS via CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+
+    <!-- Tailwind Config -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Nunito Sans', 'system-ui', 'sans-serif'],
+                        display: ['Quicksand', 'system-ui', 'sans-serif'],
+                    }
+                }
+            }
+        }
+    </script>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Custom Styles -->
+    <style>
+        .accordion-content {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.25s ease-out, visibility 0s 0.25s;
+            visibility: hidden;
+        }
+        .accordion-content.open {
+            visibility: visible;
+            transition: max-height 0.25s ease-out, visibility 0s 0s;
+        }
+        .accordion-chevron {
+            transition: transform 0.25s ease-out;
+        }
+        .accordion-chevron.open {
+            transform: rotate(180deg);
+        }
+        .submitter-reveal {
+            animation: fadeIn 0.3s ease-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-4px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="min-h-screen bg-gray-100 font-sans text-gray-900">
+
+    <!-- ================================================================
+         APP SHELL
+         ================================================================ -->
+    <div id="app" class="max-w-[428px] mx-auto min-h-screen bg-white flex flex-col">
+
+        <!-- ============================================================
+             HEADER
+             ============================================================ -->
+        <header class="px-4 py-3 border-b border-gray-200 relative flex items-center">
+            <a
+                id="reveal-back"
+                data-object-id="reveal-back"
+                href="session-view.html"
+                class="w-8 text-gray-600 hover:text-gray-900 transition-colors"
+            >
+                <svg class="w-5 h-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path fill-rule="evenodd" d="M12.79 5.23a.75.75 0 01-.02 1.06L8.832 10l3.938 3.71a.75.75 0 11-1.04 1.08l-4.5-4.25a.75.75 0 010-1.08l4.5-4.25a.75.75 0 011.06.02z" clip-rule="evenodd"/>
+                </svg>
+            </a>
+
+            <div class="absolute left-1/2 -translate-x-1/2 text-center">
+                <h1 id="reveal-title" data-object-id="reveal-title" class="text-sm font-semibold font-display">Loading...</h1>
+                <p id="reveal-session-name" class="text-[11px] text-gray-400"></p>
+            </div>
+
+            <div class="w-8 ml-auto"></div>
+        </header>
+
+        <!-- ============================================================
+             MAIN CONTENT
+             ============================================================ -->
+        <main class="flex-1 flex flex-col">
+
+            <!-- Tape info -->
+            <div class="px-4 pt-4 pb-3">
+                <h2 id="reveal-tape-name" class="text-lg font-semibold font-display text-gray-900 leading-snug"></h2>
+                <p id="reveal-tape-desc" class="text-sm text-gray-400 mt-0.5"></p>
+            </div>
+
+            <!-- Song accordion list -->
+            <div class="border-t border-gray-200">
+                <div id="song-accordion" class="px-4">
+                </div>
+            </div>
+
+        </main>
+    </div>
+
+    <!-- ================================================================
+         JAVASCRIPT
+         ================================================================ -->
+    <script>
+        /**
+         * Page: Tape Reveal
+         * Accordion with submitter reveal + comments
+         */
+
+        // ================================================================
+        // STATE
+        // ================================================================
+        let sessionData = null;
+        let tapeData = null;
+        let currentUser = null;
+        let allPlayers = null;
+
+        // ================================================================
+        // DATA LOADING
+        // ================================================================
+        async function loadRevealData() {
+            try {
+                const response = await fetch('data/demo-data.json');
+                const data = await response.json();
+
+                currentUser = data.currentUser;
+                allPlayers = data.players;
+
+                const params = new URLSearchParams(window.location.search);
+                const sessionId = params.get('session');
+                const tapeId = params.get('tape');
+
+                if (sessionId) {
+                    sessionData = data.sessions.find(s => s.id === sessionId);
+                }
+                if (!sessionData) {
+                    // Default to Playlist Pandamonium for reveal demo
+                    sessionData = data.sessions.find(s => s.ended) || data.sessions[0];
+                }
+
+                if (tapeId) {
+                    tapeData = sessionData.tapes.find(t => t.id === tapeId);
+                }
+                if (!tapeData) {
+                    tapeData = sessionData.tapes.find(t => t.status === 'results') || sessionData.tapes[0];
+                }
+
+                console.log('📦 Reveal loaded:', tapeData.title);
+                return tapeData;
+            } catch (error) {
+                console.error('❌ Failed to load reveal data:', error);
+                return null;
+            }
+        }
+
+        // ================================================================
+        // HELPERS
+        // ================================================================
+        function getPlayerName(playerId) {
+            const player = allPlayers?.find(p => p.id === playerId);
+            return player?.name || playerId;
+        }
+
+        function getPlayerColor(playerId) {
+            const player = allPlayers?.find(p => p.id === playerId);
+            return player?.avatarColor || '#9ca3af';
+        }
+
+        function getCommentsForSong(tape, songPlayerId) {
+            if (!tape.comments) return [];
+            const result = [];
+            for (const [commenterId, songComments] of Object.entries(tape.comments)) {
+                if (songComments[songPlayerId]) {
+                    result.push({
+                        commenter: commenterId,
+                        text: songComments[songPlayerId]
+                    });
+                }
+            }
+            return result;
+        }
+
+        function getTapeComments(tape) {
+            if (!tape.comments) return [];
+            const result = [];
+            for (const [commenterId, songComments] of Object.entries(tape.comments)) {
+                if (songComments['_tape']) {
+                    result.push({
+                        commenter: commenterId,
+                        text: songComments['_tape']
+                    });
+                }
+            }
+            return result;
+        }
+
+        // ================================================================
+        // ACCORDION RENDERING
+        // ================================================================
+        function renderHeader(tape, session) {
+            document.getElementById('reveal-title').textContent = `Tape ${tape.number} · Reveal`;
+            document.getElementById('reveal-session-name').textContent = session.name;
+            document.getElementById('reveal-tape-name').textContent = tape.title;
+            document.getElementById('reveal-tape-desc').textContent = tape.prompt;
+        }
+
+        function renderComment(comment) {
+            const name = getPlayerName(comment.commenter);
+            const color = getPlayerColor(comment.commenter);
+            return `
+                <div class="py-3 border-b border-gray-100 last:border-0">
+                    <div class="flex items-center gap-2.5 mb-1.5">
+                        <div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-semibold text-white flex-shrink-0" style="background-color: ${color}">
+                            ${name.charAt(0).toUpperCase()}
+                        </div>
+                        <span class="text-sm font-semibold text-gray-900">${name}</span>
+                    </div>
+                    <p class="text-sm text-gray-600 leading-relaxed">${comment.text}</p>
+                </div>
+            `;
+        }
+
+        function renderSongAccordion(tape) {
+            const songs = tape.submissions || [];
+            const container = document.getElementById('song-accordion');
+
+            if (songs.length === 0) {
+                container.innerHTML = '<p class="text-sm text-gray-400 text-center py-8">No songs to reveal</p>';
+                return;
+            }
+
+            let html = songs.map((song, i) => {
+                const comments = getCommentsForSong(tape, song.playerId);
+                const hasComments = comments.length > 0;
+
+                return `
+                    <div class="border-b border-gray-100 last:border-0" data-accordion-item="${i}">
+                        <!-- Collapsed header — tap to expand -->
+                        <button
+                            class="w-full py-3 flex items-center gap-3 text-left"
+                            onclick="toggleAccordion(${i})"
+                        >
+                            <div class="w-12 h-12 rounded-lg bg-gray-200 flex-shrink-0"></div>
+                            <div class="min-w-0 flex-1">
+                                <p class="text-sm font-semibold text-gray-900">${song.song}</p>
+                                <p class="text-xs text-gray-400">${song.artist}</p>
+                            </div>
+                            <svg class="accordion-chevron w-4 h-4 text-gray-400 flex-shrink-0" id="chevron-${i}" viewBox="0 0 20 20" fill="currentColor">
+                                <path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 11.168l3.71-3.938a.75.75 0 111.08 1.04l-4.25 4.5a.75.75 0 01-1.08 0l-4.25-4.5a.75.75 0 01.02-1.06z" clip-rule="evenodd"/>
+                            </svg>
+                        </button>
+
+                        <!-- Expanded content — submitter + comments -->
+                        <div class="accordion-content" id="content-${i}">
+                            <div class="pb-3 pl-15">
+                                <!-- Submitter reveal -->
+                                <div class="submitter-reveal mb-3 ml-[60px]">
+                                    <span class="text-xs text-gray-400">Submitted by</span>
+                                    <span class="text-xs font-semibold text-gray-700 ml-1">${getPlayerName(song.playerId)}</span>
+                                </div>
+
+                                <!-- Comments -->
+                                ${hasComments ? `
+                                    <div class="ml-[60px]">
+                                        ${comments.map(c => renderComment(c)).join('')}
+                                    </div>
+                                ` : `
+                                    <p class="ml-[60px] text-xs text-gray-300">No comments</p>
+                                `}
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+
+            // Tape-level comments
+            const tapeComments = getTapeComments(tape);
+            if (tapeComments.length > 0) {
+                html += `
+                    <div class="py-3">
+                        <p class="text-xs font-semibold text-gray-500 uppercase tracking-wide mb-3">The Tape</p>
+                        <div class="space-y-2">
+                            ${tapeComments.map(c => renderComment(c)).join('')}
+                        </div>
+                    </div>
+                `;
+            }
+
+            container.innerHTML = html;
+        }
+
+        function toggleAccordion(index) {
+            const content = document.getElementById(`content-${index}`);
+            const chevron = document.getElementById(`chevron-${index}`);
+            const isOpen = content.classList.contains('open');
+
+            if (isOpen) {
+                // Collapse
+                content.style.maxHeight = content.scrollHeight + 'px';
+                content.offsetHeight;
+                content.classList.remove('open');
+                content.style.maxHeight = null;
+                chevron.classList.remove('open');
+            } else {
+                // Expand
+                content.classList.add('open');
+                content.style.maxHeight = content.scrollHeight + 'px';
+                chevron.classList.add('open');
+
+                content.addEventListener('transitionend', function handler() {
+                    if (content.classList.contains('open')) {
+                        content.style.maxHeight = 'none';
+                    }
+                    content.removeEventListener('transitionend', handler);
+                });
+            }
+        }
+
+        // ================================================================
+        // INITIALIZATION
+        // ================================================================
+        async function init() {
+            console.log('📄 Tape Reveal loaded');
+
+            const tape = await loadRevealData();
+            if (tape && sessionData) {
+                renderHeader(tape, sessionData);
+                renderSongAccordion(tape);
+            }
+        }
+
+        document.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>

@@ -1,0 +1,75 @@
+view: Session Home
+view_id: view-a
+scenario_steps: ["01.1"]
+device: mobile-only
+fidelity: gray-model
+
+sorting:
+  active_sessions: deadline_asc  # sort by active tape deadline, ascending
+
+collapsible_sections:
+  active:
+    default_state: open
+    contains: [submitting, commenting, playlist_ready]
+  completed:
+    default_state: collapsed
+    contains: [results, ended]
+
+status_variants:
+  - status: submitting
+    accent: green
+    action_label: "Submit"
+  - status: commenting
+    accent: amber
+    action_label: "Comment"
+  - status: playlist_ready
+    accent: blue
+    action_label: "Listen"
+  - status: results
+    accent: purple
+    action_label: "Results"
+
+objects:
+  - id: page-shell
+    description: Mobile viewport container, light theme default
+  - id: collapsible-section
+    description: Expand/collapse container with label and count
+  - id: session-card
+    description: Vertical card with header, avatars, prompt, action row
+  - id: card-header
+    description: Session title (left) + drag handle (right)
+  - id: avatar-row
+    description: Overlapping player avatar circles, compress near edge
+  - id: tape-prompt
+    description: Current tape prompt, 1-line ellipsis truncated
+  - id: action-row
+    description: "[View Session] outlined | status + deadline center | [Action] filled"
+
+sections:
+  - number: 1
+    name: "Page shell + layout"
+    objects: [page-shell, collapsible-section]
+    description: "Mobile viewport, light theme, collapsible section containers with expand/collapse"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 2
+    name: "Session card — structure"
+    objects: [card-header, avatar-row, tape-prompt]
+    description: "Static card layout with session title, description, overlapping avatars, tape title + prompt"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 3
+    name: "Session card — status variants + action row"
+    objects: [action-row]
+    description: "4 status color variants, 6 demo cards (before/after for submit+comment, single for listen+results), deadline display, sort active by deadline asc"
+    status: complete
+    completed: 2026-03-25
+
+  - number: 4
+    name: "Demo data integration + polish"
+    objects: []
+    description: "Demo/Real toggle in header. Demo mode shows 6 status variants, Real mode shows actual data with user action state detection"
+    status: complete
+    completed: 2026-03-25
