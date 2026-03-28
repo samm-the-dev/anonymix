@@ -32,9 +32,9 @@ export function useOdesliLinks(submissions: OdesliInput[]) {
         if (!sub.musicbrainzId) continue;
 
         try {
-          const mbUrl = `https://musicbrainz.org/recording/${sub.musicbrainzId}`;
+          const deezerUrl = `https://www.deezer.com/track/${sub.musicbrainzId}`;
           const res = await fetch(
-            `${ODESLI_BASE}?${new URLSearchParams({ url: mbUrl })}`,
+            `${ODESLI_BASE}?${new URLSearchParams({ url: deezerUrl })}`,
           );
 
           if (res.ok) {

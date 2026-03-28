@@ -7,7 +7,7 @@ import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
 import { StatusBadge } from '@/components/StatusBadge';
 import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
-import { fetchCoverArtUrl } from '@/lib/coverArt';
+// coverArt.ts kept for future MusicBrainz fallback
 import { useOdesliLinks } from '@/hooks/useOdesliLinks';
 
 interface TapeData {
@@ -149,8 +149,8 @@ export function SessionViewPage() {
           .update({
             song_name: selectedSong.title,
             artist_name: selectedSong.artist,
-            musicbrainz_id: selectedSong.id !== 'manual' ? selectedSong.id : null,
-            release_id: selectedSong.releaseId ?? null,
+            musicbrainz_id: selectedSong.deezerId ?? null,
+            release_id: null,
             cover_art_url: coverArtUrl,
           })
           .eq('id', mySubmission.id);
@@ -162,8 +162,8 @@ export function SessionViewPage() {
           player_id: player.id,
           song_name: selectedSong.title,
           artist_name: selectedSong.artist,
-          musicbrainz_id: selectedSong.id !== 'manual' ? selectedSong.id : null,
-          release_id: selectedSong.releaseId ?? null,
+          musicbrainz_id: selectedSong.deezerId ?? null,
+          release_id: null,
           cover_art_url: coverArtUrl,
         });
         if (err) throw err;
@@ -284,7 +284,7 @@ export function SessionViewPage() {
               <>
                 <SubmissionProgress submitted={tapeSubmissions.length} total={members.length || 1} />
                 {mySubmission ? (
-                  <div className="flex items-center justify-between gap-3">
+                  <div className="flex items-end justify-between gap-3">
                     <div className="min-w-0">
                       <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Your pick</span>
                       <span className="block truncate text-sm font-medium text-foreground">
@@ -299,7 +299,7 @@ export function SessionViewPage() {
                           id: mySubmission.musicbrainz_id ?? 'manual',
                           title: mySubmission.song_name,
                           artist: mySubmission.artist_name,
-                          releaseId: mySubmission.release_id ?? undefined,
+                          deezerId: mySubmission.musicbrainz_id ?? undefined,
                         });
                         setCoverArtUrl(mySubmission.cover_art_url);
                       }}
@@ -560,26 +560,29 @@ export function SessionViewPage() {
               {results.map((r) => (
                 <button
                   key={r.id}
-                  onClick={async () => {
+                  onClick={() => {
                     setSelectedSong(r);
                     setQuery(`${r.artist} - ${r.title}`);
                     clear();
-                    setCoverArtUrl(null);
-                    if (r.releaseId) {
-                      const url = await fetchCoverArtUrl(r.releaseId);
-                      setCoverArtUrl(url);
-                    }
+                    setCoverArtUrl(r.coverArtUrl ?? null);
                   }}
                   className={cn(
-                    'flex w-full flex-col border-b border-border px-4 py-3 text-left transition-colors last:border-0 hover:bg-accent',
+                    'flex w-full items-center gap-3 border-b border-border px-4 py-3 text-left transition-colors last:border-0 hover:bg-accent',
                     selectedSong?.id === r.id && 'bg-primary/10',
                   )}
                 >
-                  <span className="font-display text-sm font-semibold text-foreground">{r.title}</span>
-                  <span className="text-xs text-muted-foreground">
-                    {r.artist}
-                    {r.album && ` · ${r.album}`}
-                  </span>
+                  {r.coverArtUrl ? (
+                    <img src={r.coverArtUrl} alt="" className="h-10 w-10 shrink-0 rounded object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 shrink-0 rounded bg-secondary" />
+                  )}
+                  <div className="min-w-0">
+                    <span className="block font-display text-sm font-semibold text-foreground">{r.title}</span>
+                    <span className="block text-xs text-muted-foreground">
+                      {r.artist}
+                      {r.album && ` · ${r.album}`}
+                    </span>
+                  </div>
                 </button>
               ))}
             </div>

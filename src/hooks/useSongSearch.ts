@@ -5,11 +5,12 @@ export interface SongResult {
   title: string;
   artist: string;
   album?: string;
-  releaseId?: string;
+  coverArtUrl?: string;
+  /** Deezer track ID — used for Odesli resolution */
+  deezerId?: string;
 }
 
-const MB_BASE = 'https://musicbrainz.org/ws/2/recording';
-const USER_AGENT = 'Anonymix/0.1.0 (https://anonymix.app)';
+const DEEZER_BASE = 'https://api.deezer.com/search';
 
 export function useSongSearch() {
   const [results, setResults] = useState<SongResult[]>([]);
@@ -18,7 +19,6 @@ export function useSongSearch() {
   const abortRef = useRef<AbortController>(undefined);
 
   const search = useCallback((query: string) => {
-    // Clear previous
     if (debounceRef.current) clearTimeout(debounceRef.current);
     if (abortRef.current) abortRef.current.abort();
 
@@ -36,30 +36,35 @@ export function useSongSearch() {
 
       try {
         const params = new URLSearchParams({
-          query: query.trim(),
-          fmt: 'json',
+          q: query.trim(),
           limit: '8',
         });
 
-        const res = await fetch(`${MB_BASE}?${params}`, {
-          headers: { 'User-Agent': USER_AGENT, Accept: 'application/json' },
+        const res = await fetch(`${DEEZER_BASE}?${params}`, {
           signal: controller.signal,
         });
 
         if (!res.ok) throw new Error(res.statusText);
 
         const data = await res.json();
-        const recordings: SongResult[] = (data.recordings ?? []).map(
-          (r: { id: string; title: string; 'artist-credit'?: { name: string }[]; releases?: { id: string; title: string }[] }) => ({
-            id: r.id,
-            title: r.title,
-            artist: r['artist-credit']?.[0]?.name ?? 'Unknown Artist',
-            album: r.releases?.[0]?.title,
-            releaseId: r.releases?.[0]?.id,
-          }),
-        );
 
-        setResults(recordings);
+        interface DeezerTrack {
+          id: number;
+          title: string;
+          artist: { name: string };
+          album: { id: number; title: string; cover_small: string; cover_medium: string };
+        }
+
+        const tracks: SongResult[] = (data.data ?? []).map((t: DeezerTrack) => ({
+          id: String(t.id),
+          title: t.title,
+          artist: t.artist.name,
+          album: t.album.title,
+          coverArtUrl: t.album.cover_medium,
+          deezerId: String(t.id),
+        }));
+
+        setResults(tracks);
       } catch (err) {
         if ((err as Error).name !== 'AbortError') {
           setResults([]);
