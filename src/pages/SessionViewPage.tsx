@@ -195,6 +195,16 @@ export function SessionViewPage() {
     navigator.clipboard?.writeText(text);
   }
 
+  const tapeSubmissions = submissions.filter(
+    (s) => 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape?.id,
+  );
+
+  // Resolve song.link URLs for playlist view (must be before any early returns)
+  const odesliInputs = (activeTape?.status === 'playlist_ready' || activeTape?.status === 'results')
+    ? tapeSubmissions.map((s) => ({ id: s.id, musicbrainzId: s.musicbrainz_id }))
+    : [];
+  const songLinks = useOdesliLinks(odesliInputs);
+
   if (loading) {
     return (
       <div className="flex min-h-screen items-center justify-center text-muted-foreground">
@@ -202,16 +212,6 @@ export function SessionViewPage() {
       </div>
     );
   }
-
-  const tapeSubmissions = submissions.filter(
-    (s) => 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape?.id,
-  );
-
-  // Resolve song.link URLs for playlist view
-  const odesliInputs = (activeTape?.status === 'playlist_ready' || activeTape?.status === 'results')
-    ? tapeSubmissions.map((s) => ({ id: s.id, musicbrainzId: s.musicbrainz_id }))
-    : [];
-  const songLinks = useOdesliLinks(odesliInputs);
 
   return (
     <div className="flex flex-1 flex-col bg-background">
