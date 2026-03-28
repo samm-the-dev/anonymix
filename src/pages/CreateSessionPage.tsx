@@ -168,8 +168,8 @@ export function CreateSessionPage() {
           session_id: session.id,
           title: filledTapes[i].name.trim(),
           prompt: filledTapes[i].prompt.trim(),
-          status: i === 0 ? 'submitting' : 'submitting',
-          deadline: new Date(Date.now() + submitDays * 86400000).toISOString(),
+          status: 'submitting',
+          submit_window_hours: submitDays * 24,
         });
         if (tapeErr) throw tapeErr;
       }

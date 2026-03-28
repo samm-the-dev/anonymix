@@ -35,6 +35,7 @@ export function SessionViewPage() {
   const { player } = useAuthContext();
 
   const [sessionName, setSessionName] = useState('');
+  const [isHost, setIsHost] = useState(false);
   const [tapes, setTapes] = useState<TapeData[]>([]);
   const [activeTapeIdx, setActiveTapeIdx] = useState(0);
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
@@ -60,11 +61,14 @@ export function SessionViewPage() {
 
     const { data: session } = await supabase
       .from('sessions')
-      .select('name')
+      .select('name, admin_id')
       .eq('id', sessionId)
       .single();
 
-    if (session) setSessionName(session.name);
+    if (session) {
+      setSessionName(session.name);
+      setIsHost(session.admin_id === player?.id);
+    }
 
     // Fetch members
     const { data: memberRows } = await supabase
@@ -213,6 +217,8 @@ export function SessionViewPage() {
     );
   }
 
+  const deadlinePassed = activeTape?.deadline ? new Date(activeTape.deadline).getTime() < Date.now() : false;
+
   return (
     <div className="flex flex-1 flex-col bg-background">
       {/* Header */}
@@ -277,6 +283,17 @@ export function SessionViewPage() {
             <p className="font-display text-lg font-semibold leading-snug text-foreground">{activeTape.title}</p>
             <p className="mb-2 text-sm text-muted-foreground">{activeTape.prompt}</p>
 
+            {/* Deadline info */}
+            {activeTape.status === 'submitting' && (
+              <p className="mb-1 text-xs text-muted-foreground">
+                {!activeTape.deadline
+                  ? 'Waiting for first submission'
+                  : new Date(activeTape.deadline).getTime() < Date.now()
+                    ? 'Submissions closing...'
+                    : `Due ${new Date(activeTape.deadline).toLocaleDateString()}`}
+              </p>
+            )}
+
             <div className="flex-1"></div> {/* spacer */}
 
             {/* State-specific content */}
@@ -310,12 +327,25 @@ export function SessionViewPage() {
                 ) : (
                   <button
                     onClick={() => setShowSearch(true)}
-                    className="w-full rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-500"
+                    disabled={deadlinePassed}
+                    className="w-full rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 dark:bg-green-600 dark:hover:bg-green-500"
                   >
-                    Submit your pick
+                    {deadlinePassed ? 'Submissions closing...' : 'Submit your pick'}
                   </button>
                 )}
               </>
+            )}
+
+            {activeTape.status === 'submitting' && isHost && (
+              <button
+                onClick={async () => {
+                  await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
+                  await fetchData();
+                }}
+                className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
+              >
+                Close submissions
+              </button>
             )}
 
             {activeTape.status === 'playlist_ready' && (
