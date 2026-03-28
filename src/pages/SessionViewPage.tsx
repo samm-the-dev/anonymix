@@ -353,10 +353,13 @@ export function SessionViewPage() {
                 <p className="text-sm text-muted-foreground">{tapeSubmissions.length} songs ready to listen</p>
                 <p className="mb-4 text-xs text-muted-foreground">Go listen, then come back to comment</p>
                 <button
-                  onClick={copyPlaylist}
+                  onClick={() => {
+                    copyPlaylist();
+                    window.open('https://www.tunemymusic.com', '_blank');
+                  }}
                   className="w-full rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
                 >
-                  Copy playlist
+                  Copy &amp; open Tune My Music
                 </button>
               </div>
             )}
@@ -464,15 +467,6 @@ export function SessionViewPage() {
                 </div>
               ))}
             </div>
-            <a
-              href="https://www.tunemymusic.com"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="mt-3 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent"
-            >
-              <ExternalLink className="h-4 w-4" />
-              Open Tune My Music
-            </a>
           </div>
         )}
 
