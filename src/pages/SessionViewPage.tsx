@@ -284,14 +284,26 @@ export function SessionViewPage() {
               <>
                 <SubmissionProgress submitted={tapeSubmissions.length} total={members.length || 1} />
                 {mySubmission ? (
-                  <div className="flex items-center justify-between">
-                    <div>
+                  <div className="flex items-center justify-between gap-3">
+                    <div className="min-w-0">
                       <span className="block text-[11px] uppercase tracking-wide text-muted-foreground">Your pick</span>
-                      <span className="text-sm font-medium text-foreground">
-                        {mySubmission.song_name}{mySubmission.artist_name ? ` — ${mySubmission.artist_name}` : ''}
+                      <span className="block truncate text-sm font-medium text-foreground">
+                        {mySubmission.song_name}{mySubmission.artist_name ? ` - ${mySubmission.artist_name}` : ''}
                       </span>
                     </div>
-                    <button onClick={() => setShowSearch(true)} className="shrink-0 text-sm font-medium text-primary">
+                    <button
+                      onClick={() => {
+                        setShowSearch(true);
+                        setQuery(`${mySubmission.artist_name ? mySubmission.artist_name + ' - ' : ''}${mySubmission.song_name}`);
+                        setSelectedSong({
+                          id: mySubmission.musicbrainz_id ?? 'manual',
+                          title: mySubmission.song_name,
+                          artist: mySubmission.artist_name,
+                          releaseId: mySubmission.release_id ?? undefined,
+                        });
+                        setCoverArtUrl(mySubmission.cover_art_url);
+                      }}
+                      className="shrink-0 text-sm font-medium text-primary">
                       Change
                     </button>
                   </div>
