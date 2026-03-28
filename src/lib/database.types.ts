@@ -147,6 +147,9 @@ export interface Database {
           player_id: string;
           song_name: string;
           artist_name: string;
+          musicbrainz_id: string | null;
+          release_id: string | null;
+          cover_art_url: string | null;
           created_at: string;
         };
         Insert: {
@@ -155,6 +158,9 @@ export interface Database {
           player_id: string;
           song_name: string;
           artist_name?: string;
+          musicbrainz_id?: string | null;
+          release_id?: string | null;
+          cover_art_url?: string | null;
           created_at?: string;
         };
         Update: {
@@ -163,6 +169,9 @@ export interface Database {
           player_id?: string;
           song_name?: string;
           artist_name?: string;
+          musicbrainz_id?: string | null;
+          release_id?: string | null;
+          cover_art_url?: string | null;
         };
         Relationships: [
           {

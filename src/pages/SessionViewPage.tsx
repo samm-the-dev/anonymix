@@ -7,6 +7,8 @@ import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
 import { StatusBadge } from '@/components/StatusBadge';
 import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
+import { fetchCoverArtUrl } from '@/lib/coverArt';
+import { useOdesliLinks } from '@/hooks/useOdesliLinks';
 
 interface TapeData {
   id: string;
@@ -21,6 +23,9 @@ interface SubmissionData {
   song_name: string;
   artist_name: string;
   player_id: string;
+  musicbrainz_id: string | null;
+  release_id: string | null;
+  cover_art_url: string | null;
 }
 
 export function SessionViewPage() {
@@ -42,6 +47,7 @@ export function SessionViewPage() {
   const [showSearch, setShowSearch] = useState(false);
   const [query, setQuery] = useState('');
   const [selectedSong, setSelectedSong] = useState<SongResult | null>(null);
+  const [coverArtUrl, setCoverArtUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
@@ -96,7 +102,7 @@ export function SessionViewPage() {
       const tapeIds = fetchedTapes.map((t) => t.id);
       const { data: subs } = await supabase
         .from('submissions')
-        .select('id, song_name, artist_name, player_id, tape_id')
+        .select('id, song_name, artist_name, player_id, tape_id, musicbrainz_id, release_id, cover_art_url')
         .in('tape_id', tapeIds);
 
       setSubmissions(subs ?? []);
@@ -140,7 +146,13 @@ export function SessionViewPage() {
         // Update existing
         const { error: err } = await supabase
           .from('submissions')
-          .update({ song_name: selectedSong.title, artist_name: selectedSong.artist })
+          .update({
+            song_name: selectedSong.title,
+            artist_name: selectedSong.artist,
+            musicbrainz_id: selectedSong.id !== 'manual' ? selectedSong.id : null,
+            release_id: selectedSong.releaseId ?? null,
+            cover_art_url: coverArtUrl,
+          })
           .eq('id', mySubmission.id);
         if (err) throw err;
       } else {
@@ -150,6 +162,9 @@ export function SessionViewPage() {
           player_id: player.id,
           song_name: selectedSong.title,
           artist_name: selectedSong.artist,
+          musicbrainz_id: selectedSong.id !== 'manual' ? selectedSong.id : null,
+          release_id: selectedSong.releaseId ?? null,
+          cover_art_url: coverArtUrl,
         });
         if (err) throw err;
       }
@@ -157,6 +172,7 @@ export function SessionViewPage() {
       await fetchData();
       setShowSearch(false);
       setSelectedSong(null);
+      setCoverArtUrl(null);
       setQuery('');
       clear();
       setShowToast(true);
@@ -190,6 +206,12 @@ export function SessionViewPage() {
   const tapeSubmissions = submissions.filter(
     (s) => 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape?.id,
   );
+
+  // Resolve song.link URLs for playlist view
+  const odesliInputs = (activeTape?.status === 'playlist_ready' || activeTape?.status === 'results')
+    ? tapeSubmissions.map((s) => ({ id: s.id, musicbrainzId: s.musicbrainz_id }))
+    : [];
+  const songLinks = useOdesliLinks(odesliInputs);
 
   return (
     <div className="flex flex-1 flex-col bg-background">
@@ -377,9 +399,26 @@ export function SessionViewPage() {
             </div>
             <div className="space-y-2">
               {tapeSubmissions.map((s) => (
-                <div key={s.id} className="rounded-lg border border-border bg-card px-3 py-2">
-                  <p className="font-display text-sm font-semibold text-foreground">{s.song_name}</p>
-                  {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
+                <div key={s.id} className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2">
+                  {s.cover_art_url ? (
+                    <img src={s.cover_art_url} alt="" className="h-10 w-10 shrink-0 rounded object-cover" />
+                  ) : (
+                    <div className="h-10 w-10 shrink-0 rounded bg-secondary" />
+                  )}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-display text-sm font-semibold text-foreground">{s.song_name}</p>
+                    {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
+                  </div>
+                  {songLinks.get(s.id) && (
+                    <a
+                      href={songLinks.get(s.id)}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
+                    >
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
               ))}
             </div>
@@ -451,8 +490,7 @@ export function SessionViewPage() {
               <ArrowLeft className="h-5 w-5" />
             </button>
             <div className="absolute left-1/2 -translate-x-1/2 text-center">
-              <h2 className="font-display text-sm font-semibold">{activeTape?.title}</h2>
-              <p className="text-[11px] text-muted-foreground">{sessionName}</p>
+              <h2 className="font-display text-sm font-semibold">{sessionName}</h2>
             </div>
             <div className="ml-auto w-8" />
           </header>
@@ -510,10 +548,15 @@ export function SessionViewPage() {
               {results.map((r) => (
                 <button
                   key={r.id}
-                  onClick={() => {
+                  onClick={async () => {
                     setSelectedSong(r);
                     setQuery(`${r.artist} - ${r.title}`);
                     clear();
+                    setCoverArtUrl(null);
+                    if (r.releaseId) {
+                      const url = await fetchCoverArtUrl(r.releaseId);
+                      setCoverArtUrl(url);
+                    }
                   }}
                   className={cn(
                     'flex w-full flex-col border-b border-border px-4 py-3 text-left transition-colors last:border-0 hover:bg-accent',
@@ -540,7 +583,11 @@ export function SessionViewPage() {
           {selectedSong && (
             <div className="px-4 pt-4">
               <div className="flex items-center gap-4">
-                <div className="h-16 w-16 shrink-0 rounded-lg bg-secondary" />
+                {coverArtUrl ? (
+                  <img src={coverArtUrl} alt="" className="h-16 w-16 shrink-0 rounded-lg object-cover" />
+                ) : (
+                  <div className="h-16 w-16 shrink-0 rounded-lg bg-secondary" />
+                )}
                 <div className="min-w-0">
                   <p className="font-display text-base font-semibold text-foreground">{selectedSong.title}</p>
                   <p className="text-sm text-muted-foreground">{selectedSong.artist}</p>

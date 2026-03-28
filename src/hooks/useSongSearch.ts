@@ -5,6 +5,7 @@ export interface SongResult {
   title: string;
   artist: string;
   album?: string;
+  releaseId?: string;
 }
 
 const MB_BASE = 'https://musicbrainz.org/ws/2/recording';
@@ -49,11 +50,12 @@ export function useSongSearch() {
 
         const data = await res.json();
         const recordings: SongResult[] = (data.recordings ?? []).map(
-          (r: { id: string; title: string; 'artist-credit'?: { name: string }[]; releases?: { title: string }[] }) => ({
+          (r: { id: string; title: string; 'artist-credit'?: { name: string }[]; releases?: { id: string; title: string }[] }) => ({
             id: r.id,
             title: r.title,
             artist: r['artist-credit']?.[0]?.name ?? 'Unknown Artist',
             album: r.releases?.[0]?.title,
+            releaseId: r.releases?.[0]?.id,
           }),
         );
 
