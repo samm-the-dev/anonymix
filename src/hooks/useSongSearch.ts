@@ -10,7 +10,8 @@ export interface SongResult {
   deezerId?: string;
 }
 
-const DEEZER_BASE = 'https://api.deezer.com/search';
+const SUPABASE_URL = import.meta.env.VITE_SUPABASE_URL as string;
+const DEEZER_PROXY = `${SUPABASE_URL}/functions/v1/deezer-search`;
 
 export function useSongSearch() {
   const [results, setResults] = useState<SongResult[]>([]);
@@ -40,7 +41,7 @@ export function useSongSearch() {
           limit: '8',
         });
 
-        const res = await fetch(`${DEEZER_BASE}?${params}`, {
+        const res = await fetch(`${DEEZER_PROXY}?${params}`, {
           signal: controller.signal,
         });
 
