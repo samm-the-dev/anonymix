@@ -352,15 +352,30 @@ export function SessionViewPage() {
               <div className="mt-2 text-center">
                 <p className="text-sm text-muted-foreground">{tapeSubmissions.length} songs ready to listen</p>
                 <p className="mb-4 text-xs text-muted-foreground">Go listen, then come back to comment</p>
-                <button
-                  onClick={() => {
-                    copyPlaylist();
-                    window.open('https://www.tunemymusic.com', '_blank');
-                  }}
-                  className="w-full rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
-                >
-                  Copy &amp; open Tune My Music
-                </button>
+                <div className="flex gap-2">
+                  <select
+                    id="tmm-platform"
+                    defaultValue="spotify"
+                    className="flex-1 rounded-xl border border-border bg-secondary px-3 py-2.5 text-sm text-foreground"
+                  >
+                    <option value="spotify">Spotify</option>
+                    <option value="youtube-music">YouTube Music</option>
+                    <option value="apple-music">Apple Music</option>
+                    <option value="tidal">Tidal</option>
+                    <option value="deezer">Deezer</option>
+                    <option value="amazon-music">Amazon Music</option>
+                  </select>
+                  <button
+                    onClick={() => {
+                      copyPlaylist();
+                      const platform = (document.getElementById('tmm-platform') as HTMLSelectElement)?.value ?? 'spotify';
+                      window.open(`https://www.tunemymusic.com/transfer/text-file-to-${platform}`, '_blank');
+                    }}
+                    className="shrink-0 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+                  >
+                    Copy &amp; open
+                  </button>
+                </div>
               </div>
             )}
 
