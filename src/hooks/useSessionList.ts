@@ -12,11 +12,11 @@ interface UseSessionListResult {
 
 /**
  * Pick the "active" tape for a session:
- * first actionable (submitting/commenting/playlist_ready), else most recent.
+ * first actionable (submitting/playlist_ready), else most recent.
  */
 function pickActiveTape(tapes: Tape[]): Tape | null {
   const actionable = tapes.find(
-    (t) => t.status === 'submitting' || t.status === 'commenting' || t.status === 'playlist_ready',
+    (t) => t.status === 'submitting' || t.status === 'playlist_ready',
   );
   return actionable ?? tapes[tapes.length - 1] ?? null;
 }
@@ -75,25 +75,15 @@ export function useSessionList(): UseSessionListResult {
       // 4. Get submissions and comments for dev user action state
       const tapeIds = (tapeRows ?? []).map((t) => t.id);
 
-      const [{ data: submissionRows }, { data: commentRows }] = await Promise.all([
-        tapeIds.length > 0
-          ? supabase
-              .from('submissions')
-              .select('tape_id')
-              .eq('player_id', playerId)
-              .in('tape_id', tapeIds)
-          : { data: [] as { tape_id: string }[] },
-        tapeIds.length > 0
-          ? supabase
-              .from('comments')
-              .select('tape_id')
-              .eq('player_id', playerId)
-              .in('tape_id', tapeIds)
-          : { data: [] as { tape_id: string }[] },
-      ]);
+      const { data: submissionRows } = tapeIds.length > 0
+        ? await supabase
+            .from('submissions')
+            .select('tape_id')
+            .eq('player_id', playerId)
+            .in('tape_id', tapeIds)
+        : { data: [] as { tape_id: string }[] };
 
       const submittedTapeIds = new Set((submissionRows ?? []).map((s) => s.tape_id));
-      const commentedTapeIds = new Set((commentRows ?? []).map((c) => c.tape_id));
 
       // 5. Assemble SessionWithTape objects
       const result: SessionWithTape[] = sessionRows.map((session) => {
@@ -137,8 +127,6 @@ export function useSessionList(): UseSessionListResult {
         if (activeTape) {
           if (activeTape.status === 'submitting') {
             userActionDone = submittedTapeIds.has(activeTape.id);
-          } else if (activeTape.status === 'commenting') {
-            userActionDone = commentedTapeIds.has(activeTape.id);
           }
         }
 

@@ -17,11 +17,8 @@ const actionButtonVariants = cva(
       status: {
         submitting:
           'bg-green-500 text-white hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600',
-        commenting:
-          'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600/80 dark:hover:bg-amber-600',
-        commenting_done: 'cursor-default border border-border bg-card text-muted-foreground',
         playlist_ready:
-          'bg-blue-500 text-white hover:bg-blue-600 dark:bg-blue-600/80 dark:hover:bg-blue-600',
+          'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600/80 dark:hover:bg-amber-600',
         results:
           'bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-600/80 dark:hover:bg-purple-600',
       },
@@ -33,18 +30,11 @@ function getActionLabel(status: TapeStatus, done: boolean): string {
   switch (status) {
     case 'submitting':
       return done ? 'Change' : 'Submit';
-    case 'commenting':
-      return done ? 'Commented' : 'Comment';
     case 'playlist_ready':
       return 'Listen & Comment';
     case 'results':
-      return 'Results';
+      return 'Reveal';
   }
-}
-
-function getButtonVariant(status: TapeStatus, done: boolean) {
-  if (status === 'commenting' && done) return 'commenting_done' as const;
-  return status;
 }
 
 interface SessionCardProps {
@@ -186,16 +176,16 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
             const base = `/session/${session.id}`;
             if (status === 'submitting') {
               navigate(`${base}?action=submit`);
-            } else if (status === 'commenting') {
-              navigate(`${base}?action=comment`);
             } else if (status === 'playlist_ready' && activeTape) {
               navigate(`${base}/tape/${activeTape.id}/comment`);
+            } else if (status === 'results' && activeTape) {
+              navigate(`${base}/tape/${activeTape.id}/reveal`);
             } else {
               navigate(base);
             }
           }}
           className={cn(
-            actionButtonVariants({ status: getButtonVariant(status, userActionDone) }),
+            actionButtonVariants({ status }),
           )}
         >
           {getActionLabel(status, userActionDone)}

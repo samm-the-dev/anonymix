@@ -14,7 +14,7 @@ describe('formatDeadline', () => {
     vi.useRealTimers();
   });
 
-  describe('submitting/commenting status', () => {
+  describe('submitting status', () => {
     it('returns "due today" when deadline is today', () => {
       expect(formatDeadline('submitting', NOW + DAY * 0.3)).toBe('due today');
     });
@@ -28,7 +28,7 @@ describe('formatDeadline', () => {
     });
 
     it('returns "due (overdue)" when deadline has passed', () => {
-      expect(formatDeadline('commenting', NOW - DAY)).toBe('due (overdue)');
+      expect(formatDeadline('submitting', NOW - DAY)).toBe('due (overdue)');
     });
 
     it('returns empty string when no deadline provided', () => {
@@ -37,8 +37,8 @@ describe('formatDeadline', () => {
   });
 
   describe('playlist_ready status', () => {
-    it('always returns empty string', () => {
-      expect(formatDeadline('playlist_ready', NOW + DAY)).toBe('');
+    it('returns deadline when provided', () => {
+      expect(formatDeadline('playlist_ready', NOW + DAY)).toBe('due tomorrow');
     });
   });
 

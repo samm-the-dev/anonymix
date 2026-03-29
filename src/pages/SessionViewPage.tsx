@@ -98,7 +98,7 @@ export function SessionViewPage() {
 
     // Find first actionable tape
     const actionableIdx = fetchedTapes.findIndex(
-      (t) => t.status === 'submitting' || t.status === 'commenting' || t.status === 'playlist_ready',
+      (t) => t.status === 'submitting' || t.status === 'playlist_ready',
     );
     setActiveTapeIdx(actionableIdx >= 0 ? actionableIdx : fetchedTapes.length - 1);
 
@@ -115,7 +115,7 @@ export function SessionViewPage() {
 
     // Count distinct commenters on active tape
     const activeTape = fetchedTapes.find(
-      (t) => t.status === 'playlist_ready' || t.status === 'commenting',
+      (t) => t.status === 'playlist_ready',
     );
     if (activeTape) {
       const { data: commentRows } = await supabase
@@ -225,10 +225,10 @@ export function SessionViewPage() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Session context bar */}
-      <div className="relative flex items-center border-b border-border px-4 py-2">
+      <div className="relative flex items-center border-b border-border px-4 py-3">
         <div className="w-8" />
         <h2 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold text-foreground">{sessionName}</h2>
-        <button onClick={() => setShowMembers(true)} className="ml-auto w-8 text-muted-foreground hover:text-foreground">
+        <button onClick={() => setShowMembers(true)} className="ml-auto text-muted-foreground hover:text-foreground">
           <Users className="h-5 w-5" />
         </button>
       </div>
@@ -275,7 +275,7 @@ export function SessionViewPage() {
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Tape {activeTapeIdx + 1}
               </span>
-              <StatusBadge status={activeTape.status as 'submitting' | 'commenting' | 'playlist_ready' | 'results'} />
+              <StatusBadge status={activeTape.status as 'submitting' | 'playlist_ready' | 'results'} />
             </div>
 
             {/* Prompt */}
@@ -356,29 +356,27 @@ export function SessionViewPage() {
                 >
                   Listen &amp; Comment
                 </button>
+                {isHost && (
+                  <button
+                    onClick={async () => {
+                      await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
+                      await fetchData();
+                    }}
+                    className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
+                  >
+                    Reveal
+                  </button>
+                )}
               </div>
-            )}
-
-            {activeTape.status === 'commenting' && (
-              <>
-                <div className="mb-1 flex items-center gap-2">
-                  <span className="text-xs font-medium text-amber-600 dark:text-amber-400">
-                    Commenting in progress
-                  </span>
-                </div>
-                <div className="mb-3 h-1 overflow-hidden rounded-full bg-secondary">
-                  <div className="h-full rounded-full bg-amber-500 transition-all" style={{ width: '0%' }} />
-                </div>
-                <button className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500">
-                  Leave comments
-                </button>
-              </>
             )}
 
             {activeTape.status === 'results' && (
               <div className="mt-2">
-                <button className="w-full rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500">
-                  See full results
+                <button
+                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}/reveal`)}
+                  className="w-full rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500"
+                >
+                  See Reveal
                 </button>
               </div>
             )}

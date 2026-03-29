@@ -78,41 +78,7 @@ describe('SessionCard', () => {
     expect(screen.getByText('Change')).toBeInTheDocument();
   });
 
-  it('shows "Comment" for commenting status', () => {
-    renderCard(
-      makeSession({
-        activeTape: {
-          id: 't1',
-          sessionId: 's1',
-          title: 'T',
-          prompt: 'p',
-          status: 'commenting',
-          deadline: NOW + DAY,
-        },
-        userActionDone: false,
-      }),
-    );
-    expect(screen.getByText('Comment')).toBeInTheDocument();
-  });
-
-  it('shows "Commented" with muted style for commenting done', () => {
-    renderCard(
-      makeSession({
-        activeTape: {
-          id: 't1',
-          sessionId: 's1',
-          title: 'T',
-          prompt: 'p',
-          status: 'commenting',
-          deadline: NOW + DAY,
-        },
-        userActionDone: true,
-      }),
-    );
-    expect(screen.getByText('Commented')).toBeInTheDocument();
-  });
-
-  it('shows "Listen" for playlist_ready', () => {
+  it('shows "Listen & Comment" for playlist_ready', () => {
     renderCard(
       makeSession({
         activeTape: {
@@ -124,10 +90,10 @@ describe('SessionCard', () => {
         },
       }),
     );
-    expect(screen.getByText('Listen')).toBeInTheDocument();
+    expect(screen.getByText('Listen & Comment')).toBeInTheDocument();
   });
 
-  it('shows "Results" for results status', () => {
+  it('shows "Reveal" for results status', () => {
     renderCard(
       makeSession({
         activeTape: {
@@ -140,7 +106,7 @@ describe('SessionCard', () => {
         },
       }),
     );
-    expect(screen.getByText('Results')).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Reveal' })).toBeInTheDocument();
   });
 
   it('renders all player avatars', () => {

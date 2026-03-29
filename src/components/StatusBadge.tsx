@@ -8,8 +8,7 @@ const badgeVariants = cva(
     variants: {
       status: {
         submitting: 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400',
-        commenting: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
-        playlist_ready: 'bg-blue-100 text-blue-700 dark:bg-blue-950/50 dark:text-blue-400',
+        playlist_ready: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
         results: 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400',
       },
     },
@@ -18,9 +17,8 @@ const badgeVariants = cva(
 
 const STATUS_LABELS: Record<TapeStatus, string> = {
   submitting: 'Submitting',
-  commenting: 'Commenting',
-  playlist_ready: 'Playlist Ready',
-  results: 'Completed',
+  playlist_ready: 'Listening',
+  results: 'Reveal',
 };
 
 interface StatusBadgeProps {

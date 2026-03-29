@@ -3,8 +3,7 @@ import type { TapeStatus } from './types';
 /**
  * Format a tape's deadline or completion date as a relative string.
  *
- * - submitting/commenting: "due today", "due tomorrow", "due in N days", "due (overdue)"
- * - playlist_ready: no deadline displayed
+ * - submitting/playlist_ready: "due today", "due tomorrow", "due in N days", "due (overdue)"
  * - results: "today", "yesterday", "N days ago", "~N months ago"
  */
 export function formatDeadline(
@@ -12,8 +11,6 @@ export function formatDeadline(
   deadline?: number,
   completedAt?: number,
 ): string {
-  if (status === 'playlist_ready') return '';
-
   if (status === 'results') {
     if (!completedAt) return '';
     const days = Math.round((Date.now() - completedAt) / 86400000);
