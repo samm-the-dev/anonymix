@@ -21,6 +21,7 @@ const actionButtonVariants = cva(
           'bg-amber-500 text-white hover:bg-amber-600 dark:bg-amber-600/80 dark:hover:bg-amber-600',
         results:
           'bg-purple-500 text-white hover:bg-purple-600 dark:bg-purple-600/80 dark:hover:bg-purple-600',
+        skipped: 'cursor-default border border-border bg-card text-muted-foreground',
       },
     },
   },
@@ -34,6 +35,8 @@ function getActionLabel(status: TapeStatus, done: boolean): string {
       return 'Listen & Comment';
     case 'results':
       return 'Complete';
+    case 'skipped':
+      return 'Skipped';
   }
 }
 

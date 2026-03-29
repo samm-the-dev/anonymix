@@ -5,7 +5,7 @@
  * For now, manually defined to match our schema.
  */
 
-export type TapeStatus = 'submitting' | 'playlist_ready' | 'results';
+export type TapeStatus = 'submitting' | 'playlist_ready' | 'results' | 'skipped';
 
 export interface Database {
   public: {

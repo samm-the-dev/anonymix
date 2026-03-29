@@ -11,6 +11,8 @@ export function formatDeadline(
   deadline?: number,
   completedAt?: number,
 ): string {
+  if (status === 'skipped') return '';
+
   if (status === 'results') {
     if (!completedAt) return '';
     const days = Math.round((Date.now() - completedAt) / 86400000);

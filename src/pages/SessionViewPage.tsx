@@ -1,14 +1,12 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, ExternalLink, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, Search, Users, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
 import { StatusBadge } from '@/components/StatusBadge';
 import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
-// coverArt.ts kept for future MusicBrainz fallback
-import { useOdesliLinks } from '@/hooks/useOdesliLinks';
 
 interface TapeData {
   id: string;
@@ -212,11 +210,6 @@ export function SessionViewPage() {
     (s) => 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape?.id,
   );
 
-  // Resolve song.link URLs for playlist view (must be before any early returns)
-  const odesliInputs = (activeTape?.status === 'playlist_ready' || activeTape?.status === 'results')
-    ? tapeSubmissions.map((s) => ({ id: s.id, musicbrainzId: s.musicbrainz_id }))
-    : [];
-  const songLinks = useOdesliLinks(odesliInputs);
 
   if (loading) {
     return (
@@ -331,7 +324,7 @@ export function SessionViewPage() {
                   </div>
                 ) : (
                   <div className="flex gap-2">
-                    {isHost && (
+                    {isHost && tapeSubmissions.length >= 2 && (
                       <button
                         onClick={async () => {
                           await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
@@ -340,6 +333,17 @@ export function SessionViewPage() {
                         className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
                       >
                         Close
+                      </button>
+                    )}
+                    {isHost && tapeSubmissions.length < 2 && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('tapes').update({ status: 'skipped' }).eq('id', activeTape.id);
+                          await fetchData();
+                        }}
+                        className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
+                      >
+                        Skip
                       </button>
                     )}
                     <button
@@ -354,11 +358,11 @@ export function SessionViewPage() {
               </>
             )}
 
-            {activeTape.status === 'playlist_ready' && (
+            {activeTape.status === 'playlist_ready' && tapeSubmissions.length > 0 && (
               <div className="mt-2">
                 <SubmissionProgress submitted={commentersCount} total={members.length || 1} colorClass="bg-amber-500" textColorClass="text-amber-600 dark:text-amber-400" />
                 <div className="flex gap-2">
-                  {isHost && (
+                  {isHost && tapeSubmissions.length >= 2 && (
                     <button
                       onClick={async () => {
                         await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
@@ -377,6 +381,26 @@ export function SessionViewPage() {
                   </button>
                 </div>
               </div>
+            )}
+            {activeTape.status === 'playlist_ready' && tapeSubmissions.length === 0 && (
+              <div className="mt-2 text-center">
+                <p className="text-xs text-muted-foreground">No one submitted this round</p>
+                {isHost && (
+                  <button
+                    onClick={async () => {
+                      await supabase.from('tapes').update({ status: 'skipped' }).eq('id', activeTape.id);
+                      await fetchData();
+                    }}
+                    className="mt-2 rounded-xl border border-border px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
+                  >
+                    Skip
+                  </button>
+                )}
+              </div>
+            )}
+
+            {activeTape.status === 'skipped' && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">Skipped - no submissions</p>
             )}
 
             {activeTape.status === 'results' && (
@@ -427,43 +451,6 @@ export function SessionViewPage() {
         </div>{/* end crate container */}
       </div>{/* end crate centering wrapper */}
 
-      {/* Results song list below crate (results only — playlist_ready uses comment page) */}
-      {activeTape &&
-        activeTape.status === 'results' &&
-        tapeSubmissions.length > 0 && (
-          <div className="mx-auto mt-4 w-full max-w-[375px] px-4">
-            <div className="mb-2 flex items-center justify-between">
-              <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
-                Playlist ({tapeSubmissions.length} songs)
-              </span>
-            </div>
-            <div className="space-y-2">
-              {tapeSubmissions.map((s) => (
-                <div key={s.id} className="flex items-center gap-3 rounded-lg border border-border bg-card px-3 py-2">
-                  {s.cover_art_url ? (
-                    <img src={s.cover_art_url} alt="" className="h-10 w-10 shrink-0 rounded object-cover" />
-                  ) : (
-                    <div className="h-10 w-10 shrink-0 rounded bg-secondary" />
-                  )}
-                  <div className="min-w-0 flex-1">
-                    <p className="font-display text-sm font-semibold text-foreground">{s.song_name}</p>
-                    {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
-                  </div>
-                  {songLinks.get(s.id) && (
-                    <a
-                      href={songLinks.get(s.id)}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="shrink-0 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground"
-                    >
-                      <ExternalLink className="h-4 w-4" />
-                    </a>
-                  )}
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
 
       {/* Members bottom sheet */}
       {showMembers && (

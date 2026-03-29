@@ -10,6 +10,7 @@ const badgeVariants = cva(
         submitting: 'bg-green-100 text-green-700 dark:bg-green-950/50 dark:text-green-400',
         playlist_ready: 'bg-amber-100 text-amber-700 dark:bg-amber-950/50 dark:text-amber-400',
         results: 'bg-purple-100 text-purple-700 dark:bg-purple-950/50 dark:text-purple-400',
+        skipped: 'bg-gray-100 text-gray-500 dark:bg-gray-800/50 dark:text-gray-400',
       },
     },
   },
@@ -19,6 +20,7 @@ const STATUS_LABELS: Record<TapeStatus, string> = {
   submitting: 'Submitting',
   playlist_ready: 'Listening',
   results: 'Complete',
+  skipped: 'Skipped',
 };
 
 interface StatusBadgeProps {

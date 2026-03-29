@@ -221,9 +221,12 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
 
   const commentedCount = Object.values(comments).filter((t) => t.trim().length > 0).length;
 
+  const hasSongs = submissions.length > 0;
+
   return (
     <div className="flex flex-1 flex-col">
-        {/* Info card with tabs */}
+        {/* Info card with tabs — only show when there are songs */}
+        {hasSongs && (
         <div className="border-b border-border">
           <div className="flex border-b border-border">
             <button
@@ -268,6 +271,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
             )}
           </div>
         </div>
+        )}
 
         {/* Tape info */}
         <div className="px-4 py-3">
@@ -278,7 +282,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
         {/* Song list with comment fields */}
         <div className="flex-1 border-t border-border px-4">
           {submissions.length === 0 ? (
-            <p className="py-8 text-center text-sm text-muted-foreground">No songs to comment on yet</p>
+            <p className="py-8 text-center text-sm text-muted-foreground">No one submitted this round</p>
           ) : (
             submissions.map((s) => (
               <div key={s.id} className="border-b border-border/50 py-3 last:border-0">
@@ -308,6 +312,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
         </div>
 
         {/* Submit button */}
+        {hasSongs && (
         <div className="border-t border-border p-4">
           <button
             onClick={handleSubmit}
@@ -317,6 +322,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
             {submitting ? 'Sharing...' : `Share comments${commentedCount > 0 ? ` (${commentedCount})` : ''}`}
           </button>
         </div>
+        )}
 
       {/* Success toast */}
       {showToast && (
