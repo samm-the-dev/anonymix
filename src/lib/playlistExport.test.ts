@@ -40,7 +40,6 @@ describe('generateXspf', () => {
   it('handles track with empty artist', () => {
     const result = generateXspf(
       [{ song_name: 'Unknown', artist_name: '' }],
-      { title: 'Tape' },
     );
     expect(result).toContain('<title>Unknown</title>');
     expect(result).not.toContain('<creator>');
@@ -49,7 +48,7 @@ describe('generateXspf', () => {
 
 describe('generateCsv', () => {
   it('generates CSV with header and rows', () => {
-    const result = generateCsv(tracks, { title: 'Tape' });
+    const result = generateCsv(tracks);
     const lines = result.split('\n');
     expect(lines[0]).toBe('Title,Artist');
     expect(lines[1]).toBe('Bohemian Rhapsody,Queen');
@@ -59,7 +58,6 @@ describe('generateCsv', () => {
   it('quotes fields containing commas', () => {
     const result = generateCsv(
       [{ song_name: 'Hello, Goodbye', artist_name: 'Earth, Wind & Fire' }],
-      { title: 'Tape' },
     );
     const lines = result.split('\n');
     expect(lines[1]).toBe('"Hello, Goodbye","Earth, Wind & Fire"');
@@ -68,7 +66,6 @@ describe('generateCsv', () => {
   it('escapes double quotes in fields', () => {
     const result = generateCsv(
       [{ song_name: 'Say "Hello"', artist_name: 'Artist' }],
-      { title: 'Tape' },
     );
     expect(result).toContain('"Say ""Hello"""');
   });

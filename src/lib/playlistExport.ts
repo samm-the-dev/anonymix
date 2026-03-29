@@ -52,7 +52,7 @@ function csvField(value: string): string {
   return value;
 }
 
-export function generateCsv(tracks: Track[], meta: PlaylistMeta): string {
+export function generateCsv(tracks: Track[]): string {
   const lines = ['Title,Artist'];
   for (const track of tracks) {
     lines.push(`${csvField(track.song_name)},${csvField(track.artist_name)}`);
