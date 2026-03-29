@@ -64,21 +64,26 @@ BEGIN
     RETURN NEW;
   END IF;
 
-  -- Call send-push Edge Function via pg_net
-  PERFORM extensions.http_post(
-    url := v_supabase_url || '/functions/v1/send-push',
-    body := jsonb_build_object(
-      'session_id', v_session_id,
-      'title', v_title,
-      'body', v_body,
-      'url', v_url,
-      'exclude_player_id', v_actor_id
-    )::text,
-    headers := jsonb_build_object(
-      'Content-Type', 'application/json',
-      'Authorization', 'Bearer ' || coalesce(v_push_secret, '')
-    )::jsonb
-  );
+  -- Call send-push Edge Function via pg_net (best-effort, never block the status change)
+  BEGIN
+    PERFORM net.http_post(
+      url := v_supabase_url || '/functions/v1/send-push',
+      body := jsonb_build_object(
+        'session_id', v_session_id,
+        'title', v_title,
+        'body', v_body,
+        'url', v_url,
+        'exclude_player_id', v_actor_id
+      ),
+      headers := jsonb_build_object(
+        'Content-Type', 'application/json',
+        'Authorization', 'Bearer ' || coalesce(v_push_secret, '')
+      )
+    );
+  EXCEPTION WHEN OTHERS THEN
+    -- Log but don't block the tape status change
+    RAISE WARNING 'send-push failed: %', SQLERRM;
+  END;
 
   RETURN NEW;
 END;

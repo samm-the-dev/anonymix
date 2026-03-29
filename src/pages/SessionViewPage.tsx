@@ -62,7 +62,9 @@ export function SessionViewPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [toastMessage, setToastMessage] = useState('');
   const [showLockConfirm, setShowLockConfirm] = useState(false);
+  const [busy, setBusy] = useState(false);
   const [memberAction, setMemberAction] = useState<{ type: 'make_host' | 'remove'; member: { id: string; name: string } } | null>(null);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const { permission, requestPermission, supported: notifSupported } = useNotificationPermission(player?.id);
@@ -80,7 +82,12 @@ export function SessionViewPage() {
       .eq('slug', sessionSlug)
       .single();
 
-    if (!session) return;
+    if (!session) {
+      setToastMessage('Session not found');
+      setShowToast(true);
+      setTimeout(() => navigate('/'), 1500);
+      return;
+    }
     const sessionId = session.id;
     setSessionId(sessionId);
 
@@ -210,18 +217,30 @@ export function SessionViewPage() {
 
   async function advanceTape() {
     if (!activeTape) return;
-    if (activeTape.status === 'submitting') {
-      await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
-      await fetchData();
-    } else if (activeTape.status === 'playlist_ready') {
-      await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
-      navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
+    setBusy(true);
+    try {
+      if (activeTape.status === 'submitting') {
+        const { error: err } = await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
+        if (err) throw err;
+        await fetchData();
+      } else if (activeTape.status === 'playlist_ready') {
+        const { error: err } = await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
+        if (err) throw err;
+        navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
+      }
+    } catch (err) {
+      setToastMessage(err instanceof Error ? err.message : 'Failed to update tape');
+      setShowToast(true);
+      setTimeout(() => setShowToast(false), 3000);
+    } finally {
+      setBusy(false);
     }
   }
 
   async function handleSubmit() {
     if (!activeTape || !player || !selectedSong) return;
     setSubmitting(true);
+    setBusy(true);
     setError(null);
 
     try {
@@ -258,6 +277,7 @@ export function SessionViewPage() {
       setCoverArtUrl(null);
       setQuery('');
       clear();
+      setToastMessage('');
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2500);
 
@@ -269,6 +289,7 @@ export function SessionViewPage() {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
       setSubmitting(false);
+      setBusy(false);
     }
   }
 
@@ -942,10 +963,17 @@ export function SessionViewPage() {
       {/* Success toast */}
       {showToast && (
         <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-foreground px-6 py-3 text-background shadow-lg">
-          <svg className="h-5 w-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
+          <svg className={`h-5 w-5 ${toastMessage ? 'text-red-400' : 'text-green-400'}`} fill="currentColor" viewBox="0 0 20 20">
             <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
           </svg>
-          <span className="text-sm font-medium">Song submitted!</span>
+          <span className="text-sm font-medium">{toastMessage || 'Song submitted!'}</span>
+        </div>
+      )}
+
+      {/* Loading overlay */}
+      {busy && (
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-background/50">
+          <div className="h-8 w-8 animate-spin rounded-full border-2 border-muted-foreground border-t-primary" />
         </div>
       )}
     </div>
