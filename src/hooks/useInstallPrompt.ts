@@ -24,6 +24,7 @@ export function useInstallPrompt() {
     function handlePrompt(e: Event) {
       e.preventDefault();
       setDeferredPrompt(e as BeforeInstallPromptEvent);
+      if (import.meta.env.DEV) console.log('[PWA] beforeinstallprompt captured');
     }
 
     window.addEventListener('beforeinstallprompt', handlePrompt);
