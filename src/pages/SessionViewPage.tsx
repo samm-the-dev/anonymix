@@ -166,7 +166,21 @@ export function SessionViewPage() {
     if (loading) return;
     const action = searchParams.get('action');
     if (action === 'submit' && activeTape?.status === 'submitting') {
+      // Find existing submission inline (mySubmission effect may not have run yet)
+      const existing = submissions.find(
+        (s) => s.player_id === player?.id && 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape.id,
+      );
       setShowSearch(true);
+      if (existing) {
+        setQuery(`${existing.artist_name ? existing.artist_name + ' - ' : ''}${existing.song_name}`);
+        setSelectedSong({
+          id: existing.musicbrainz_id ?? 'manual',
+          title: existing.song_name,
+          artist: existing.artist_name,
+          deezerId: existing.musicbrainz_id ?? undefined,
+        });
+        setCoverArtUrl(existing.cover_art_url);
+      }
     }
   }, [loading, searchParams, activeTape]);
 
