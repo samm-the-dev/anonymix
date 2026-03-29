@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { PlaylistImport } from '@/components/PlaylistImport';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -197,8 +198,18 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
         <p className="mt-0.5 text-sm text-muted-foreground">{tapePrompt}</p>
       </div>
 
-      {/* Playlist import */}
-      <PlaylistImport songs={submissions} />
+      {/* Playlist import — collapsible */}
+      {submissions.length > 0 && (
+        <Collapsible.Root>
+          <Collapsible.Trigger className="flex w-full items-center justify-between border-b border-border px-4 py-2 text-xs font-medium text-muted-foreground [&[data-state=closed]>svg]:-rotate-90">
+            <span>Import playlist</span>
+            <ChevronDown className="h-3 w-3 transition-transform duration-200" />
+          </Collapsible.Trigger>
+          <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+            <PlaylistImport songs={submissions} />
+          </Collapsible.Content>
+        </Collapsible.Root>
+      )}
 
       {/* Song accordion */}
       <div className="flex-1 border-t border-border px-4">
