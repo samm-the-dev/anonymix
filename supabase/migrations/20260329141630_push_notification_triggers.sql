@@ -65,6 +65,11 @@ BEGIN
   WHERE name = 'send_push_secret'
   LIMIT 1;
 
+  -- Skip if secret not configured (avoids unauthenticated requests)
+  IF v_push_secret IS NULL THEN
+    RETURN NEW;
+  END IF;
+
   -- Call send-push Edge Function via pg_net
   PERFORM extensions.http_post(
     url := v_supabase_url || '/functions/v1/send-push',

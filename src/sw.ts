@@ -25,7 +25,13 @@ registerRoute(
 self.addEventListener('push', (event) => {
   if (!event.data) return;
 
-  const data = event.data.json() as { title?: string; body?: string; url?: string };
+  let data: { title?: string; body?: string; url?: string };
+  try {
+    data = event.data.json();
+  } catch {
+    data = { title: 'Anonymix', body: event.data.text() };
+  }
+
   const title = data.title || 'Anonymix';
   const options: NotificationOptions = {
     body: data.body,
@@ -37,15 +43,16 @@ self.addEventListener('push', (event) => {
   event.waitUntil(self.registration.showNotification(title, options));
 });
 
-// Notification click handler — open/focus app and navigate
+// Notification click handler — open/focus app and navigate (same-origin only)
 self.addEventListener('notificationclick', (event) => {
   event.notification.close();
-  const url = (event.notification.data as { url?: string })?.url || '/';
+  const raw = (event.notification.data as { url?: string })?.url || '/';
+  // Constrain to same-origin to prevent open-redirect
+  const url = raw.startsWith('/') ? raw : '/';
 
   event.waitUntil(
     (async () => {
       const clients = await self.clients.matchAll({ type: 'window', includeUncontrolled: true });
-      // Focus existing window if one exists
       for (const client of clients) {
         if (client.url.includes(self.location.origin) && 'focus' in client) {
           await client.focus();
@@ -53,7 +60,6 @@ self.addEventListener('notificationclick', (event) => {
           return;
         }
       }
-      // Otherwise open new window
       await self.clients.openWindow(url);
     })(),
   );
