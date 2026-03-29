@@ -24,7 +24,7 @@ export function AppBar({ showBack = false }: AppBarProps) {
         )}
         <h1 className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 font-display text-lg font-semibold">
           Anonymix
-          <CassetteTape className="h-5 w-5" />
+          <CassetteTape className="h-5 w-5 text-violet-400" />
         </h1>
         <button
           onClick={toggleTheme}
