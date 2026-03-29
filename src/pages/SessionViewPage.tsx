@@ -330,49 +330,52 @@ export function SessionViewPage() {
                     </button>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => setShowSearch(true)}
-                    disabled={deadlinePassed}
-                    className="w-full rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 dark:bg-green-600 dark:hover:bg-green-500"
-                  >
-                    {deadlinePassed ? 'Submissions closing...' : 'Submit your pick'}
-                  </button>
+                  <div className="flex gap-2">
+                    {isHost && (
+                      <button
+                        onClick={async () => {
+                          await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
+                          await fetchData();
+                        }}
+                        className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
+                      >
+                        Close
+                      </button>
+                    )}
+                    <button
+                      onClick={() => setShowSearch(true)}
+                      disabled={deadlinePassed}
+                      className="flex-1 rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 dark:bg-green-600 dark:hover:bg-green-500"
+                    >
+                      {deadlinePassed ? 'Submissions closing...' : 'Submit your pick'}
+                    </button>
+                  </div>
                 )}
               </>
-            )}
-
-            {activeTape.status === 'submitting' && isHost && (
-              <button
-                onClick={async () => {
-                  await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
-                  await fetchData();
-                }}
-                className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
-              >
-                Close submissions
-              </button>
             )}
 
             {activeTape.status === 'playlist_ready' && (
               <div className="mt-2">
                 <SubmissionProgress submitted={commentersCount} total={members.length || 1} colorClass="bg-amber-500" textColorClass="text-amber-600 dark:text-amber-400" />
-                <button
-                  onClick={() => navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`)}
-                  className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
-                >
-                  Listen &amp; Comment
-                </button>
-                {isHost && (
+                <div className="flex gap-2">
+                  {isHost && (
+                    <button
+                      onClick={async () => {
+                        await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
+                        navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
+                      }}
+                      className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
+                    >
+                      Complete
+                    </button>
+                  )}
                   <button
-                    onClick={async () => {
-                      await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
-                      navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
-                    }}
-                    className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
+                    onClick={() => navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`)}
+                    className="flex-1 rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
                   >
-                    Complete
+                    Listen &amp; Comment
                   </button>
-                )}
+                </div>
               </div>
             )}
 

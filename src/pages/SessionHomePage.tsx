@@ -67,17 +67,6 @@ export function SessionHomePage() {
 
   return (
     <div>
-      {/* Create Session FAB */}
-      <div className="px-4 pt-4">
-        <button
-          onClick={() => navigate('/create')}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:opacity-90"
-        >
-          <Plus className="h-4 w-4" />
-          New Session
-        </button>
-      </div>
-
       <CollapsibleSection title="Active" count={activeSessions.length} defaultExpanded={true}>
         {activeSessions.length > 0 ? (
           <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 px-4">
@@ -110,6 +99,17 @@ export function SessionHomePage() {
             </div>
           )}
         </CollapsibleSection>
+      </div>
+
+      {/* New Session */}
+      <div className="px-4 py-4">
+        <button
+          onClick={() => navigate('/create')}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-primary py-3 text-sm font-semibold text-primary-foreground hover:opacity-90"
+        >
+          <Plus className="h-4 w-4" />
+          New Session
+        </button>
       </div>
     </div>
   );
