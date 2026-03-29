@@ -149,6 +149,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
     if (tapeRes.data) {
       setTapeTitle(tapeRes.data.title);
       setTapePrompt(tapeRes.data.prompt);
+      document.title = `${tapeRes.data.title} | Anonymix`;
     }
 
     const subs = subsRes.data ?? [];

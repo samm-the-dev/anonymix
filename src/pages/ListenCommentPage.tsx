@@ -89,6 +89,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
     if (tapeRes.data) {
       setTapeTitle(tapeRes.data.title);
       setTapePrompt(tapeRes.data.prompt);
+      document.title = `${tapeRes.data.title} | Anonymix`;
     }
 
     const allSubs = subsRes.data ?? [];

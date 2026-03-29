@@ -55,6 +55,7 @@ export function JoinSessionPage() {
       const members = (session.players as unknown as { player_id: string; players: { name: string; avatar: string; avatar_color: string } | null }[]) ?? [];
 
       setSessionSlug(session.slug);
+      document.title = `Join ${session.name} | Anonymix`;
       setInvite({
         sessionName: session.name,
         description: session.description,

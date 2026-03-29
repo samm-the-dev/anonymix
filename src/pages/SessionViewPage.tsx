@@ -82,6 +82,7 @@ export function SessionViewPage() {
     if (session) {
       setSessionName(session.name);
       setIsHost(session.admin_id === player?.id);
+      document.title = `${session.name} | Anonymix`;
     }
 
     // Fetch members

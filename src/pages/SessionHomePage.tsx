@@ -33,6 +33,8 @@ export function SessionHomePage() {
   const navigate = useNavigate();
   const { sessions, loading, error, refetch } = useSessionList();
 
+  document.title = 'Anonymix';
+
   if (loading) {
     return (
       <div className="flex items-center justify-center p-8 text-muted-foreground">Loading...</div>
