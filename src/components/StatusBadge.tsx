@@ -18,7 +18,7 @@ const badgeVariants = cva(
 const STATUS_LABELS: Record<TapeStatus, string> = {
   submitting: 'Submitting',
   playlist_ready: 'Listening',
-  results: 'Reveal',
+  results: 'Complete',
 };
 
 interface StatusBadgeProps {

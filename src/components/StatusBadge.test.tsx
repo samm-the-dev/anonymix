@@ -7,7 +7,7 @@ describe('StatusBadge', () => {
   const cases: { status: TapeStatus; label: string; colorClass: string }[] = [
     { status: 'submitting', label: 'Submitting', colorClass: 'bg-green-100' },
     { status: 'playlist_ready', label: 'Listening', colorClass: 'bg-amber-100' },
-    { status: 'results', label: 'Reveal', colorClass: 'bg-purple-100' },
+    { status: 'results', label: 'Complete', colorClass: 'bg-purple-100' },
   ];
 
   cases.forEach(({ status, label, colorClass }) => {

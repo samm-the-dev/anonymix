@@ -225,10 +225,10 @@ export function SessionViewPage() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Session context bar */}
-      <div className="relative flex items-center border-b border-border px-4 py-3">
-        <div className="w-8" />
-        <h2 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold text-foreground">{sessionName}</h2>
-        <button onClick={() => setShowMembers(true)} className="ml-auto text-muted-foreground hover:text-foreground">
+      <div className="flex items-center border-b border-border px-4 py-3">
+        <div className="h-5 w-5" />
+        <h2 className="flex-1 text-center font-display text-sm font-semibold text-foreground">{sessionName}</h2>
+        <button onClick={() => setShowMembers(true)} className="text-muted-foreground hover:text-foreground">
           <Users className="h-5 w-5" />
         </button>
       </div>
@@ -360,11 +360,11 @@ export function SessionViewPage() {
                   <button
                     onClick={async () => {
                       await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
-                      await fetchData();
+                      navigate(`/session/${sessionId}/tape/${activeTape.id}/comments`);
                     }}
                     className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
                   >
-                    Reveal
+                    Complete
                   </button>
                 )}
               </div>
@@ -373,10 +373,10 @@ export function SessionViewPage() {
             {activeTape.status === 'results' && (
               <div className="mt-2">
                 <button
-                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}/reveal`)}
+                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}/comments`)}
                   className="w-full rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500"
                 >
-                  See Reveal
+                  View Comments
                 </button>
               </div>
             )}

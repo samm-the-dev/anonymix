@@ -93,7 +93,7 @@ describe('SessionCard', () => {
     expect(screen.getByText('Listen & Comment')).toBeInTheDocument();
   });
 
-  it('shows "Reveal" for results status', () => {
+  it('shows "Complete" for results status', () => {
     renderCard(
       makeSession({
         activeTape: {
@@ -106,7 +106,7 @@ describe('SessionCard', () => {
         },
       }),
     );
-    expect(screen.getByRole('button', { name: 'Reveal' })).toBeInTheDocument();
+    expect(screen.getByRole('button', { name: 'Complete' })).toBeInTheDocument();
   });
 
   it('renders all player avatars', () => {

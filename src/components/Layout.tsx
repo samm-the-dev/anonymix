@@ -16,9 +16,9 @@ export function Layout() {
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="relative flex items-center border-b border-border px-4 py-3">
         {isHome ? (
-          <div className="w-8" />
+          <div className="" />
         ) : (
-          <button onClick={() => navigate(-1)} className="w-8 text-muted-foreground hover:text-foreground">
+          <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </button>
         )}
@@ -28,10 +28,10 @@ export function Layout() {
         </h1>
         <button
           onClick={toggleTheme}
-          className="ml-auto rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+          className="ml-auto rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
           aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
         >
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
+          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
         </button>
       </header>
 

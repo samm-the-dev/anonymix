@@ -59,7 +59,7 @@ function AppRoutes() {
         <Route index element={<SessionHomePage />} />
         <Route path="session/:sessionId" element={<SessionViewPage />} />
         <Route path="session/:sessionId/tape/:tapeId/comment" element={<ListenCommentPage />} />
-        <Route path="session/:sessionId/tape/:tapeId/reveal" element={<RevealPage />} />
+        <Route path="session/:sessionId/tape/:tapeId/comments" element={<RevealPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

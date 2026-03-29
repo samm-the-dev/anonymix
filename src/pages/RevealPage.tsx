@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -53,13 +53,12 @@ function AccordionItem({
   players: Map<string, PlayerInfo>;
 }) {
   const [open, setOpen] = useState(false);
-  const contentRef = useRef<HTMLDivElement>(null);
 
   return (
     <div className="border-b border-border/50 last:border-0">
       <button
         onClick={() => setOpen(!open)}
-        className="flex w-full items-center gap-3 py-3 text-left"
+        className={`flex w-full items-center gap-3 pt-3 text-left transition-[padding-bottom] duration-250 ease-out ${open ? 'pb-0' : 'pb-3'}`}
       >
         {submission.cover_art_url ? (
           <img src={submission.cover_art_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
@@ -76,11 +75,10 @@ function AccordionItem({
       </button>
 
       <div
-        ref={contentRef}
-        className="overflow-hidden transition-[max-height] duration-250 ease-out"
-        style={{ maxHeight: open ? contentRef.current?.scrollHeight ?? 'none' : 0 }}
+        className={`grid transition-[grid-template-rows] duration-250 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
       >
-        <div className="pb-3 pl-[60px]">
+        <div className="min-h-0" style={{ clipPath: 'inset(0 0 0 0)' }}>
+        <div className="pb-0.5 pl-[60px]">
           {/* Submitter reveal */}
           <div className="mb-3">
             <span className="text-xs text-muted-foreground">Submitted by</span>
@@ -103,7 +101,7 @@ function AccordionItem({
               {comments.map((c) => {
                 const commenter = players.get(c.player_id);
                 return (
-                  <div key={c.id} className="border-t border-border/30 py-2.5">
+                  <div key={c.id} className="pb-3">
                     <div className="mb-1 flex items-center gap-2">
                       {commenter && (
                         <span
@@ -123,6 +121,7 @@ function AccordionItem({
           ) : (
             <p className="text-xs text-muted-foreground/60">No comments</p>
           )}
+        </div>
         </div>
       </div>
     </div>
@@ -199,10 +198,10 @@ export function RevealPage() {
   return (
     <div className="flex flex-1 flex-col">
       {/* Session context bar */}
-      <div className="relative flex items-center border-b border-border px-4 py-2">
-        <div className="w-8" />
-        <h2 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold text-foreground">{sessionName}</h2>
-        <div className="ml-auto w-8" />
+      <div className="flex items-center border-b border-border px-4 py-3">
+        <div className="h-5 w-5" />
+        <h2 className="flex-1 text-center font-display text-sm font-semibold text-foreground">{sessionName}</h2>
+        <div className="h-5 w-5" />
       </div>
 
       {/* Tape info */}
@@ -214,7 +213,7 @@ export function RevealPage() {
       {/* Song accordion */}
       <div className="flex-1 border-t border-border px-4">
         {submissions.length === 0 ? (
-          <p className="py-8 text-center text-sm text-muted-foreground">No songs to reveal</p>
+          <p className="py-8 text-center text-sm text-muted-foreground">No songs submitted</p>
         ) : (
           submissions.map((s) => (
             <AccordionItem
@@ -229,12 +228,14 @@ export function RevealPage() {
 
         {/* The Tape comments */}
         {tapeComments.length > 0 && (
-          <div className="border-t border-border py-3">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">The Tape</p>
+          <div className="pt-3">
+            <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground pb-1.5">
+              The Tape
+            </p>
             {tapeComments.map((c) => {
               const commenter = players.get(c.player_id);
               return (
-                <div key={c.id} className="border-t border-border/30 py-2.5 first:mt-2">
+                <div key={c.id} className="py-1.5">
                   <div className="mb-1 flex items-center gap-2">
                     {commenter && (
                       <span
