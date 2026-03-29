@@ -16,7 +16,7 @@ DECLARE
   v_slug text;
   v_url text;
   v_supabase_url text;
-  v_push_secret text;
+  v_push_secret text;  -- read from Postgres vault
 BEGIN
   -- Only fire on specific status transitions
   IF NEW.status = OLD.status THEN
@@ -59,9 +59,11 @@ BEGIN
     v_supabase_url := 'https://mryuusvhdadbjpupzpol.supabase.co';
   END IF;
 
-  -- Shared secret for authenticating trigger-originated requests to the Edge Function.
-  -- Must be set via: ALTER DATABASE postgres SET app.settings.send_push_secret = '<secret>';
-  v_push_secret := current_setting('app.settings.send_push_secret', true);
+  -- Read shared secret from Postgres vault (stored via vault.create_secret)
+  SELECT decrypted_secret INTO v_push_secret
+  FROM vault.decrypted_secrets
+  WHERE name = 'send_push_secret'
+  LIMIT 1;
 
   -- Call send-push Edge Function via pg_net
   PERFORM extensions.http_post(
