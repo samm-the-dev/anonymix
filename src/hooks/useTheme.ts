@@ -10,7 +10,6 @@ function getInitialTheme(): Theme {
 
   if (window.matchMedia('(prefers-color-scheme: dark)').matches) return 'dark';
 
-  // Default to light — Anonymix's own visual identity
   return 'light';
 }
 
@@ -26,6 +25,19 @@ export function useTheme() {
     }
     localStorage.setItem(STORAGE_KEY, theme);
   }, [theme]);
+
+  // React to OS theme changes when user hasn't explicitly chosen a theme
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-color-scheme: dark)');
+    const handler = (e: MediaQueryListEvent) => {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (!stored) {
+        setTheme(e.matches ? 'dark' : 'light');
+      }
+    };
+    mq.addEventListener('change', handler);
+    return () => mq.removeEventListener('change', handler);
+  }, []);
 
   const toggleTheme = () => setTheme((prev) => (prev === 'dark' ? 'light' : 'dark'));
 

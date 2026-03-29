@@ -28,7 +28,16 @@
       href="https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&family=Nunito+Sans:wght@400;500;600;700&display=swap"
       rel="stylesheet"
     />
+    <meta name="color-scheme" content="light dark" />
     <title>Anonymix</title>
+    <!-- Apply theme before first paint to prevent flash -->
+    <script>
+      (function() {
+        var stored = localStorage.getItem('anonymix-theme');
+        var dark = stored === 'dark' || (!stored && window.matchMedia('(prefers-color-scheme: dark)').matches);
+        if (dark) document.documentElement.classList.add('dark');
+      })();
+    </script>
     <!-- SPA redirect restore for GitHub Pages 404.html -->
     <script>
       (function(l) {
