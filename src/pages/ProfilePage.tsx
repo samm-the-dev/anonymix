@@ -12,7 +12,7 @@ const COLORS = [
 
 export function ProfilePage() {
   const { player, user, signOut, updatePlayer } = useAuthContext();
-  const { canInstall, promptInstall } = useInstallPrompt();
+  const { isInstallable, installApp } = useInstallPrompt();
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(player?.name ?? '');
   const [avatar, setAvatar] = useState(player?.avatar ?? '🎸');
@@ -136,9 +136,9 @@ export function ProfilePage() {
       </div>
 
       {/* Install App */}
-      {canInstall && (
+      {isInstallable && (
         <button
-          onClick={promptInstall}
+          onClick={installApp}
           className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent"
         >
           <Download className="h-4 w-4" />
@@ -149,7 +149,7 @@ export function ProfilePage() {
       {/* Sign Out */}
       <button
         onClick={signOut}
-        className={`${canInstall ? 'mt-3' : 'mt-8'} flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent`}
+        className={`${isInstallable ? 'mt-3' : 'mt-8'} flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent`}
       >
         <LogOut className="h-4 w-4" />
         Sign out

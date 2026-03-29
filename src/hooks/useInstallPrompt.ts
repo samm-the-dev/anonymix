@@ -1,6 +1,4 @@
-import { useState, useEffect } from 'react';
-
-const DISMISSED_KEY = 'anonymix-install-dismissed';
+import { useCallback, useEffect, useRef, useState } from 'react';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -8,45 +6,38 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 export function useInstallPrompt() {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
-  const [isDismissed, setIsDismissed] = useState(
-    () => localStorage.getItem(DISMISSED_KEY) === 'true',
-  );
+  const [isInstallable, setIsInstallable] = useState(false);
+  const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    // Detect if already installed (standalone mode)
-    if (window.matchMedia('(display-mode: standalone)').matches) {
-      setIsInstalled(true);
-      return;
-    }
+    if (window.matchMedia('(display-mode: standalone)').matches) return;
 
-    function handlePrompt(e: Event) {
+    const onBeforeInstall = (e: Event) => {
       e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      if (import.meta.env.DEV) console.log('[PWA] beforeinstallprompt captured');
-    }
+      deferredPrompt.current = e as BeforeInstallPromptEvent;
+      setIsInstallable(true);
+    };
 
-    window.addEventListener('beforeinstallprompt', handlePrompt);
-    return () => window.removeEventListener('beforeinstallprompt', handlePrompt);
+    const onInstalled = () => {
+      deferredPrompt.current = null;
+      setIsInstallable(false);
+    };
+
+    window.addEventListener('beforeinstallprompt', onBeforeInstall);
+    window.addEventListener('appinstalled', onInstalled);
+    return () => {
+      window.removeEventListener('beforeinstallprompt', onBeforeInstall);
+      window.removeEventListener('appinstalled', onInstalled);
+    };
   }, []);
 
-  const canInstall = !!deferredPrompt && !isInstalled && !isDismissed;
+  const installApp = useCallback(async () => {
+    const prompt = deferredPrompt.current;
+    if (!prompt) return;
+    await prompt.prompt();
+    deferredPrompt.current = null;
+    setIsInstallable(false);
+  }, []);
 
-  async function promptInstall() {
-    if (!deferredPrompt) return;
-    await deferredPrompt.prompt();
-    const { outcome } = await deferredPrompt.userChoice;
-    if (outcome === 'accepted') {
-      setIsInstalled(true);
-    }
-    setDeferredPrompt(null);
-  }
-
-  function dismiss() {
-    setIsDismissed(true);
-    localStorage.setItem(DISMISSED_KEY, 'true');
-  }
-
-  return { canInstall, promptInstall, dismiss };
+  return { isInstallable, installApp };
 }

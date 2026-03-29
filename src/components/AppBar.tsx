@@ -12,7 +12,7 @@ export function AppBar({ showBack = false }: AppBarProps) {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const online = useOnlineStatus();
-  const { canInstall, promptInstall } = useInstallPrompt();
+  const { isInstallable, installApp } = useInstallPrompt();
 
   return (
     <>
@@ -29,9 +29,9 @@ export function AppBar({ showBack = false }: AppBarProps) {
           <CassetteTape className="h-5 w-5 text-violet-400" />
         </h1>
         <div className="ml-auto flex items-center gap-1">
-          {canInstall && (
+          {isInstallable && (
             <button
-              onClick={promptInstall}
+              onClick={installApp}
               className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
               aria-label="Install app"
             >
