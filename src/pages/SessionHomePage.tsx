@@ -4,6 +4,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { SessionCard } from '@/components/SessionCard';
 import { useSessionList } from '@/hooks/useSessionList';
 import { InstallBanner } from '@/components/InstallBanner';
+import { InstallGuide } from '@/components/InstallGuide';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -89,6 +90,7 @@ export function SessionHomePage() {
       </CollapsibleSection>
 
       <InstallBanner />
+      <InstallGuide />
 
       {/* New Session */}
       <div className="px-4 py-4">

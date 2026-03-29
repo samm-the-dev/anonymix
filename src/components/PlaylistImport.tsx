@@ -21,7 +21,7 @@ export function PlaylistImport({ songs, playlistTitle, playlistDescription }: Pl
 
   function downloadAndOpen() {
     const content = generateXspf(songs, meta);
-    downloadFile(content, `${filename}.xspf`, 'application/xspf+xml');
+    downloadFile(content, `${filename}.xspf`, 'application/octet-stream');
     setDownloaded(true);
     setTimeout(() => setDownloaded(false), 2000);
     window.open('https://www.tunemymusic.com/', '_blank');
@@ -33,15 +33,15 @@ export function PlaylistImport({ songs, playlistTitle, playlistDescription }: Pl
     <div className="border-b border-border px-4 py-3">
       <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
         <li>Tap below to save the playlist file and open TuneMyMusic</li>
-        <li>Choose "Select file from your device", upload the file</li>
-        <li>Pick your destination service and transfer</li>
+        <li>Scroll down, select "Upload file", upload the file</li>
+        <li>Choose your destination service and start transfer</li>
       </ol>
       <button
         onClick={downloadAndOpen}
         className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
       >
         <Download className="h-4 w-4" />
-        {downloaded ? 'Saved!' : 'Save Playlist & Open Transfer'}
+        {downloaded ? 'Saved!' : 'Save File & Open Transfer'}
         {downloaded ? '' : <ExternalLink className="h-4 w-4" />}
       </button>
     </div>
