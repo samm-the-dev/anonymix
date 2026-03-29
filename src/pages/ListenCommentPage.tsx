@@ -1,14 +1,28 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Copy, ExternalLink, Smile } from 'lucide-react';
-import EmojiPicker, { Theme } from 'emoji-picker-react';
-import * as Popover from '@radix-ui/react-popover';
+import { Copy, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useTheme } from '@/hooks/useTheme';
+import { EmojiPicker } from '@/components/EmojiPicker';
 
-function CommentField({ value, onChange, theme }: { value: string; onChange: (v: string) => void; theme: string }) {
+function CommentField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function insertEmoji(emoji: string) {
+    const textarea = textareaRef.current;
+    if (textarea) {
+      const start = textarea.selectionStart;
+      const end = textarea.selectionEnd;
+      onChange(value.slice(0, start) + emoji + value.slice(end));
+      requestAnimationFrame(() => {
+        const pos = start + emoji.length;
+        textarea.setSelectionRange(pos, pos);
+        textarea.focus();
+      });
+    } else {
+      onChange(value + emoji);
+    }
+  }
 
   return (
     <div className="mt-3">
@@ -21,43 +35,7 @@ function CommentField({ value, onChange, theme }: { value: string; onChange: (v:
           rows={2}
           className="w-full resize-none rounded-lg bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
-        <Popover.Root>
-          <Popover.Trigger asChild>
-            <button
-              type="button"
-              className="shrink-0 self-end px-2 pb-2 text-muted-foreground hover:text-foreground"
-            >
-              <Smile className="h-4 w-4" />
-            </button>
-          </Popover.Trigger>
-          <Popover.Portal>
-            <Popover.Content side="top" align="end" sideOffset={4} className="z-50">
-              <EmojiPicker
-                theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
-                height={350}
-                width={300}
-                skinTonesDisabled
-                searchDisabled={false}
-                onEmojiClick={(emojiData) => {
-                  const textarea = textareaRef.current;
-                  if (textarea) {
-                    const start = textarea.selectionStart;
-                    const end = textarea.selectionEnd;
-                    const newValue = value.slice(0, start) + emojiData.emoji + value.slice(end);
-                    onChange(newValue);
-                    requestAnimationFrame(() => {
-                      const pos = start + emojiData.emoji.length;
-                      textarea.setSelectionRange(pos, pos);
-                      textarea.focus();
-                    });
-                  } else {
-                    onChange(value + emojiData.emoji);
-                  }
-                }}
-              />
-            </Popover.Content>
-          </Popover.Portal>
-        </Popover.Root>
+        <EmojiPicker onSelect={insertEmoji} />
       </div>
     </div>
   );
@@ -74,7 +52,6 @@ interface SubmissionRow {
 export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; tapeId: string }) {
   const navigate = useNavigate();
   const { player } = useAuthContext();
-  const { theme } = useTheme();
 
   const [tapeTitle, setTapeTitle] = useState('');
   const [tapePrompt, setTapePrompt] = useState('');
@@ -289,7 +266,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
                     {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
                   </div>
                 </div>
-                <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} theme={theme} />
+                <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} />
               </div>
             ))
           )}
@@ -298,7 +275,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
           {submissions.length > 0 && (
             <div className="py-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">The Tape</p>
-              <CommentField value={comments['_tape'] ?? ''} onChange={(v) => updateComment('_tape', v)} theme={theme} />
+              <CommentField value={comments['_tape'] ?? ''} onChange={(v) => updateComment('_tape', v)} />
             </div>
           )}
         </div>
