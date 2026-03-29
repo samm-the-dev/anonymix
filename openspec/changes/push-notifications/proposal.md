@@ -27,7 +27,7 @@ Players have no way to learn about new tapes, playlist availability, or results 
 ## Impact
 
 - **New Edge Function**: `send-push` for Web Push delivery
-- **New dependency**: `web-push` (Edge Function)
+- **No new dependencies**: Web Push encryption implemented via Web Crypto API
 - **Environment**: VAPID public/private key pair needed in Supabase secrets + `VITE_VAPID_PUBLIC_KEY` client env
 - **Service worker**: Switch from `generateSW` to `injectManifest` for push handler
 - **Modified files**: vite.config.ts, advance trigger migration, playlistExport.ts, SessionHomePage, useNotificationPermission

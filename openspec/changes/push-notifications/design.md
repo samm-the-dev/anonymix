@@ -41,7 +41,7 @@ vite-plugin-pwa's `generateSW` mode doesn't support custom push event handlers. 
 
 ### 4. Edge Function `send-push`
 
-Accepts: `{ session_id, title, body, url, exclude_player_id }`. Queries `push_subscriptions` joined with `session_players` to get all member subscriptions (excluding sender). Uses `web-push` npm package. Cleans up expired subscriptions (410 responses).
+Accepts: `{ session_id, title, body, url, exclude_player_id }`. Queries `push_subscriptions` joined with `session_players` to get all member subscriptions (excluding sender). Implements VAPID + RFC 8291 encryption directly via Web Crypto API (no external dependencies). Cleans up expired subscriptions (410 responses).
 
 ### 5. Notification triggers
 

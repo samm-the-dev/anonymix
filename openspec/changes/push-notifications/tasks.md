@@ -16,7 +16,7 @@
 
 ## 4. Edge Function
 
-- [x] 4.1 Create Supabase Edge Function `send-push`: accept payload, query push_subscriptions joined with session_players, send Web Push via web-push package, delete 410 Gone subscriptions
+- [x] 4.1 Create Supabase Edge Function `send-push`: accept payload, query push_subscriptions joined with session_players, send Web Push via Web Crypto (VAPID + RFC 8291), delete 410 Gone subscriptions
 - [x] 4.2 Deploy Edge Function and verify it's callable
 
 ## 5. Notification Triggers
