@@ -1,4 +1,4 @@
-# Anonymix 📼
+# Anonymix
 
 Make mixtapes with friends. Anonymous submissions, themed rounds, real reactions.
 
