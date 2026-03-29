@@ -11,8 +11,6 @@ import { cn } from '@/lib/utils';
 import type { TapeStatus } from '@/lib/types';
 import { Spinner } from '@/components/Spinner';
 import { computeExtendedDeadline } from '@/lib/extendDeadline';
-import { useNotificationPermission } from '@/hooks/useNotificationPermission';
-import { NotificationPrompt } from '@/components/NotificationPrompt';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
@@ -67,8 +65,6 @@ export function SessionViewPage() {
   const [showLockConfirm, setShowLockConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [memberAction, setMemberAction] = useState<{ type: 'make_host' | 'remove'; member: { id: string; name: string } } | null>(null);
-  const [showNotifPrompt, setShowNotifPrompt] = useState(false);
-  const { permission, requestPermission, supported: notifSupported } = useNotificationPermission(player?.id);
   const { results, searching, search, clear } = useSongSearch();
 
   const activeTape = tapes[activeTapeIdx] ?? null;
@@ -282,10 +278,6 @@ export function SessionViewPage() {
       setShowToast(true);
       setTimeout(() => setShowToast(false), 2500);
 
-      // Show notification prompt after first submission if not yet granted
-      if (notifSupported && permission === 'default') {
-        setTimeout(() => setShowNotifPrompt(true), 3000);
-      }
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
     } finally {
@@ -946,17 +938,6 @@ export function SessionViewPage() {
             </button>
           </div>
         </div>
-      )}
-
-      {/* Notification pre-prompt */}
-      {showNotifPrompt && (
-        <NotificationPrompt
-          onAllow={async () => {
-            setShowNotifPrompt(false);
-            await requestPermission();
-          }}
-          onDismiss={() => setShowNotifPrompt(false)}
-        />
       )}
 
       {/* Success toast */}

@@ -3,7 +3,6 @@ import { ChevronDown, Plus } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { SessionCard } from '@/components/SessionCard';
 import { useSessionList } from '@/hooks/useSessionList';
-import { InstallBanner } from '@/components/InstallBanner';
 import { Spinner } from '@/components/Spinner';
 
 interface CollapsibleSectionProps {
@@ -88,8 +87,6 @@ export function SessionHomePage() {
           </div>
         )}
       </CollapsibleSection>
-
-      <InstallBanner />
 
       {/* New Session */}
       <div className="px-4 py-4">
