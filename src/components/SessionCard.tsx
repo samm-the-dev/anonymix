@@ -36,7 +36,7 @@ function getActionLabel(status: TapeStatus, done: boolean): string {
     case 'commenting':
       return done ? 'Commented' : 'Comment';
     case 'playlist_ready':
-      return 'Listen';
+      return 'Listen & Comment';
     case 'results':
       return 'Results';
   }
@@ -188,6 +188,8 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
               navigate(`${base}?action=submit`);
             } else if (status === 'commenting') {
               navigate(`${base}?action=comment`);
+            } else if (status === 'playlist_ready' && activeTape) {
+              navigate(`${base}/tape/${activeTape.id}/comment`);
             } else {
               navigate(base);
             }

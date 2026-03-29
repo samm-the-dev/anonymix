@@ -11,6 +11,7 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ProfileSetupPage } from '@/pages/ProfileSetupPage';
 import { TermsPage } from '@/pages/TermsPage';
+import { ListenCommentPage } from '@/pages/ListenCommentPage';
 
 const PENDING_PATH_KEY = 'anonymix-pending-path';
 
@@ -53,6 +54,7 @@ function AppRoutes() {
     <Routes>
       <Route path="create" element={<CreateSessionPage />} />
       <Route path="join/:sessionId" element={<JoinSessionPage />} />
+      <Route path="session/:sessionId/tape/:tapeId/comment" element={<ListenCommentPage />} />
       <Route element={<Layout />}>
         <Route index element={<SessionHomePage />} />
         <Route path="session/:sessionId" element={<SessionViewPage />} />

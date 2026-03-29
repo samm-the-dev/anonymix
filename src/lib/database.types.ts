@@ -198,6 +198,7 @@ export interface Database {
           id: string;
           tape_id: string;
           player_id: string;
+          submission_id: string | null;
           text: string;
           created_at: string;
         };
@@ -205,6 +206,7 @@ export interface Database {
           id?: string;
           tape_id: string;
           player_id: string;
+          submission_id?: string | null;
           text: string;
           created_at?: string;
         };
@@ -212,6 +214,7 @@ export interface Database {
           id?: string;
           tape_id?: string;
           player_id?: string;
+          submission_id?: string | null;
           text?: string;
         };
         Relationships: [
@@ -227,6 +230,13 @@ export interface Database {
             columns: ['player_id'];
             isOneToOne: false;
             referencedRelation: 'players';
+            referencedColumns: ['id'];
+          },
+          {
+            foreignKeyName: 'comments_submission_id_fkey';
+            columns: ['submission_id'];
+            isOneToOne: false;
+            referencedRelation: 'submissions';
             referencedColumns: ['id'];
           },
         ];

@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Copy, ExternalLink, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, ExternalLink, Search, Users, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
@@ -43,6 +43,7 @@ export function SessionViewPage() {
   const [members, setMembers] = useState<{ id: string; name: string; avatar: string; avatarColor: string }[]>([]);
   const [loading, setLoading] = useState(true);
   const [showMembers, setShowMembers] = useState(false);
+  const [commentersCount, setCommentersCount] = useState(0);
 
   // Submission form
   const [showSearch, setShowSearch] = useState(false);
@@ -110,6 +111,19 @@ export function SessionViewPage() {
         .in('tape_id', tapeIds);
 
       setSubmissions(subs ?? []);
+    }
+
+    // Count distinct commenters on active tape
+    const activeTape = fetchedTapes.find(
+      (t) => t.status === 'playlist_ready' || t.status === 'commenting',
+    );
+    if (activeTape) {
+      const { data: commentRows } = await supabase
+        .from('comments')
+        .select('player_id')
+        .eq('tape_id', activeTape.id);
+      const distinct = new Set((commentRows ?? []).map((r) => r.player_id));
+      setCommentersCount(distinct.size);
     }
 
     setLoading(false);
@@ -186,17 +200,6 @@ export function SessionViewPage() {
     } finally {
       setSubmitting(false);
     }
-  }
-
-  // Copy playlist to clipboard for Tune My Music
-  function copyPlaylist() {
-    const tapeSubmissions = submissions.filter(
-      (s) => 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape?.id,
-    );
-    const text = tapeSubmissions
-      .map((s) => (s.artist_name ? `${s.artist_name} - ${s.song_name}` : s.song_name))
-      .join('\n');
-    navigator.clipboard?.writeText(text);
   }
 
   const tapeSubmissions = submissions.filter(
@@ -349,33 +352,14 @@ export function SessionViewPage() {
             )}
 
             {activeTape.status === 'playlist_ready' && (
-              <div className="mt-2 text-center">
-                <p className="text-sm text-muted-foreground">{tapeSubmissions.length} songs ready to listen</p>
-                <p className="mb-4 text-xs text-muted-foreground">Go listen, then come back to comment</p>
-                <div className="flex gap-2">
-                  <select
-                    id="tmm-platform"
-                    defaultValue="spotify"
-                    className="flex-1 rounded-xl border border-border bg-secondary px-3 py-2.5 text-sm text-foreground"
-                  >
-                    <option value="spotify">Spotify</option>
-                    <option value="youtube-music">YouTube Music</option>
-                    <option value="apple-music">Apple Music</option>
-                    <option value="tidal">Tidal</option>
-                    <option value="deezer">Deezer</option>
-                    <option value="amazon-music">Amazon Music</option>
-                  </select>
-                  <button
-                    onClick={() => {
-                      copyPlaylist();
-                      const platform = (document.getElementById('tmm-platform') as HTMLSelectElement)?.value ?? 'spotify';
-                      window.open(`https://www.tunemymusic.com/transfer/text-file-to-${platform}`, '_blank');
-                    }}
-                    className="shrink-0 rounded-xl bg-blue-500 px-4 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
-                  >
-                    Copy &amp; open
-                  </button>
-                </div>
+              <div className="mt-2">
+                <SubmissionProgress submitted={commentersCount} total={members.length || 1} colorClass="bg-amber-500" textColorClass="text-amber-600 dark:text-amber-400" />
+                <button
+                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}/comment`)}
+                  className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
+                >
+                  Listen &amp; Comment
+                </button>
               </div>
             )}
 
@@ -440,22 +424,15 @@ export function SessionViewPage() {
         </div>{/* end crate container */}
       </div>{/* end crate centering wrapper */}
 
-      {/* Playlist song list below crate (for playlist_ready / results) */}
+      {/* Results song list below crate (results only — playlist_ready uses comment page) */}
       {activeTape &&
-        (activeTape.status === 'playlist_ready' || activeTape.status === 'results') &&
+        activeTape.status === 'results' &&
         tapeSubmissions.length > 0 && (
           <div className="mx-auto mt-4 w-full max-w-[375px] px-4">
             <div className="mb-2 flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">
                 Playlist ({tapeSubmissions.length} songs)
               </span>
-              <button
-                onClick={copyPlaylist}
-                className="flex items-center gap-1 text-xs text-primary hover:opacity-80"
-              >
-                <Copy className="h-3 w-3" />
-                Copy for Tune My Music
-              </button>
             </div>
             <div className="space-y-2">
               {tapeSubmissions.map((s) => (
