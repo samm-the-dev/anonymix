@@ -1,8 +1,7 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CassetteTape, Download, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, CassetteTape, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
-import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 interface AppBarProps {
   showBack?: boolean;
@@ -12,7 +11,6 @@ export function AppBar({ showBack = false }: AppBarProps) {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const online = useOnlineStatus();
-  const { canInstall, promptInstall } = useInstallPrompt();
 
   return (
     <>
@@ -29,15 +27,6 @@ export function AppBar({ showBack = false }: AppBarProps) {
           <CassetteTape className="h-5 w-5 text-violet-400" />
         </h1>
         <div className="ml-auto flex items-center gap-1">
-          {canInstall && (
-            <button
-              onClick={promptInstall}
-              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              aria-label="Install app"
-            >
-              <Download className="h-5 w-5" />
-            </button>
-          )}
           <button
             onClick={toggleTheme}
             className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
