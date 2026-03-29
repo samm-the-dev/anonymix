@@ -52,21 +52,15 @@ BEGIN
 
   v_url := '/' || v_slug;
 
-  -- Get Supabase URL from config (set via vault or hardcode project URL)
-  v_supabase_url := current_setting('app.settings.supabase_url', true);
-  IF v_supabase_url IS NULL OR v_supabase_url = '' THEN
-    -- Fallback: Anonymix Supabase project URL
-    v_supabase_url := 'https://mryuusvhdadbjpupzpol.supabase.co';
-  END IF;
+  -- Read config from Postgres vault (stored via vault.create_secret)
+  SELECT decrypted_secret INTO v_supabase_url
+  FROM vault.decrypted_secrets WHERE name = 'supabase_url' LIMIT 1;
 
-  -- Read shared secret from Postgres vault (stored via vault.create_secret)
   SELECT decrypted_secret INTO v_push_secret
-  FROM vault.decrypted_secrets
-  WHERE name = 'send_push_secret'
-  LIMIT 1;
+  FROM vault.decrypted_secrets WHERE name = 'send_push_secret' LIMIT 1;
 
-  -- Skip if secret not configured (avoids unauthenticated requests)
-  IF v_push_secret IS NULL THEN
+  -- Skip if not configured
+  IF v_supabase_url IS NULL OR v_push_secret IS NULL THEN
     RETURN NEW;
   END IF;
 
