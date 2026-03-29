@@ -15,10 +15,18 @@ interface UseSessionListResult {
  * first actionable (submitting/playlist_ready), else most recent.
  */
 function pickActiveTape(tapes: Tape[]): { tape: Tape | null; index: number } {
+  // First actionable tape
   const idx = tapes.findIndex(
     (t) => t.status === 'submitting' || t.status === 'playlist_ready',
   );
   if (idx >= 0) return { tape: tapes[idx], index: idx };
+
+  // Fallback: last results tape (prefer over skipped)
+  for (let i = tapes.length - 1; i >= 0; i--) {
+    if (tapes[i].status === 'results') return { tape: tapes[i], index: i };
+  }
+
+  // Final fallback: last tape
   const last = tapes.length - 1;
   return { tape: tapes[last] ?? null, index: Math.max(last, 0) };
 }

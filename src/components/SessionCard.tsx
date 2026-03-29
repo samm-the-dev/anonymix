@@ -97,20 +97,22 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
               sideOffset={4}
               className="z-50 overflow-hidden rounded-lg border border-border bg-background shadow-lg"
             >
-              <DropdownMenu.Item
-                onSelect={() => {
-                  const link = `${window.location.origin}/join/${session.id}`;
-                  if (navigator.share) {
-                    navigator.share({ title: `Join ${session.name} on Anonymix`, url: link });
-                  } else {
-                    navigator.clipboard?.writeText(link);
-                  }
-                }}
-                className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
-              >
-                <Link className="h-4 w-4" />
-                Invite
-              </DropdownMenu.Item>
+              {!session.ended && (
+                <DropdownMenu.Item
+                  onSelect={() => {
+                    const link = `${window.location.origin}/join/${session.id}`;
+                    if (navigator.share) {
+                      navigator.share({ title: `Join ${session.name} on Anonymix`, url: link });
+                    } else {
+                      navigator.clipboard?.writeText(link);
+                    }
+                  }}
+                  className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                >
+                  <Link className="h-4 w-4" />
+                  Invite
+                </DropdownMenu.Item>
+              )}
               <DropdownMenu.Item
                 onSelect={handleExport}
                 className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
@@ -160,32 +162,38 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
           View
         </button>
 
-        {/* Status + Deadline */}
-        <div className="flex items-center gap-1">
-          <StatusBadge status={status} />
-          {deadline && (
-            <span className="whitespace-nowrap text-[11px] text-muted-foreground">{deadline}</span>
-          )}
-        </div>
+        {session.ended ? (
+          <span className="text-xs font-medium text-muted-foreground">Complete</span>
+        ) : (
+          <>
+            {/* Status + Deadline */}
+            <div className="flex items-center gap-1">
+              <StatusBadge status={status} />
+              {deadline && (
+                <span className="whitespace-nowrap text-[11px] text-muted-foreground">{deadline}</span>
+              )}
+            </div>
 
-        {/* Action Button */}
-        <button
-          onClick={() => {
-            const base = `/${session.slug}`;
-            if (status === 'submitting') {
-              navigate(`${base}?action=submit`);
-            } else if ((status === 'playlist_ready' || status === 'results') && activeTape) {
-              navigate(`${base}/tape/${activeTapeIndex + 1}`);
-            } else {
-              navigate(base);
-            }
-          }}
-          className={cn(
-            actionButtonVariants({ status }),
-          )}
-        >
-          {getActionLabel(status, userActionDone)}
-        </button>
+            {/* Action Button */}
+            <button
+              onClick={() => {
+                const base = `/${session.slug}`;
+                if (status === 'submitting') {
+                  navigate(`${base}?action=submit`);
+                } else if ((status === 'playlist_ready' || status === 'results') && activeTape) {
+                  navigate(`${base}/tape/${activeTapeIndex + 1}`);
+                } else {
+                  navigate(base);
+                }
+              }}
+              className={cn(
+                actionButtonVariants({ status }),
+              )}
+            >
+              {getActionLabel(status, userActionDone)}
+            </button>
+          </>
+        )}
       </div>
 
       {/* Delete confirm dialog */}
