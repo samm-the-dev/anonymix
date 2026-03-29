@@ -54,10 +54,10 @@ function AppRoutes() {
     <Routes>
       <Route path="create" element={<CreateSessionPage />} />
       <Route path="join/:sessionId" element={<JoinSessionPage />} />
-      <Route path="session/:sessionId/tape/:tapeId/comment" element={<ListenCommentPage />} />
       <Route element={<Layout />}>
         <Route index element={<SessionHomePage />} />
         <Route path="session/:sessionId" element={<SessionViewPage />} />
+        <Route path="session/:sessionId/tape/:tapeId/comment" element={<ListenCommentPage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

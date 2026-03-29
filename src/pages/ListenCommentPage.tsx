@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CassetteTape, Copy, Moon, Sun, ExternalLink, Smile } from 'lucide-react';
+import { Copy, ExternalLink, Smile } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -83,7 +83,7 @@ export function ListenCommentPage() {
   const { sessionId, tapeId } = useParams<{ sessionId: string; tapeId: string }>();
   const navigate = useNavigate();
   const { player } = useAuthContext();
-  const { theme, toggleTheme } = useTheme();
+  const { theme } = useTheme();
 
   const [tapeTitle, setTapeTitle] = useState('');
   const [tapePrompt, setTapePrompt] = useState('');
@@ -223,27 +223,7 @@ export function ListenCommentPage() {
   const commentedCount = Object.values(comments).filter((t) => t.trim().length > 0).length;
 
   return (
-    <div className="flex min-h-screen flex-col bg-background text-foreground">
-      {/* App bar — matches Layout but with back button */}
-      <header className="relative flex items-center border-b border-border px-4 py-3">
-        <button onClick={() => navigate(`/session/${sessionId}`)} className="w-8 text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 font-display text-lg font-semibold">
-          Anonymix
-          <CassetteTape className="h-5 w-5" />
-        </h1>
-        <button
-          onClick={toggleTheme}
-          className="ml-auto rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-        </button>
-      </header>
-
-      {/* Page content */}
-      <div className="flex flex-1 flex-col">
+    <div className="flex flex-1 flex-col">
         {/* Info card with tabs */}
         <div className="border-b border-border">
           <div className="flex border-b border-border">
@@ -338,7 +318,6 @@ export function ListenCommentPage() {
             {submitting ? 'Sharing...' : `Share comments${commentedCount > 0 ? ` (${commentedCount})` : ''}`}
           </button>
         </div>
-      </div>
 
       {/* Success toast */}
       {showToast && (

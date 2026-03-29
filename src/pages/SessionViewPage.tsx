@@ -223,19 +223,15 @@ export function SessionViewPage() {
   const deadlinePassed = activeTape?.deadline ? new Date(activeTape.deadline).getTime() < Date.now() : false;
 
   return (
-    <div className="flex flex-1 flex-col bg-background">
-      {/* Header */}
-      <header className="relative flex items-center border-b border-border px-4 py-3">
-        <button onClick={() => navigate('/')} className="w-8 text-muted-foreground hover:text-foreground">
-          <ArrowLeft className="h-5 w-5" />
-        </button>
-        <h1 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold">
-          {sessionName}
-        </h1>
+    <div className="flex flex-1 flex-col">
+      {/* Session context bar */}
+      <div className="relative flex items-center border-b border-border px-4 py-2">
+        <div className="w-8" />
+        <h2 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold text-foreground">{sessionName}</h2>
         <button onClick={() => setShowMembers(true)} className="ml-auto w-8 text-muted-foreground hover:text-foreground">
-          <Users className="ml-auto h-5 w-5" />
+          <Users className="h-5 w-5" />
         </button>
-      </header>
+      </div>
 
       {/* Crate centering — matches prototype: flex-1 flex items-center justify-center p-4 */}
       <div className="flex flex-1 items-center justify-center p-4">

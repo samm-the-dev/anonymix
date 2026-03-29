@@ -1,5 +1,5 @@
-import { NavLink, Outlet, useLocation } from 'react-router-dom';
-import { CassetteTape, Home, Moon, Sun } from 'lucide-react';
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { ArrowLeft, CassetteTape, Home, Moon, Sun } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTheme } from '@/hooks/useTheme';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -8,11 +8,20 @@ export function Layout() {
   const { theme, toggleTheme } = useTheme();
   const { player } = useAuthContext();
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const isHome = location.pathname === '/' || location.pathname === '/profile';
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
       <header className="relative flex items-center border-b border-border px-4 py-3">
-        <div className="w-8" />
+        {isHome ? (
+          <div className="w-8" />
+        ) : (
+          <button onClick={() => navigate(-1)} className="w-8 text-muted-foreground hover:text-foreground">
+            <ArrowLeft className="h-5 w-5" />
+          </button>
+        )}
         <h1 className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 font-display text-lg font-semibold">
           Anonymix
           <CassetteTape className="h-5 w-5" />
