@@ -1,5 +1,5 @@
 /** Tape status states — matches the Supabase tape_status enum */
-export type TapeStatus = 'submitting' | 'playlist_ready' | 'results' | 'skipped';
+export type TapeStatus = 'upcoming' | 'submitting' | 'playlist_ready' | 'results' | 'skipped';
 
 /** Player display info */
 export interface Player {

@@ -5,7 +5,7 @@
  * For now, manually defined to match our schema.
  */
 
-export type TapeStatus = 'submitting' | 'playlist_ready' | 'results' | 'skipped';
+export type TapeStatus = 'upcoming' | 'submitting' | 'playlist_ready' | 'results' | 'skipped';
 
 export interface Database {
   public: {
@@ -113,6 +113,7 @@ export interface Database {
           deadline: string | null;
           completed_at: string | null;
           submit_window_hours: number;
+          comment_window_hours: number;
           created_at: string;
         };
         Insert: {
@@ -124,6 +125,7 @@ export interface Database {
           deadline?: string | null;
           completed_at?: string | null;
           submit_window_hours?: number;
+          comment_window_hours?: number;
           created_at?: string;
         };
         Update: {
@@ -135,6 +137,7 @@ export interface Database {
           deadline?: string | null;
           completed_at?: string | null;
           submit_window_hours?: number;
+          comment_window_hours?: number;
         };
         Relationships: [
           {

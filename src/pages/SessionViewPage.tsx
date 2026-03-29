@@ -291,6 +291,13 @@ export function SessionViewPage() {
                     : `Due ${new Date(activeTape.deadline).toLocaleDateString()}`}
               </p>
             )}
+            {activeTape.status === 'playlist_ready' && activeTape.deadline && (
+              <p className="mb-1 text-xs text-muted-foreground">
+                {new Date(activeTape.deadline).getTime() < Date.now()
+                  ? 'Completing...'
+                  : `Due ${new Date(activeTape.deadline).toLocaleDateString()}`}
+              </p>
+            )}
 
             <div className="flex-1"></div> {/* spacer */}
 
@@ -397,6 +404,10 @@ export function SessionViewPage() {
                   </button>
                 )}
               </div>
+            )}
+
+            {activeTape.status === 'upcoming' && (
+              <p className="mt-2 text-center text-xs text-muted-foreground">Coming up next</p>
             )}
 
             {activeTape.status === 'skipped' && (

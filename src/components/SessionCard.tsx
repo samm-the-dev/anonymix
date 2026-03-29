@@ -15,6 +15,7 @@ const actionButtonVariants = cva(
   {
     variants: {
       status: {
+        upcoming: 'cursor-default border border-border bg-card text-muted-foreground',
         submitting:
           'bg-green-500 text-white hover:bg-green-600 dark:bg-green-600/80 dark:hover:bg-green-600',
         playlist_ready:
@@ -29,6 +30,8 @@ const actionButtonVariants = cva(
 
 function getActionLabel(status: TapeStatus, done: boolean): string {
   switch (status) {
+    case 'upcoming':
+      return 'Upcoming';
     case 'submitting':
       return done ? 'Change' : 'Submit';
     case 'playlist_ready':

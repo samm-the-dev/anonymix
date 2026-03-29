@@ -169,14 +169,15 @@ export function CreateSessionPage() {
 
       if (memErr) throw memErr;
 
-      // Create tapes — first one starts as 'submitting', rest queued
+      // Create tapes — first one starts as 'submitting', rest as 'upcoming'
       for (let i = 0; i < filledTapes.length; i++) {
         const { error: tapeErr } = await supabase.from('tapes').insert({
           session_id: session.id,
           title: filledTapes[i].name.trim(),
           prompt: filledTapes[i].prompt.trim(),
-          status: 'submitting',
+          status: i === 0 ? 'submitting' : 'upcoming',
           submit_window_hours: submitDays * 24,
+          comment_window_hours: commentDays * 24,
         });
         if (tapeErr) throw tapeErr;
       }

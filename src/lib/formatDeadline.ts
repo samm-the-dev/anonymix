@@ -11,7 +11,7 @@ export function formatDeadline(
   deadline?: number,
   completedAt?: number,
 ): string {
-  if (status === 'skipped') return '';
+  if (status === 'skipped' || status === 'upcoming') return '';
 
   if (status === 'results') {
     if (!completedAt) return '';
