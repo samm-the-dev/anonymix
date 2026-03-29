@@ -1,7 +1,8 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CassetteTape, Moon, Sun } from 'lucide-react';
+import { ArrowLeft, CassetteTape, Download, Moon, Sun } from 'lucide-react';
 import { useTheme } from '@/hooks/useTheme';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
+import { useInstallPrompt } from '@/hooks/useInstallPrompt';
 
 interface AppBarProps {
   showBack?: boolean;
@@ -11,6 +12,7 @@ export function AppBar({ showBack = false }: AppBarProps) {
   const { theme, toggleTheme } = useTheme();
   const navigate = useNavigate();
   const online = useOnlineStatus();
+  const { canInstall, promptInstall } = useInstallPrompt();
 
   return (
     <>
@@ -26,13 +28,24 @@ export function AppBar({ showBack = false }: AppBarProps) {
           Anonymix
           <CassetteTape className="h-5 w-5 text-violet-400" />
         </h1>
-        <button
-          onClick={toggleTheme}
-          className="ml-auto rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-        </button>
+        <div className="ml-auto flex items-center gap-1">
+          {canInstall && (
+            <button
+              onClick={promptInstall}
+              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+              aria-label="Install app"
+            >
+              <Download className="h-5 w-5" />
+            </button>
+          )}
+          <button
+            onClick={toggleTheme}
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
+          >
+            {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
+          </button>
+        </div>
       </header>
       {!online && (
         <div className="bg-amber-500/10 px-4 py-1.5 text-center text-xs font-medium text-amber-600 dark:text-amber-400">
