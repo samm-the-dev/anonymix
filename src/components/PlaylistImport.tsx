@@ -44,50 +44,37 @@ export function PlaylistImport({ songs, playlistTitle, playlistDescription }: Pl
   return (
     <div className="border-b border-border px-4 py-3">
       <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-        <li>Download the playlist file or copy the songs below</li>
-        <li>
-          Open{' '}
-          <a
-            href="https://www.tunemymusic.com/"
-            target="_blank"
-            rel="noopener noreferrer"
-            className="text-blue-500 underline"
-          >
-            TuneMyMusic
-          </a>
-          , choose "File" as source, and upload
-        </li>
-        <li>Choose your destination service, log in, and transfer</li>
+        <li>Copy the songs and open TuneMyMusic</li>
+        <li>Select "Free text", paste, and choose your destination</li>
       </ol>
 
       <div className="flex flex-col gap-2">
-        {/* Download buttons row */}
+        <button
+          onClick={copyAndOpen}
+          className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+        >
+          <Copy className="h-4 w-4" />
+          {copied ? 'Copied!' : 'Copy Songs & Open Transfer'}
+          {copied ? '' : <ExternalLink className="h-4 w-4" />}
+        </button>
+
+        {/* File download alternatives */}
         <div className="flex gap-2">
           <button
             onClick={downloadXspf}
-            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2 text-xs font-medium text-muted-foreground hover:bg-muted"
           >
-            <Download className="h-4 w-4" />
+            <Download className="h-3.5 w-3.5" />
             Download .xspf
           </button>
           <button
             onClick={downloadCsvFile}
-            className="flex items-center justify-center gap-1.5 rounded-xl border border-border bg-card px-4 py-2.5 text-sm font-medium text-foreground hover:bg-muted"
+            className="flex flex-1 items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2 text-xs font-medium text-muted-foreground hover:bg-muted"
           >
-            <Download className="h-4 w-4" />
-            .csv
+            <Download className="h-3.5 w-3.5" />
+            Download .csv
           </button>
         </div>
-
-        {/* Copy fallback */}
-        <button
-          onClick={copyAndOpen}
-          className="flex w-full items-center justify-center gap-1.5 rounded-xl border border-border bg-card py-2.5 text-sm font-medium text-foreground hover:bg-muted"
-        >
-          <Copy className="h-4 w-4" />
-          {copied ? 'Copied!' : 'Copy & Open TuneMyMusic'}
-          {copied ? '' : <ExternalLink className="h-4 w-4" />}
-        </button>
       </div>
     </div>
   );
