@@ -12,7 +12,7 @@ function getStoredPreference(): StoredPreference {
   } catch {
     // Storage unavailable (privacy mode, etc.)
   }
-  return 'system';
+  return 'dark';
 }
 
 function getSystemTheme(): Theme {
@@ -23,8 +23,9 @@ function useSystemTheme(): Theme {
   return useSyncExternalStore(
     (cb) => {
       const mq = window.matchMedia('(prefers-color-scheme: dark)');
-      mq.addEventListener('change', cb);
-      return () => mq.removeEventListener('change', cb);
+      const handler = () => cb();
+      mq.addEventListener('change', handler);
+      return () => mq.removeEventListener('change', handler);
     },
     getSystemTheme,
   );
@@ -42,12 +43,15 @@ export function useTheme() {
     } else {
       root.classList.remove('dark');
     }
+  }, [theme]);
+
+  useEffect(() => {
     try {
       localStorage.setItem(STORAGE_KEY, preference);
     } catch {
       // Storage unavailable
     }
-  }, [theme, preference]);
+  }, [preference]);
 
   const toggleTheme = () => {
     setPreference((prev) => {
