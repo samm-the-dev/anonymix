@@ -77,7 +77,7 @@ export function JoinSessionPage() {
           .select('player_id')
           .eq('session_id', sid)
           .eq('player_id', player.id)
-          .single();
+          .maybeSingle();
 
         if (alreadyMember) {
           navigate(`/${session.slug}`, { replace: true });
@@ -110,7 +110,7 @@ export function JoinSessionPage() {
         .select('player_id')
         .eq('session_id', sessionId)
         .eq('player_id', player.id)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Already a member, just navigate
@@ -163,7 +163,7 @@ export function JoinSessionPage() {
   const remainingTapes = invite.tapes.length - shownTapes.length;
 
   return (
-    <div className="mx-auto flex flex-1 max-w-sm flex-col items-center justify-center px-6">
+    <div className="flex flex-col items-center justify-center p-6">
       {/* Invited by */}
       <p className="text-sm text-muted-foreground">
         {invite.adminName} invited you to join
