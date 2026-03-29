@@ -49,7 +49,7 @@ interface SubmissionRow {
   cover_art_url: string | null;
 }
 
-export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; tapeId: string }) {
+export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessionId: string; tapeId: string; ended?: boolean }) {
   const navigate = useNavigate();
   const { player } = useAuthContext();
 
@@ -62,7 +62,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
   const [showToast, setShowToast] = useState(false);
   const [copied, setCopied] = useState(false);
 
-  const [infoTab, setInfoTab] = useState<'how' | 'import'>('how');
+  const [infoTab, setInfoTab] = useState<'how' | 'import'>(ended ? 'import' : 'how');
 
   // Comment state: submissionId -> text, plus '_tape' for tape-level
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -286,7 +286,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
         </div>
 
         {/* Submit button */}
-        {hasSongs && (
+        {hasSongs && !ended && (
         <div className="border-t border-border p-4">
           <button
             onClick={handleSubmit}

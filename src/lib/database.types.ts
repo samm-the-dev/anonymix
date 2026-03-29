@@ -44,6 +44,7 @@ export interface Database {
           admin_id: string;
           slug: string;
           ended: boolean;
+          completed_at: string | null;
           created_at: string;
         };
         Insert: {
@@ -53,6 +54,7 @@ export interface Database {
           admin_id: string;
           slug: string;
           ended?: boolean;
+          completed_at?: string | null;
           created_at?: string;
         };
         Update: {
@@ -62,6 +64,7 @@ export interface Database {
           slug?: string;
           admin_id?: string;
           ended?: boolean;
+          completed_at?: string | null;
         };
         Relationships: [
           {

@@ -11,6 +11,7 @@ export function TapePage() {
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [tapeId, setTapeId] = useState<string | null>(null);
   const [tapeTitle, setTapeTitle] = useState('');
+  const [sessionEnded, setSessionEnded] = useState(false);
 
   useEffect(() => {
     if (!sessionSlug || !tapeIndex) return;
@@ -18,11 +19,12 @@ export function TapePage() {
     async function resolve() {
       const { data: session } = await supabase
         .from('sessions')
-        .select('id')
+        .select('id, ended')
         .eq('slug', sessionSlug!)
         .single();
       if (!session) return;
       setSessionId(session.id);
+      setSessionEnded(session.ended);
 
       const idx = parseInt(tapeIndex!, 10) - 1;
       const { data: tapes } = await supabase
@@ -66,5 +68,5 @@ export function TapePage() {
   }
 
   if (status === 'results') return <ResultsPage sessionId={sessionId} tapeId={tapeId} />;
-  return <ListenCommentPage sessionId={sessionId} tapeId={tapeId} />;
+  return <ListenCommentPage sessionId={sessionId} tapeId={tapeId} ended={sessionEnded} />;
 }

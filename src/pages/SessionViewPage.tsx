@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, MoreVertical, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, ChevronDown, MoreVertical, Search, Users, X } from 'lucide-react';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
@@ -40,6 +41,7 @@ export function SessionViewPage() {
 
   const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionName, setSessionName] = useState('');
+  const [sessionEnded, setSessionEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
   const [tapes, setTapes] = useState<TapeData[]>([]);
   const [activeTapeIdx, setActiveTapeIdx] = useState(0);
@@ -49,6 +51,7 @@ export function SessionViewPage() {
   const [loading, setLoading] = useState(true);
   const [showMembers, setShowMembers] = useState(false);
   const [commentersCount, setCommentersCount] = useState(0);
+  const [allComments, setAllComments] = useState<{ submission_id: string | null; player_id: string }[]>([]);
 
   // Submission form
   const [showSearch, setShowSearch] = useState(false);
@@ -71,7 +74,7 @@ export function SessionViewPage() {
     // Resolve slug → session
     const { data: session } = await supabase
       .from('sessions')
-      .select('id, name, admin_id, slug')
+      .select('id, name, admin_id, slug, ended')
       .eq('slug', sessionSlug)
       .single();
 
@@ -81,6 +84,7 @@ export function SessionViewPage() {
 
     if (session) {
       setSessionName(session.name);
+      setSessionEnded(session.ended);
       setIsHost(session.admin_id === player?.id);
       document.title = `${session.name} | Anonymix`;
     }
@@ -128,16 +132,26 @@ export function SessionViewPage() {
     }
 
     // Count distinct commenters on active tape
-    const activeTape = fetchedTapes.find(
+    const activeTapeForComments = fetchedTapes.find(
       (t) => t.status === 'playlist_ready',
     );
-    if (activeTape) {
+    if (activeTapeForComments) {
       const { data: commentRows } = await supabase
         .from('comments')
         .select('player_id')
-        .eq('tape_id', activeTape.id);
+        .eq('tape_id', activeTapeForComments.id);
       const distinct = new Set((commentRows ?? []).map((r) => r.player_id));
       setCommentersCount(distinct.size);
+    }
+
+    // Fetch all comments for summary when session is ended
+    if (session.ended && fetchedTapes.length > 0) {
+      const tapeIds = fetchedTapes.map((t) => t.id);
+      const { data: comments } = await supabase
+        .from('comments')
+        .select('submission_id, player_id')
+        .in('tape_id', tapeIds);
+      setAllComments(comments ?? []);
     }
 
     setLoading(false);
@@ -245,6 +259,36 @@ export function SessionViewPage() {
     (s) => 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape?.id,
   );
 
+  // Summary stats for completed sessions
+  const summary = sessionEnded ? (() => {
+    const tapesCompleted = tapes.filter((t) => t.status === 'results').length;
+    const totalSongs = submissions.length;
+    const totalComments = allComments.length;
+
+    // Most-commented songs
+    const commentsBySub = new Map<string, number>();
+    for (const c of allComments) {
+      if (c.submission_id) {
+        commentsBySub.set(c.submission_id, (commentsBySub.get(c.submission_id) ?? 0) + 1);
+      }
+    }
+    const maxSongComments = Math.max(0, ...commentsBySub.values());
+    const topSongs = maxSongComments > 0
+      ? submissions.filter((s) => commentsBySub.get(s.id) === maxSongComments)
+      : [];
+
+    // Most active commenters
+    const commentsByPlayer = new Map<string, number>();
+    for (const c of allComments) {
+      commentsByPlayer.set(c.player_id, (commentsByPlayer.get(c.player_id) ?? 0) + 1);
+    }
+    const maxPlayerComments = Math.max(0, ...commentsByPlayer.values());
+    const topCommenters = maxPlayerComments > 0
+      ? members.filter((m) => commentsByPlayer.get(m.id) === maxPlayerComments)
+      : [];
+
+    return { tapesCompleted, totalSongs, totalComments, topSongs, maxSongComments, topCommenters, maxPlayerComments };
+  })() : null;
 
   if (loading) {
     return (
@@ -266,6 +310,65 @@ export function SessionViewPage() {
           <Users className="h-5 w-5" />
         </button>
       </div>
+
+      {/* Session summary for completed sessions */}
+      {summary && (
+        <Collapsible.Root defaultOpen asChild>
+          <div className="border-b border-border">
+            <Collapsible.Trigger className="flex w-full items-center justify-between px-4 py-2 text-xs font-semibold text-muted-foreground [&[data-state=closed]>svg]:-rotate-90">
+              <span>Session Complete</span>
+              <ChevronDown className="h-3 w-3 transition-transform duration-200" />
+            </Collapsible.Trigger>
+            <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+              <div className="px-4 pb-3">
+                {/* Totals */}
+                <div className="flex gap-4 text-xs text-muted-foreground">
+                  <span>{summary.tapesCompleted} tape{summary.tapesCompleted !== 1 ? 's' : ''}</span>
+                  <span>{summary.totalSongs} song{summary.totalSongs !== 1 ? 's' : ''}</span>
+                  <span>{summary.totalComments} comment{summary.totalComments !== 1 ? 's' : ''}</span>
+                </div>
+
+                {/* Most-commented songs */}
+                {summary.topSongs.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Most commented</p>
+                    {summary.topSongs.map((s) => (
+                      <div key={s.id} className="mt-1 flex items-center gap-2">
+                        {s.cover_art_url ? (
+                          <img src={s.cover_art_url} alt="" className="h-6 w-6 shrink-0 rounded object-cover" />
+                        ) : (
+                          <div className="h-6 w-6 shrink-0 rounded bg-secondary" />
+                        )}
+                        <span className="truncate text-xs font-medium text-foreground">{s.song_name}</span>
+                        <span className="shrink-0 text-[10px] text-muted-foreground">{summary.maxSongComments}</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+
+                {/* Most active commenters */}
+                {summary.topCommenters.length > 0 && (
+                  <div className="mt-2">
+                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Most active</p>
+                    {summary.topCommenters.map((m) => (
+                      <div key={m.id} className="mt-1 flex items-center gap-2">
+                        <span
+                          className="flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
+                          style={{ backgroundColor: m.avatarColor + '22', borderColor: m.avatarColor, borderWidth: 1 }}
+                        >
+                          {m.avatar}
+                        </span>
+                        <span className="text-xs font-medium text-foreground">{m.name}</span>
+                        <span className="text-[10px] text-muted-foreground">{summary.maxPlayerComments} comments</span>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </Collapsible.Content>
+          </div>
+        </Collapsible.Root>
+      )}
 
       {/* Crate centering — matches prototype: flex-1 flex items-center justify-center p-4 */}
       <div className="flex flex-1 items-center justify-center p-4">
