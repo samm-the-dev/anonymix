@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, ChevronDown, MoreVertical, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, ChevronDown, Crown, MoreVertical, Search, UserMinus, Users, X } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -43,6 +43,7 @@ export function SessionViewPage() {
   const [sessionName, setSessionName] = useState('');
   const [sessionEnded, setSessionEnded] = useState(false);
   const [isHost, setIsHost] = useState(false);
+  const [adminId, setAdminId] = useState<string | null>(null);
   const [tapes, setTapes] = useState<TapeData[]>([]);
   const [activeTapeIdx, setActiveTapeIdx] = useState(0);
   const [submissions, setSubmissions] = useState<SubmissionData[]>([]);
@@ -62,6 +63,7 @@ export function SessionViewPage() {
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
   const [showLockConfirm, setShowLockConfirm] = useState(false);
+  const [memberAction, setMemberAction] = useState<{ type: 'make_host' | 'remove'; member: { id: string; name: string } } | null>(null);
   const [showNotifPrompt, setShowNotifPrompt] = useState(false);
   const { permission, requestPermission, supported: notifSupported } = useNotificationPermission(player?.id);
   const { results, searching, search, clear } = useSongSearch();
@@ -86,6 +88,7 @@ export function SessionViewPage() {
       setSessionName(session.name);
       setSessionEnded(session.ended);
       setIsHost(session.admin_id === player?.id);
+      setAdminId(session.admin_id);
       document.title = `${session.name} | Anonymix`;
     }
 
@@ -640,24 +643,101 @@ export function SessionViewPage() {
                   >
                     {m.avatar}
                   </div>
-                  <span className="text-sm font-medium text-foreground">{m.name}</span>
+                  <div className="min-w-0 flex-1">
+                    <span className="text-sm font-medium text-foreground">{m.name}</span>
+                    {m.id === adminId && (
+                      <span className="ml-1.5 text-[10px] font-semibold uppercase tracking-wide text-amber-500">Host</span>
+                    )}
+                  </div>
+                  {isHost && m.id !== player?.id && !sessionEnded && (
+                    <DropdownMenu.Root>
+                      <DropdownMenu.Trigger asChild>
+                        <button className="rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-foreground">
+                          <MoreVertical className="h-4 w-4" />
+                        </button>
+                      </DropdownMenu.Trigger>
+                      <DropdownMenu.Portal>
+                        <DropdownMenu.Content align="end" sideOffset={4} className="z-[60] overflow-hidden rounded-lg border border-border bg-background shadow-lg">
+                          <DropdownMenu.Item
+                            className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                            onSelect={() => setMemberAction({ type: 'make_host', member: m })}
+                          >
+                            <Crown className="h-4 w-4" />
+                            Make host
+                          </DropdownMenu.Item>
+                          <DropdownMenu.Item
+                            className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-red-500 outline-none hover:bg-accent focus:bg-accent"
+                            onSelect={() => setMemberAction({ type: 'remove', member: m })}
+                          >
+                            <UserMinus className="h-4 w-4" />
+                            Remove
+                          </DropdownMenu.Item>
+                        </DropdownMenu.Content>
+                      </DropdownMenu.Portal>
+                    </DropdownMenu.Root>
+                  )}
                 </div>
               ))}
             </div>
-            <div className="px-4 pb-4">
-              <button
-                onClick={() => {
-                  navigator.clipboard?.writeText(`${window.location.origin}/join/${sessionId}`);
-                  setShowMembers(false);
-                }}
-                className="w-full rounded-xl border border-primary/20 py-2.5 text-sm font-medium text-primary hover:bg-primary/5"
-              >
-                Copy invite link
-              </button>
-            </div>
+            {!sessionEnded && (
+              <div className="px-4 pb-4">
+                <button
+                  onClick={() => {
+                    navigator.clipboard?.writeText(`${window.location.origin}/join/${sessionId}`);
+                    setShowMembers(false);
+                  }}
+                  className="w-full rounded-xl border border-primary/20 py-2.5 text-sm font-medium text-primary hover:bg-primary/5"
+                >
+                  Copy invite link
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
+
+      {/* Member action confirm dialog */}
+      <AlertDialog.Root open={!!memberAction} onOpenChange={(open) => { if (!open) setMemberAction(null); }}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+          <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-5">
+            <AlertDialog.Title className="font-display text-base font-semibold text-foreground">
+              {memberAction?.type === 'make_host' ? 'Transfer host role?' : 'Remove member?'}
+            </AlertDialog.Title>
+            <AlertDialog.Description className="mt-1 text-sm text-muted-foreground">
+              {memberAction?.type === 'make_host'
+                ? <><span className="font-medium text-foreground">{memberAction.member.name}</span> will become the host and you'll become a regular member.</>
+                : <><span className="font-medium text-foreground">{memberAction?.member.name}</span> will be removed from this session.</>}
+            </AlertDialog.Description>
+            <div className="mt-5 flex gap-2">
+              <AlertDialog.Cancel asChild>
+                <button className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  Cancel
+                </button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action asChild>
+                <button
+                  onClick={async () => {
+                    if (!memberAction || !sessionId) return;
+                    if (memberAction.type === 'make_host') {
+                      await supabase.from('sessions').update({ admin_id: memberAction.member.id }).eq('id', sessionId);
+                      setAdminId(memberAction.member.id);
+                      setIsHost(false);
+                    } else {
+                      await supabase.from('session_players').delete().eq('session_id', sessionId).eq('player_id', memberAction.member.id);
+                      setMembers((prev) => prev.filter((p) => p.id !== memberAction.member.id));
+                    }
+                    setMemberAction(null);
+                  }}
+                  className={`flex-1 rounded-xl py-2.5 text-sm font-semibold text-white ${memberAction?.type === 'remove' ? 'bg-red-500 hover:bg-red-600' : 'bg-primary hover:opacity-90'}`}
+                >
+                  {memberAction?.type === 'make_host' ? 'Transfer' : 'Remove'}
+                </button>
+              </AlertDialog.Action>
+            </div>
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
 
       {/* Lock confirm dialog */}
       <AlertDialog.Root open={showLockConfirm} onOpenChange={setShowLockConfirm}>
