@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
+import { PlaylistImport } from '@/components/PlaylistImport';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -195,6 +196,9 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
         <h2 className="font-display text-lg font-semibold leading-snug text-foreground">{tapeTitle}</h2>
         <p className="mt-0.5 text-sm text-muted-foreground">{tapePrompt}</p>
       </div>
+
+      {/* Playlist import */}
+      <PlaylistImport songs={submissions} />
 
       {/* Song accordion */}
       <div className="flex-1 border-t border-border px-4">
