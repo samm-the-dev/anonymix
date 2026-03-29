@@ -339,6 +339,16 @@ export function SessionViewPage() {
                             Complete
                           </DropdownMenu.Item>
                         )}
+                        {/* TODO: temporary — remove after testing */}
+                        <DropdownMenu.Item
+                          onSelect={async () => {
+                            await supabase.from('tapes').update({ status: 'skipped' }).eq('id', activeTape.id);
+                            await fetchData();
+                          }}
+                          className="flex cursor-pointer items-center gap-2 whitespace-nowrap px-3 py-2 text-sm text-red-400 outline-none hover:bg-accent focus:bg-accent"
+                        >
+                          Skip tape
+                        </DropdownMenu.Item>
                       </DropdownMenu.Content>
                     </DropdownMenu.Portal>
                   </DropdownMenu.Root>
