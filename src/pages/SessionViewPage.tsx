@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, useRef } from 'react';
+import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, MoreVertical, Search, Users, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
@@ -9,6 +9,7 @@ import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
 import type { TapeStatus } from '@/lib/types';
 import { computeExtendedDeadline } from '@/lib/extendDeadline';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 
 interface TapeData {
   id: string;
@@ -54,9 +55,7 @@ export function SessionViewPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
-  const [showHostMenu, setShowHostMenu] = useState(false);
   const [showLockConfirm, setShowLockConfirm] = useState(false);
-  const hostMenuRef = useRef<HTMLDivElement>(null);
   const { results, searching, search, clear } = useSongSearch();
 
   const activeTape = tapes[activeTapeIdx] ?? null;
@@ -142,16 +141,6 @@ export function SessionViewPage() {
     fetchData();
   }, [fetchData]);
 
-  // Close host menu on outside click
-  useEffect(() => {
-    if (!showHostMenu) return;
-    function handleClick(e: MouseEvent) {
-      if (hostMenuRef.current && !hostMenuRef.current.contains(e.target as Node)) setShowHostMenu(false);
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [showHostMenu]);
-
   // Auto-open action from query param
   useEffect(() => {
     if (loading) return;
@@ -175,9 +164,10 @@ export function SessionViewPage() {
 
   async function extendDeadline() {
     if (!activeTape) return;
-    await supabase.from('tapes').update({
+    const { error: err } = await supabase.from('tapes').update({
       deadline: computeExtendedDeadline(activeTape.deadline),
     }).eq('id', activeTape.id);
+    if (err) console.error('extendDeadline failed:', err);
     await fetchData();
   }
 
@@ -311,47 +301,43 @@ export function SessionViewPage() {
               <div className="flex items-center gap-1.5">
                 <StatusBadge status={activeTape.status} />
                 {isHost && (activeTape.status === 'submitting' || activeTape.status === 'playlist_ready') && (
-                  <div className="flex items-center" ref={hostMenuRef}>
-                    <button onClick={() => setShowHostMenu(!showHostMenu)} className="text-muted-foreground hover:text-foreground">
-                      <MoreVertical className="h-4 w-4" />
-                    </button>
-                    {showHostMenu && (
-                      <div className="relative">
-                        <div className="absolute right-0 z-10 mt-1 whitespace-nowrap rounded-lg border border-border bg-card py-1 shadow-lg">
-                          <div className="flex flex-col">
-                            <button
-                              onClick={() => { setShowHostMenu(false); extendDeadline(); }}
-                              className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent"
-                            >
-                              Wait another day
-                            </button>
-                            {activeTape.status === 'submitting' && tapeSubmissions.length >= 2 && (
-                              <button
-                                onClick={() => {
-                                  setShowHostMenu(false);
-                                  setShowLockConfirm(true);
-                                }}
-                                className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent"
-                              >
-                                Lock in submissions
-                              </button>
-                            )}
-                            {activeTape.status === 'playlist_ready' && tapeSubmissions.length >= 2 && (
-                              <button
-                                onClick={() => {
-                                  setShowHostMenu(false);
-                                  setShowLockConfirm(true);
-                                }}
-                                className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent"
-                              >
-                                Complete
-                              </button>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-                    )}
-                  </div>
+                  <DropdownMenu.Root>
+                    <DropdownMenu.Trigger asChild>
+                      <button className="text-muted-foreground hover:text-foreground">
+                        <MoreVertical className="h-4 w-4" />
+                      </button>
+                    </DropdownMenu.Trigger>
+                    <DropdownMenu.Portal>
+                      <DropdownMenu.Content
+                        align="end"
+                        sideOffset={4}
+                        className="z-50 overflow-hidden rounded-lg border border-border bg-background shadow-lg"
+                      >
+                        <DropdownMenu.Item
+                          onSelect={extendDeadline}
+                          className="cursor-pointer whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                        >
+                          Wait another day
+                        </DropdownMenu.Item>
+                        {activeTape.status === 'submitting' && tapeSubmissions.length >= 2 && (
+                          <DropdownMenu.Item
+                            onSelect={() => setShowLockConfirm(true)}
+                            className="cursor-pointer whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                          >
+                            Lock in submissions
+                          </DropdownMenu.Item>
+                        )}
+                        {activeTape.status === 'playlist_ready' && tapeSubmissions.length >= 2 && (
+                          <DropdownMenu.Item
+                            onSelect={() => setShowLockConfirm(true)}
+                            className="cursor-pointer whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                          >
+                            Complete
+                          </DropdownMenu.Item>
+                        )}
+                      </DropdownMenu.Content>
+                    </DropdownMenu.Portal>
+                  </DropdownMenu.Root>
                 )}
               </div>
             </div>
