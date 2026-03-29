@@ -40,6 +40,7 @@ describe('generateXspf', () => {
   it('handles track with empty artist', () => {
     const result = generateXspf(
       [{ song_name: 'Unknown', artist_name: '' }],
+      { title: 'Tape' },
     );
     expect(result).toContain('<title>Unknown</title>');
     expect(result).not.toContain('<creator>');
