@@ -149,7 +149,7 @@ export function ProfilePage() {
       {/* Sign Out */}
       <button
         onClick={signOut}
-        className={`${isInstallable ? 'mt-3' : 'mt-8'} flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent`
+        className={`${isInstallable ? 'mt-3' : 'mt-8'} flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent`}
       >
         <LogOut className="h-4 w-4" />
         Sign out
