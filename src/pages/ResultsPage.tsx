@@ -201,7 +201,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
       {/* Playlist import — collapsible */}
       {submissions.length > 0 && (
         <Collapsible.Root>
-          <Collapsible.Trigger className="flex w-full items-center justify-between border-b border-border px-4 py-2 text-xs font-medium text-muted-foreground [&[data-state=closed]>svg]:-rotate-90">
+          <Collapsible.Trigger className="flex w-full items-center justify-between border-t border-border px-4 py-2 text-xs font-medium text-muted-foreground [&[data-state=closed]>svg]:-rotate-90">
             <span>Import playlist</span>
             <ChevronDown className="h-3 w-3 transition-transform duration-200" />
           </Collapsible.Trigger>
