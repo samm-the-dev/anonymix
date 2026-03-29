@@ -149,6 +149,40 @@ export interface Database {
           },
         ];
       };
+      push_subscriptions: {
+        Row: {
+          id: string;
+          player_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          player_id: string;
+          endpoint: string;
+          p256dh: string;
+          auth: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          player_id?: string;
+          endpoint?: string;
+          p256dh?: string;
+          auth?: string;
+        };
+        Relationships: [
+          {
+            foreignKeyName: 'push_subscriptions_player_id_fkey';
+            columns: ['player_id'];
+            isOneToOne: false;
+            referencedRelation: 'players';
+            referencedColumns: ['id'];
+          },
+        ];
+      };
       submissions: {
         Row: {
           id: string;

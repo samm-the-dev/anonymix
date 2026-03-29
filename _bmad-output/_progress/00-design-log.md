@@ -1,11 +1,24 @@
 # Design Log — Anonymix
 
 ## Current Phase
-Phase 4: UX Design — **IN PROGRESS**
+Phase 8: Product Evolution — **ACTIVE**
 
 ## Current
 
 (empty)
+
+## Evolution Log
+
+| Improvement | Status | Date |
+|-------------|--------|------|
+| Layout consistency (three-tier shells) | complete | 2026-03-29 |
+
+### 2026-03-29 — Layout Consistency Complete
+
+**Target:** Unify app shell across all pages into three tiers.
+**Approach:** Extract shared AppBar, create TaskLayout (no bottom nav), restructure routes.
+**Result:** One AppBar component, two layout wrappers, zero duplicated headers.
+**Artifacts:** `evolution/scenarios/layout-consistency.md`, `evolution/specs/layout-consistency.md`
 
 ## Phase 4 Summary
 
