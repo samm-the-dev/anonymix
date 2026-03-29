@@ -1,6 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, MoreVertical, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, MoreVertical, Search, Users, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
@@ -316,23 +316,26 @@ export function SessionViewPage() {
                       >
                         <DropdownMenu.Item
                           onSelect={extendDeadline}
-                          className="cursor-pointer whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                          className="flex cursor-pointer items-center gap-2 whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
                         >
+                          <CalendarPlus className="h-4 w-4" />
                           Wait another day
                         </DropdownMenu.Item>
                         {activeTape.status === 'submitting' && tapeSubmissions.length >= 2 && (
                           <DropdownMenu.Item
                             onSelect={() => setShowLockConfirm(true)}
-                            className="cursor-pointer whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                            className="flex cursor-pointer items-center gap-2 whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
                           >
+                            <CassetteTape className="h-4 w-4" />
                             Lock in submissions
                           </DropdownMenu.Item>
                         )}
                         {activeTape.status === 'playlist_ready' && tapeSubmissions.length >= 2 && (
                           <DropdownMenu.Item
                             onSelect={() => setShowLockConfirm(true)}
-                            className="cursor-pointer whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
+                            className="flex cursor-pointer items-center gap-2 whitespace-nowrap px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
                           >
+                            <CheckCircle className="h-4 w-4" />
                             Complete
                           </DropdownMenu.Item>
                         )}

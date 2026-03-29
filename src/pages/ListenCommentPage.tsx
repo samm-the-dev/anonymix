@@ -2,27 +2,16 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Copy, ExternalLink, Smile } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
+import * as Popover from '@radix-ui/react-popover';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 
-
 function CommentField({ value, onChange, theme }: { value: string; onChange: (v: string) => void; theme: string }) {
-  const [showPicker, setShowPicker] = useState(false);
-  const ref = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
-  useEffect(() => {
-    if (!showPicker) return;
-    function handleClick(e: MouseEvent) {
-      if (ref.current && !ref.current.contains(e.target as Node)) setShowPicker(false);
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [showPicker]);
-
   return (
-    <div className="relative mt-3">
+    <div className="mt-3">
       <div className="flex rounded-lg border border-border bg-card focus-within:border-border/80">
         <textarea
           ref={textareaRef}
@@ -32,41 +21,44 @@ function CommentField({ value, onChange, theme }: { value: string; onChange: (v:
           rows={2}
           className="w-full resize-none rounded-lg bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
-        <button
-          type="button"
-          onClick={() => setShowPicker(!showPicker)}
-          className="shrink-0 self-end px-2 pb-2 text-muted-foreground hover:text-foreground"
-        >
-          <Smile className="h-4 w-4" />
-        </button>
+        <Popover.Root>
+          <Popover.Trigger asChild>
+            <button
+              type="button"
+              className="shrink-0 self-end px-2 pb-2 text-muted-foreground hover:text-foreground"
+            >
+              <Smile className="h-4 w-4" />
+            </button>
+          </Popover.Trigger>
+          <Popover.Portal>
+            <Popover.Content side="top" align="end" sideOffset={4} className="z-50">
+              <EmojiPicker
+                theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
+                height={350}
+                width={300}
+                skinTonesDisabled
+                searchDisabled={false}
+                onEmojiClick={(emojiData) => {
+                  const textarea = textareaRef.current;
+                  if (textarea) {
+                    const start = textarea.selectionStart;
+                    const end = textarea.selectionEnd;
+                    const newValue = value.slice(0, start) + emojiData.emoji + value.slice(end);
+                    onChange(newValue);
+                    requestAnimationFrame(() => {
+                      const pos = start + emojiData.emoji.length;
+                      textarea.setSelectionRange(pos, pos);
+                      textarea.focus();
+                    });
+                  } else {
+                    onChange(value + emojiData.emoji);
+                  }
+                }}
+              />
+            </Popover.Content>
+          </Popover.Portal>
+        </Popover.Root>
       </div>
-      {showPicker && (
-        <div ref={ref} className="absolute right-0 bottom-full z-50 mb-1">
-          <EmojiPicker
-            theme={theme === 'dark' ? Theme.DARK : Theme.LIGHT}
-            height={350}
-            width={300}
-            skinTonesDisabled
-            searchDisabled={false}
-            onEmojiClick={(emojiData) => {
-              const textarea = textareaRef.current;
-              if (textarea) {
-                const start = textarea.selectionStart;
-                const end = textarea.selectionEnd;
-                const newValue = value.slice(0, start) + emojiData.emoji + value.slice(end);
-                onChange(newValue);
-                requestAnimationFrame(() => {
-                  const pos = start + emojiData.emoji.length;
-                  textarea.setSelectionRange(pos, pos);
-                  textarea.focus();
-                });
-              } else {
-                onChange(value + emojiData.emoji);
-              }
-            }}
-          />
-        </div>
-      )}
     </div>
   );
 }
