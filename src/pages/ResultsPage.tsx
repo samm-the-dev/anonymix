@@ -128,7 +128,7 @@ function AccordionItem({
   );
 }
 
-export function RevealPage() {
+export function ResultsPage() {
   const { sessionId, tapeId } = useParams<{ sessionId: string; tapeId: string }>();
   const { player } = useAuthContext();
 

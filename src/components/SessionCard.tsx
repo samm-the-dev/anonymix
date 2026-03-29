@@ -177,9 +177,9 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
             if (status === 'submitting') {
               navigate(`${base}?action=submit`);
             } else if (status === 'playlist_ready' && activeTape) {
-              navigate(`${base}/tape/${activeTape.id}/comment`);
+              navigate(`${base}/tape/${activeTape.id}`);
             } else if (status === 'results' && activeTape) {
-              navigate(`${base}/tape/${activeTape.id}/comments`);
+              navigate(`${base}/tape/${activeTape.id}`);
             } else {
               navigate(base);
             }

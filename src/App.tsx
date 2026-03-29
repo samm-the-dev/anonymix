@@ -11,8 +11,7 @@ import { ProfilePage } from '@/pages/ProfilePage';
 import { PrivacyPage } from '@/pages/PrivacyPage';
 import { ProfileSetupPage } from '@/pages/ProfileSetupPage';
 import { TermsPage } from '@/pages/TermsPage';
-import { ListenCommentPage } from '@/pages/ListenCommentPage';
-import { RevealPage } from '@/pages/RevealPage';
+import { TapePage } from '@/pages/TapePage';
 
 const PENDING_PATH_KEY = 'anonymix-pending-path';
 
@@ -58,8 +57,7 @@ function AppRoutes() {
       <Route element={<Layout />}>
         <Route index element={<SessionHomePage />} />
         <Route path="session/:sessionId" element={<SessionViewPage />} />
-        <Route path="session/:sessionId/tape/:tapeId/comment" element={<ListenCommentPage />} />
-        <Route path="session/:sessionId/tape/:tapeId/comments" element={<RevealPage />} />
+        <Route path="session/:sessionId/tape/:tapeId" element={<TapePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

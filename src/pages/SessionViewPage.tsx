@@ -351,7 +351,7 @@ export function SessionViewPage() {
               <div className="mt-2">
                 <SubmissionProgress submitted={commentersCount} total={members.length || 1} colorClass="bg-amber-500" textColorClass="text-amber-600 dark:text-amber-400" />
                 <button
-                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}/comment`)}
+                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}`)}
                   className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
                 >
                   Listen &amp; Comment
@@ -360,7 +360,7 @@ export function SessionViewPage() {
                   <button
                     onClick={async () => {
                       await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
-                      navigate(`/session/${sessionId}/tape/${activeTape.id}/comments`);
+                      navigate(`/session/${sessionId}/tape/${activeTape.id}`);
                     }}
                     className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
                   >
@@ -373,7 +373,7 @@ export function SessionViewPage() {
             {activeTape.status === 'results' && (
               <div className="mt-2">
                 <button
-                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}/comments`)}
+                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}`)}
                   className="w-full rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500"
                 >
                   View Comments
