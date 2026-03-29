@@ -9,6 +9,7 @@ import { StatusBadge } from '@/components/StatusBadge';
 import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
 import type { TapeStatus } from '@/lib/types';
+import { Spinner } from '@/components/Spinner';
 import { computeExtendedDeadline } from '@/lib/extendDeadline';
 import { useNotificationPermission } from '@/hooks/useNotificationPermission';
 import { NotificationPrompt } from '@/components/NotificationPrompt';
@@ -330,9 +331,7 @@ export function SessionViewPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
+      <Spinner />
     );
   }
 

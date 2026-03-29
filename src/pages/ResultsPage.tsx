@@ -1,6 +1,7 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
+import { Spinner } from '@/components/Spinner';
 import { PlaylistImport } from '@/components/PlaylistImport';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -175,9 +176,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
+      <Spinner />
     );
   }
 

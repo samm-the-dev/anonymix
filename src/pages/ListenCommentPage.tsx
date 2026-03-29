@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { Spinner } from '@/components/Spinner';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { PlaylistImport } from '@/components/PlaylistImport';
 
@@ -170,9 +171,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
+      <Spinner />
     );
   }
 

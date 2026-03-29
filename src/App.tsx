@@ -3,6 +3,7 @@ import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { TaskLayout } from '@/components/TaskLayout';
+import { Spinner } from '@/components/Spinner';
 import { SessionHomePage } from '@/pages/SessionHomePage';
 import { SessionViewPage } from '@/pages/SessionViewPage';
 import { CreateSessionPage } from '@/pages/CreateSessionPage';
@@ -41,9 +42,7 @@ function AppRoutes() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
+      <Spinner />
     );
   }
 
