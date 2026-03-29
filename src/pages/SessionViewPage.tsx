@@ -29,11 +29,12 @@ interface SubmissionData {
 }
 
 export function SessionViewPage() {
-  const { sessionId } = useParams<{ sessionId: string }>();
+  const { sessionSlug } = useParams<{ sessionSlug: string }>();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { player } = useAuthContext();
 
+  const [sessionId, setSessionId] = useState<string | null>(null);
   const [sessionName, setSessionName] = useState('');
   const [isHost, setIsHost] = useState(false);
   const [tapes, setTapes] = useState<TapeData[]>([]);
@@ -58,13 +59,18 @@ export function SessionViewPage() {
   const activeTape = tapes[activeTapeIdx] ?? null;
 
   const fetchData = useCallback(async () => {
-    if (!sessionId || !player) return;
+    if (!sessionSlug || !player) return;
 
+    // Resolve slug → session
     const { data: session } = await supabase
       .from('sessions')
-      .select('name, admin_id')
-      .eq('id', sessionId)
+      .select('id, name, admin_id, slug')
+      .eq('slug', sessionSlug)
       .single();
+
+    if (!session) return;
+    const sessionId = session.id;
+    setSessionId(sessionId);
 
     if (session) {
       setSessionName(session.name);
@@ -127,7 +133,7 @@ export function SessionViewPage() {
     }
 
     setLoading(false);
-  }, [sessionId, player]);
+  }, [sessionSlug, player]);
 
   useEffect(() => {
     fetchData();
@@ -351,7 +357,7 @@ export function SessionViewPage() {
               <div className="mt-2">
                 <SubmissionProgress submitted={commentersCount} total={members.length || 1} colorClass="bg-amber-500" textColorClass="text-amber-600 dark:text-amber-400" />
                 <button
-                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}`)}
+                  onClick={() => navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`)}
                   className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
                 >
                   Listen &amp; Comment
@@ -360,7 +366,7 @@ export function SessionViewPage() {
                   <button
                     onClick={async () => {
                       await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
-                      navigate(`/session/${sessionId}/tape/${activeTape.id}`);
+                      navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
                     }}
                     className="mt-2 w-full rounded-xl border border-border py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
                   >
@@ -373,7 +379,7 @@ export function SessionViewPage() {
             {activeTape.status === 'results' && (
               <div className="mt-2">
                 <button
-                  onClick={() => navigate(`/session/${sessionId}/tape/${activeTape.id}`)}
+                  onClick={() => navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`)}
                   className="w-full rounded-xl bg-purple-500 py-2.5 text-sm font-semibold text-white hover:bg-purple-600 dark:bg-purple-600 dark:hover:bg-purple-500"
                 >
                   View Comments

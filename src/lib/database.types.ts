@@ -42,6 +42,7 @@ export interface Database {
           name: string;
           description: string;
           admin_id: string;
+          slug: string;
           ended: boolean;
           created_at: string;
         };
@@ -50,6 +51,7 @@ export interface Database {
           name: string;
           description: string;
           admin_id: string;
+          slug: string;
           ended?: boolean;
           created_at?: string;
         };
@@ -57,6 +59,7 @@ export interface Database {
           id?: string;
           name?: string;
           description?: string;
+          slug?: string;
           admin_id?: string;
           ended?: boolean;
         };

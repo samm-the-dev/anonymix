@@ -26,8 +26,10 @@ export interface SessionWithTape {
   name: string;
   description: string;
   adminId: string;
+  slug: string;
   ended: boolean;
   activeTape: Tape | null;
+  activeTapeIndex: number;
   userActionDone: boolean;
   players: Player[];
 }

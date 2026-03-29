@@ -56,8 +56,8 @@ function AppRoutes() {
       <Route path="join/:sessionId" element={<JoinSessionPage />} />
       <Route element={<Layout />}>
         <Route index element={<SessionHomePage />} />
-        <Route path="session/:sessionId" element={<SessionViewPage />} />
-        <Route path="session/:sessionId/tape/:tapeId" element={<TapePage />} />
+        <Route path=":sessionSlug" element={<SessionViewPage />} />
+        <Route path=":sessionSlug/tape/:tapeIndex" element={<TapePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

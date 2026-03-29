@@ -6,6 +6,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useTheme } from '@/hooks/useTheme';
 import { pickAndImportBlueprint, type SessionBlueprint } from '@/lib/sessionBlueprint';
+import { sessionSlug } from '@/lib/slugify';
 
 interface TapeDraft {
   name: string;
@@ -76,6 +77,7 @@ export function CreateSessionPage() {
 
   // Celebration
   const [createdSessionId, setCreatedSessionId] = useState<string | null>(null);
+  const [createdSlug, setCreatedSlug] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState(false);
@@ -142,13 +144,18 @@ export function CreateSessionPage() {
     try {
       const filledTapes = tapes.filter((t) => t.name.trim().length > 0);
 
-      // Create session
+      // Create session (generate ID client-side for slug)
+      const sessionId = crypto.randomUUID();
+      const slug = sessionSlug(sessionName.trim(), sessionId);
+
       const { data: session, error: sessErr } = await supabase
         .from('sessions')
         .insert({
+          id: sessionId,
           name: sessionName.trim(),
           description: sessionDesc.trim(),
           admin_id: player.id,
+          slug,
         })
         .select()
         .single();
@@ -175,6 +182,7 @@ export function CreateSessionPage() {
       }
 
       setCreatedSessionId(session.id);
+      setCreatedSlug(slug);
       setStep('celebration');
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
@@ -495,7 +503,7 @@ export function CreateSessionPage() {
           </button>
 
           <button
-            onClick={() => navigate(`/session/${createdSessionId}`)}
+            onClick={() => navigate(`/${createdSlug}`)}
             className="mt-2 w-full rounded-xl border border-border py-2.5 text-sm font-medium text-muted-foreground hover:bg-accent"
           >
             Go to session

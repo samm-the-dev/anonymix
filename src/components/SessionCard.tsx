@@ -44,7 +44,7 @@ interface SessionCardProps {
 
 export function SessionCard({ session, onDelete }: SessionCardProps) {
   const navigate = useNavigate();
-  const { activeTape, userActionDone, players } = session;
+  const { activeTape, activeTapeIndex, userActionDone, players } = session;
   const status = activeTape?.status ?? 'results';
   const deadline = formatDeadline(
     status,
@@ -156,7 +156,7 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
       <div className="flex items-center justify-between gap-1.5 pt-3">
         {/* View Button */}
         <button
-          onClick={() => navigate(`/session/${session.id}`)}
+          onClick={() => navigate(`/${session.slug}`)}
           className="shrink-0 rounded-full border border-border px-3 py-1.5 text-xs font-medium text-muted-foreground hover:bg-accent"
         >
           View
@@ -173,13 +173,11 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
         {/* Action Button */}
         <button
           onClick={() => {
-            const base = `/session/${session.id}`;
+            const base = `/${session.slug}`;
             if (status === 'submitting') {
               navigate(`${base}?action=submit`);
-            } else if (status === 'playlist_ready' && activeTape) {
-              navigate(`${base}/tape/${activeTape.id}`);
-            } else if (status === 'results' && activeTape) {
-              navigate(`${base}/tape/${activeTape.id}`);
+            } else if ((status === 'playlist_ready' || status === 'results') && activeTape) {
+              navigate(`${base}/tape/${activeTapeIndex + 1}`);
             } else {
               navigate(base);
             }

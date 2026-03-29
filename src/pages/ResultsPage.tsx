@@ -1,5 +1,4 @@
 import { useEffect, useState, useCallback } from 'react';
-import { useParams } from 'react-router-dom';
 import { ChevronDown } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
@@ -128,8 +127,7 @@ function AccordionItem({
   );
 }
 
-export function ResultsPage() {
-  const { sessionId, tapeId } = useParams<{ sessionId: string; tapeId: string }>();
+export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: string }) {
   const { player } = useAuthContext();
 
   const [sessionName, setSessionName] = useState('');

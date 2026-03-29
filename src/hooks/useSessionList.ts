@@ -14,11 +14,13 @@ interface UseSessionListResult {
  * Pick the "active" tape for a session:
  * first actionable (submitting/playlist_ready), else most recent.
  */
-function pickActiveTape(tapes: Tape[]): Tape | null {
-  const actionable = tapes.find(
+function pickActiveTape(tapes: Tape[]): { tape: Tape | null; index: number } {
+  const idx = tapes.findIndex(
     (t) => t.status === 'submitting' || t.status === 'playlist_ready',
   );
-  return actionable ?? tapes[tapes.length - 1] ?? null;
+  if (idx >= 0) return { tape: tapes[idx], index: idx };
+  const last = tapes.length - 1;
+  return { tape: tapes[last] ?? null, index: Math.max(last, 0) };
 }
 
 export function useSessionList(): UseSessionListResult {
@@ -120,7 +122,7 @@ export function useSessionList(): UseSessionListResult {
             completedAt: t.completed_at ? new Date(t.completed_at).getTime() : undefined,
           }));
 
-        const activeTape = pickActiveTape(tapes);
+        const { tape: activeTape, index: activeTapeIndex } = pickActiveTape(tapes);
 
         // User action state
         let userActionDone = false;
@@ -135,8 +137,10 @@ export function useSessionList(): UseSessionListResult {
           name: session.name,
           description: session.description,
           adminId: session.admin_id,
+          slug: session.slug,
           ended: session.ended,
           activeTape,
+          activeTapeIndex,
           userActionDone,
           players,
         };

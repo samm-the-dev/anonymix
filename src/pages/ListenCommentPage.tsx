@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { Copy, ExternalLink, Smile } from 'lucide-react';
 import EmojiPicker, { Theme } from 'emoji-picker-react';
 import { supabase } from '@/lib/supabase';
@@ -79,8 +79,7 @@ interface SubmissionRow {
   cover_art_url: string | null;
 }
 
-export function ListenCommentPage() {
-  const { sessionId, tapeId } = useParams<{ sessionId: string; tapeId: string }>();
+export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; tapeId: string }) {
   const navigate = useNavigate();
   const { player } = useAuthContext();
   const { theme } = useTheme();
@@ -208,7 +207,7 @@ export function ListenCommentPage() {
 
     setShowToast(true);
     setTimeout(() => {
-      navigate(`/session/${sessionId}`);
+      navigate(-1);
     }, 1200);
   }
 

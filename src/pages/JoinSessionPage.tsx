@@ -21,6 +21,7 @@ export function JoinSessionPage() {
   const { theme, toggleTheme } = useTheme();
 
   const [invite, setInvite] = useState<InviteData | null>(null);
+  const [sessionSlug, setSessionSlug] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
   const [joining, setJoining] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -32,7 +33,7 @@ export function JoinSessionPage() {
     async function fetchInvite(sid: string) {
       const { data: session } = await supabase
         .from('sessions')
-        .select('name, description, admin_id, players:session_players(player_id, players(name, avatar, avatar_color))')
+        .select('name, description, admin_id, slug, players:session_players(player_id, players(name, avatar, avatar_color))')
         .eq('id', sid)
         .single();
 
@@ -56,6 +57,7 @@ export function JoinSessionPage() {
 
       const members = (session.players as unknown as { player_id: string; players: { name: string; avatar: string; avatar_color: string } | null }[]) ?? [];
 
+      setSessionSlug(session.slug);
       setInvite({
         sessionName: session.name,
         description: session.description,
@@ -80,7 +82,7 @@ export function JoinSessionPage() {
           .single();
 
         if (alreadyMember) {
-          navigate(`/session/${sid}`, { replace: true });
+          navigate(`/${session.slug}`, { replace: true });
           return;
         }
 
@@ -114,7 +116,7 @@ export function JoinSessionPage() {
 
       if (existing) {
         // Already a member, just navigate
-        navigate(`/session/${sessionId}`, { replace: true });
+        navigate(`/${sessionSlug}`, { replace: true });
         return;
       }
 
@@ -125,7 +127,7 @@ export function JoinSessionPage() {
 
       if (joinErr) throw joinErr;
 
-      navigate(`/session/${sessionId}`, { replace: true });
+      navigate(`/${sessionSlug}`, { replace: true });
     } catch (err) {
       setError(err instanceof Error ? err.message : String(err));
       setJoining(false);
