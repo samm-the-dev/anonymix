@@ -1,6 +1,8 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Download, Link, MoreVertical, Trash2 } from 'lucide-react';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 import { cva } from 'class-variance-authority';
 import { cn } from '@/lib/utils';
 import { StatusBadge } from './StatusBadge';
@@ -57,21 +59,9 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
     activeTape?.deadline,
     activeTape?.completedAt,
   );
-  const [menuOpen, setMenuOpen] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const menuRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (!menuOpen) return;
-    function handleClick(e: MouseEvent) {
-      if (menuRef.current && !menuRef.current.contains(e.target as Node)) setMenuOpen(false);
-    }
-    document.addEventListener('mousedown', handleClick);
-    return () => document.removeEventListener('mousedown', handleClick);
-  }, [menuOpen]);
 
   async function handleExport() {
-    setMenuOpen(false);
     const { data: tapes } = await supabase
       .from('tapes')
       .select('title, prompt')
@@ -95,15 +85,20 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
         <h3 className="font-display text-base font-semibold text-card-foreground">
           {session.name}
         </h3>
-        <div className="relative" ref={menuRef}>
-          <button onClick={() => setMenuOpen(!menuOpen)}>
-            <MoreVertical className="h-5 w-5 shrink-0 text-muted-foreground" />
-          </button>
-          {menuOpen && (
-            <div className="absolute right-0 z-10 mt-1 w-40 rounded-lg border border-border bg-card py-1 shadow-lg">
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
+        <DropdownMenu.Root>
+          <DropdownMenu.Trigger asChild>
+            <button>
+              <MoreVertical className="h-5 w-5 shrink-0 text-muted-foreground" />
+            </button>
+          </DropdownMenu.Trigger>
+          <DropdownMenu.Portal>
+            <DropdownMenu.Content
+              align="end"
+              sideOffset={4}
+              className="z-50 overflow-hidden rounded-lg border border-border bg-background shadow-lg"
+            >
+              <DropdownMenu.Item
+                onSelect={() => {
                   const link = `${window.location.origin}/join/${session.id}`;
                   if (navigator.share) {
                     navigator.share({ title: `Join ${session.name} on Anonymix`, url: link });
@@ -111,31 +106,28 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
                     navigator.clipboard?.writeText(link);
                   }
                 }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent"
+                className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
               >
                 <Link className="h-4 w-4" />
                 Invite
-              </button>
-              <button
-                onClick={handleExport}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-foreground hover:bg-accent"
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onSelect={handleExport}
+                className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-foreground outline-none hover:bg-accent focus:bg-accent"
               >
                 <Download className="h-4 w-4" />
                 Export
-              </button>
-              <button
-                onClick={() => {
-                  setMenuOpen(false);
-                  setConfirmDelete(true);
-                }}
-                className="flex w-full items-center gap-2 px-3 py-2 text-sm text-red-500 hover:bg-accent"
+              </DropdownMenu.Item>
+              <DropdownMenu.Item
+                onSelect={() => setConfirmDelete(true)}
+                className="flex cursor-pointer items-center gap-2 px-3 py-2 text-sm text-red-500 outline-none hover:bg-accent focus:bg-accent"
               >
                 <Trash2 className="h-4 w-4" />
                 Delete
-              </button>
-            </div>
-          )}
-        </div>
+              </DropdownMenu.Item>
+            </DropdownMenu.Content>
+          </DropdownMenu.Portal>
+        </DropdownMenu.Root>
       </div>
 
       {/* Description */}
@@ -197,37 +189,38 @@ export function SessionCard({ session, onDelete }: SessionCardProps) {
       </div>
 
       {/* Delete confirm dialog */}
-      {confirmDelete && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-card p-5">
-            <h3 className="font-display text-base font-semibold text-foreground">
+      <AlertDialog.Root open={confirmDelete} onOpenChange={setConfirmDelete}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+          <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-5">
+            <AlertDialog.Title className="font-display text-base font-semibold text-foreground">
               Delete session?
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
+            </AlertDialog.Title>
+            <AlertDialog.Description className="mt-1 text-sm text-muted-foreground">
               <span className="font-medium text-foreground">{session.name}</span> and all its tapes,
               submissions, and comments will be permanently deleted.
-            </p>
+            </AlertDialog.Description>
             <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setConfirmDelete(false)}
-                className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={async () => {
-                  await supabase.from('sessions').delete().eq('id', session.id);
-                  setConfirmDelete(false);
-                  onDelete?.();
-                }}
-                className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600"
-              >
-                Delete
-              </button>
+              <AlertDialog.Cancel asChild>
+                <button className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  Cancel
+                </button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action asChild>
+                <button
+                  onClick={async () => {
+                    await supabase.from('sessions').delete().eq('id', session.id);
+                    onDelete?.();
+                  }}
+                  className="flex-1 rounded-xl bg-red-500 py-2.5 text-sm font-semibold text-white hover:bg-red-600"
+                >
+                  Delete
+                </button>
+              </AlertDialog.Action>
             </div>
-          </div>
-        </div>
-      )}
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
     </div>
   );
 }

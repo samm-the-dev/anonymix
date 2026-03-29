@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
+import * as Accordion from '@radix-ui/react-accordion';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -27,7 +28,7 @@ interface PlayerInfo {
 
 import { seededShuffle } from '@/lib/seededShuffle';
 
-function AccordionItem({
+function SongAccordionItem({
   submission,
   player,
   comments,
@@ -38,14 +39,9 @@ function AccordionItem({
   comments: CommentRow[];
   players: Map<string, PlayerInfo>;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div className="border-b border-border/50 last:border-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className={`flex w-full items-center gap-3 pt-3 text-left transition-[padding-bottom] duration-250 ease-out ${open ? 'pb-0' : 'pb-3'}`}
-      >
+    <Accordion.Item value={submission.id} className="border-b border-border/50 last:border-0">
+      <Accordion.Trigger className="flex w-full items-center gap-3 py-3 text-left [&[data-state=open]>svg]:rotate-180">
         {submission.cover_art_url ? (
           <img src={submission.cover_art_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
         ) : (
@@ -55,16 +51,11 @@ function AccordionItem({
           <p className="text-sm font-semibold text-foreground">{submission.song_name}</p>
           {submission.artist_name && <p className="text-xs text-muted-foreground">{submission.artist_name}</p>}
         </div>
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
+        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
+      </Accordion.Trigger>
 
-      <div
-        className={`grid transition-[grid-template-rows] duration-250 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
-      >
-        <div className="min-h-0" style={{ clipPath: 'inset(0 0 0 0)' }}>
-        <div className="pb-0.5 pl-[60px]">
+      <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
+        <div className="pb-3 pl-[60px]">
           {/* Submitter reveal */}
           <div className="mb-3">
             <span className="text-xs text-muted-foreground">Submitted by</span>
@@ -108,9 +99,8 @@ function AccordionItem({
             <p className="text-xs text-muted-foreground/60">No comments</p>
           )}
         </div>
-        </div>
-      </div>
-    </div>
+      </Accordion.Content>
+    </Accordion.Item>
   );
 }
 
@@ -200,15 +190,17 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
         {submissions.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">No songs submitted</p>
         ) : (
-          submissions.map((s) => (
-            <AccordionItem
-              key={s.id}
-              submission={s}
-              player={players.get(s.player_id)}
-              comments={comments.filter((c) => c.submission_id === s.id)}
-              players={players}
-            />
-          ))
+          <Accordion.Root type="multiple">
+            {submissions.map((s) => (
+              <SongAccordionItem
+                key={s.id}
+                submission={s}
+                player={players.get(s.player_id)}
+                comments={comments.filter((c) => c.submission_id === s.id)}
+                players={players}
+              />
+            ))}
+          </Accordion.Root>
         )}
 
         {/* The Tape comments */}

@@ -10,6 +10,7 @@ import { cn } from '@/lib/utils';
 import type { TapeStatus } from '@/lib/types';
 import { computeExtendedDeadline } from '@/lib/extendDeadline';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
+import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 interface TapeData {
   id: string;
@@ -518,34 +519,36 @@ export function SessionViewPage() {
       )}
 
       {/* Lock confirm dialog */}
-      {showLockConfirm && activeTape && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
-          <div className="w-full max-w-sm rounded-xl border border-border bg-card p-5">
-            <h3 className="font-display text-base font-semibold text-foreground">
-              {activeTape.status === 'submitting' ? 'Lock in submissions?' : 'Complete this tape?'}
-            </h3>
-            <p className="mt-1 text-sm text-muted-foreground">
-              {activeTape.status === 'submitting'
+      <AlertDialog.Root open={showLockConfirm} onOpenChange={setShowLockConfirm}>
+        <AlertDialog.Portal>
+          <AlertDialog.Overlay className="fixed inset-0 z-50 bg-black/50" />
+          <AlertDialog.Content className="fixed left-1/2 top-1/2 z-50 w-full max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-xl border border-border bg-card p-5">
+            <AlertDialog.Title className="font-display text-base font-semibold text-foreground">
+              {activeTape?.status === 'submitting' ? 'Lock in submissions?' : 'Complete this tape?'}
+            </AlertDialog.Title>
+            <AlertDialog.Description className="mt-1 text-sm text-muted-foreground">
+              {activeTape?.status === 'submitting'
                 ? 'This will close submissions and move to the listening phase. Players who haven\'t submitted will miss this round.'
                 : 'This will end the listening phase and reveal who submitted each song.'}
-            </p>
+            </AlertDialog.Description>
             <div className="mt-5 flex gap-2">
-              <button
-                onClick={() => setShowLockConfirm(false)}
-                className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={() => { setShowLockConfirm(false); advanceTape(); }}
-                className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
-              >
-                Confirm
-              </button>
+              <AlertDialog.Cancel asChild>
+                <button className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent">
+                  Cancel
+                </button>
+              </AlertDialog.Cancel>
+              <AlertDialog.Action asChild>
+                <button
+                  onClick={advanceTape}
+                  className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+                >
+                  Confirm
+                </button>
+              </AlertDialog.Action>
             </div>
-          </div>
-        </div>
-      )}
+          </AlertDialog.Content>
+        </AlertDialog.Portal>
+      </AlertDialog.Root>
 
       {/* Song search overlay */}
       {showSearch && (

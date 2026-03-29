@@ -1,7 +1,6 @@
-import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ChevronDown, Plus } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import * as Collapsible from '@radix-ui/react-collapsible';
 import { SessionCard } from '@/components/SessionCard';
 import { useSessionList } from '@/hooks/useSessionList';
 
@@ -13,32 +12,19 @@ interface CollapsibleSectionProps {
 }
 
 function CollapsibleSection({ title, count, defaultExpanded, children }: CollapsibleSectionProps) {
-  const [expanded, setExpanded] = useState(defaultExpanded);
-
   return (
-    <section>
-      <button
-        onClick={() => setExpanded(!expanded)}
-        className="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-muted-foreground"
-      >
-        <ChevronDown
-          className={cn(
-            'h-4 w-4 text-muted-foreground transition-transform duration-200',
-            !expanded && '-rotate-90',
-          )}
-        />
-        <span>{title}</span>
-        <span className="font-normal text-muted-foreground">({count})</span>
-      </button>
-      <div
-        className={cn(
-          'grid transition-[grid-template-rows] duration-200',
-          expanded ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]',
-        )}
-      >
-        <div className="overflow-hidden">{children}</div>
-      </div>
-    </section>
+    <Collapsible.Root defaultOpen={defaultExpanded} asChild>
+      <section>
+        <Collapsible.Trigger className="flex w-full items-center gap-2 px-4 py-3 text-sm font-semibold text-muted-foreground [&[data-state=closed]>svg]:-rotate-90">
+          <ChevronDown className="h-4 w-4 text-muted-foreground transition-transform duration-200" />
+          <span>{title}</span>
+          <span className="font-normal text-muted-foreground">({count})</span>
+        </Collapsible.Trigger>
+        <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+          {children}
+        </Collapsible.Content>
+      </section>
+    </Collapsible.Root>
   );
 }
 
@@ -81,25 +67,23 @@ export function SessionHomePage() {
         )}
       </CollapsibleSection>
 
-      <div>
-        <CollapsibleSection
-          title="Completed"
-          count={completedSessions.length}
-          defaultExpanded={false}
-        >
-          {completedSessions.length > 0 ? (
-            <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 px-4">
-              {completedSessions.map((session) => (
-                <SessionCard key={session.id} session={session} onDelete={refetch} />
-              ))}
-            </div>
-          ) : (
-            <div className="px-4 py-8 text-center text-sm text-muted-foreground">
-              No completed sessions
-            </div>
-          )}
-        </CollapsibleSection>
-      </div>
+      <CollapsibleSection
+        title="Completed"
+        count={completedSessions.length}
+        defaultExpanded={false}
+      >
+        {completedSessions.length > 0 ? (
+          <div className="grid grid-cols-[repeat(auto-fill,minmax(300px,1fr))] gap-4 px-4">
+            {completedSessions.map((session) => (
+              <SessionCard key={session.id} session={session} onDelete={refetch} />
+            ))}
+          </div>
+        ) : (
+          <div className="px-4 py-8 text-center text-sm text-muted-foreground">
+            No completed sessions
+          </div>
+        )}
+      </CollapsibleSection>
 
       {/* New Session */}
       <div className="px-4 py-4">
