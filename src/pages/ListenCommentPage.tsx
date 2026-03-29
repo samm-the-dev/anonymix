@@ -56,7 +56,6 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
   const [tapeTitle, setTapeTitle] = useState('');
   const [tapePrompt, setTapePrompt] = useState('');
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
-  const [mySubmission, setMySubmission] = useState<SubmissionRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -92,9 +91,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
       document.title = `${tapeRes.data.title} | Anonymix`;
     }
 
-    const allSubs = subsRes.data ?? [];
-    setMySubmission(allSubs.find((s) => s.player_id === player.id) ?? null);
-    setSubmissions(allSubs);
+    setSubmissions(subsRes.data ?? []);
 
     // Map existing comments
     const existing: Record<string, string> = {};

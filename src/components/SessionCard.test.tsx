@@ -18,6 +18,8 @@ function makeSession(overrides: Partial<SessionWithTape> = {}): SessionWithTape 
     name: 'Test Session',
     description: 'A test session',
     adminId: 'p1',
+    slug: 'test-session-s1',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't1',

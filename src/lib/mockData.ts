@@ -18,6 +18,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Friday Night Vinyl',
     description: 'Weekly picks with the crew',
     adminId: 'p1',
+    slug: 'mock-session-p1',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't1',
@@ -35,6 +37,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Friday Night Vinyl (submitted)',
     description: 'Weekly picks with the crew',
     adminId: 'p1',
+    slug: 'mock-session-p1',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't1b',
@@ -52,6 +56,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Road Trip Jams',
     description: 'Songs for the open road',
     adminId: 'p3',
+    slug: 'mock-session-p3',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't2',
@@ -69,6 +75,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Road Trip Jams (commented)',
     description: 'Songs for the open road',
     adminId: 'p3',
+    slug: 'mock-session-p3',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't2b',
@@ -86,6 +94,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Deep Cuts Club',
     description: 'No singles allowed',
     adminId: 'p5',
+    slug: 'mock-session-p5',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't3',
@@ -102,6 +112,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Throwback Thursday',
     description: 'Nostalgia only',
     adminId: 'p2',
+    slug: 'mock-session-p2',
+    activeTapeIndex: 0,
     ended: false,
     activeTape: {
       id: 't4',
@@ -119,6 +131,8 @@ export const MOCK_SESSIONS: SessionWithTape[] = [
     name: 'Summer 2025 Mix',
     description: 'The soundtrack to last summer',
     adminId: 'p1',
+    slug: 'mock-session-ended',
+    activeTapeIndex: 0,
     ended: true,
     activeTape: {
       id: 't5',
