@@ -16,6 +16,7 @@ DECLARE
   v_slug text;
   v_url text;
   v_supabase_url text;
+  v_push_secret text;
 BEGIN
   -- Only fire on specific status transitions
   IF NEW.status = OLD.status THEN
@@ -54,8 +55,13 @@ BEGIN
   -- Get Supabase URL from config (set via vault or hardcode project URL)
   v_supabase_url := current_setting('app.settings.supabase_url', true);
   IF v_supabase_url IS NULL OR v_supabase_url = '' THEN
+    -- Fallback: Anonymix Supabase project URL
     v_supabase_url := 'https://mryuusvhdadbjpupzpol.supabase.co';
   END IF;
+
+  -- Shared secret for authenticating trigger-originated requests to the Edge Function.
+  -- Must be set via: ALTER DATABASE postgres SET app.settings.send_push_secret = '<secret>';
+  v_push_secret := current_setting('app.settings.send_push_secret', true);
 
   -- Call send-push Edge Function via pg_net
   PERFORM extensions.http_post(
@@ -68,7 +74,8 @@ BEGIN
       'exclude_player_id', v_actor_id
     )::text,
     headers := jsonb_build_object(
-      'Content-Type', 'application/json'
+      'Content-Type', 'application/json',
+      'Authorization', 'Bearer ' || coalesce(v_push_secret, '')
     )::jsonb
   );
 

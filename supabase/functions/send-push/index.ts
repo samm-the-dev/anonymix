@@ -33,6 +33,39 @@ function concatUint8Arrays(...arrays: Uint8Array[]): Uint8Array {
   return result;
 }
 
+/** Convert an ECDSA signature from DER encoding to raw r||s (64 bytes). Passes through if already raw. */
+function derToRaw(sig: Uint8Array): Uint8Array {
+  // Raw P-256 signature is exactly 64 bytes (32-byte r + 32-byte s)
+  if (sig.length === 64) return sig;
+
+  // DER: 0x30 <totalLen> 0x02 <rLen> <r> 0x02 <sLen> <s>
+  if (sig[0] !== 0x30) {
+    throw new Error(`Unexpected ECDSA signature format (first byte: 0x${sig[0].toString(16)})`);
+  }
+
+  let offset = 2; // skip 0x30 and total length
+  if (sig[1] & 0x80) offset++; // long-form length (unlikely for P-256 but be safe)
+
+  function readInteger(): Uint8Array {
+    if (sig[offset] !== 0x02) throw new Error("Expected ASN.1 INTEGER tag");
+    offset++;
+    const len = sig[offset++];
+    const raw = sig.slice(offset, offset + len);
+    offset += len;
+    // Strip leading zero padding, then left-pad to 32 bytes
+    let start = 0;
+    while (start < raw.length - 1 && raw[start] === 0) start++;
+    const trimmed = raw.slice(start);
+    const padded = new Uint8Array(32);
+    padded.set(trimmed, 32 - trimmed.length);
+    return padded;
+  }
+
+  const r = readInteger();
+  const s = readInteger();
+  return concatUint8Arrays(r, s);
+}
+
 async function createVapidAuthHeader(
   audience: string,
   subject: string,
@@ -66,10 +99,8 @@ async function createVapidAuthHeader(
     await crypto.subtle.sign({ name: "ECDSA", hash: "SHA-256" }, key, new TextEncoder().encode(unsignedToken)),
   );
 
-  // Convert DER signature to raw r||s format (each 32 bytes)
-  const r = signature.slice(0, 32);
-  const s = signature.slice(32, 64);
-  const rawSig = concatUint8Arrays(r, s);
+  // Web Crypto ECDSA may return DER-encoded or raw r||s signatures
+  const rawSig = derToRaw(signature);
 
   const token = `${unsignedToken}.${base64UrlEncode(rawSig)}`;
 
@@ -172,6 +203,7 @@ async function sendPushNotification(
     method: "POST",
     headers: {
       Authorization: vapidHeaders.authorization,
+      "Crypto-Key": vapidHeaders.cryptoKey,
       "Content-Type": "application/octet-stream",
       "Content-Encoding": "aes128gcm",
       TTL: "86400",
@@ -189,6 +221,13 @@ Deno.serve(async (req) => {
     });
   }
 
+  // Authenticate via shared secret
+  const expectedSecret = Deno.env.get("SEND_PUSH_SECRET");
+  const authHeader = req.headers.get("Authorization");
+  if (!expectedSecret || authHeader !== `Bearer ${expectedSecret}`) {
+    return new Response(JSON.stringify({ error: "Unauthorized" }), { status: 401 });
+  }
+
   try {
     const { session_id, title, body, url, exclude_player_id } = await req.json();
 
@@ -203,10 +242,14 @@ Deno.serve(async (req) => {
     );
 
     // Get all session member player IDs
-    const { data: members } = await supabase
+    const { data: members, error: membersError } = await supabase
       .from("session_players")
       .select("player_id")
       .eq("session_id", session_id);
+
+    if (membersError) {
+      return new Response(JSON.stringify({ error: membersError.message }), { status: 500 });
+    }
 
     if (!members || members.length === 0) {
       return new Response(JSON.stringify({ sent: 0 }), { status: 200 });
@@ -221,10 +264,14 @@ Deno.serve(async (req) => {
     }
 
     // Get push subscriptions for those members
-    const { data: subscriptions } = await supabase
+    const { data: subscriptions, error: subsError } = await supabase
       .from("push_subscriptions")
       .select("id, player_id, endpoint, p256dh, auth")
       .in("player_id", memberIds);
+
+    if (subsError) {
+      return new Response(JSON.stringify({ error: subsError.message }), { status: 500 });
+    }
 
     if (!subscriptions || subscriptions.length === 0) {
       return new Response(JSON.stringify({ sent: 0 }), { status: 200 });
