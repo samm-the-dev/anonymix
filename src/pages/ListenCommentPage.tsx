@@ -56,6 +56,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
   const [tapeTitle, setTapeTitle] = useState('');
   const [tapePrompt, setTapePrompt] = useState('');
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
+  const [mySubmission, setMySubmission] = useState<SubmissionRow | null>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
@@ -90,9 +91,9 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
       setTapePrompt(tapeRes.data.prompt);
     }
 
-    // Exclude current user's own submission
-    const otherSubs = (subsRes.data ?? []).filter((s) => s.player_id !== player.id);
-    setSubmissions(otherSubs);
+    const allSubs = subsRes.data ?? [];
+    setMySubmission(allSubs.find((s) => s.player_id === player.id) ?? null);
+    setSubmissions(allSubs);
 
     // Map existing comments
     const existing: Record<string, string> = {};
@@ -261,10 +262,13 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
                   ) : (
                     <div className="h-12 w-12 shrink-0 rounded-lg bg-secondary" />
                   )}
-                  <div className="min-w-0">
+                  <div className="min-w-0 flex-1">
                     <p className="text-sm font-semibold text-foreground">{s.song_name}</p>
                     {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
                   </div>
+                  {s.player_id === player?.id && (
+                    <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Your pick</span>
+                  )}
                 </div>
                 <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} />
               </div>
@@ -288,7 +292,7 @@ export function ListenCommentPage({ sessionId, tapeId }: { sessionId: string; ta
             disabled={submitting}
             className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 disabled:opacity-40 dark:bg-amber-600 dark:hover:bg-amber-500"
           >
-            {submitting ? 'Sharing...' : `Share comments${commentedCount > 0 ? ` (${commentedCount})` : ''}`}
+            {submitting ? 'Sharing...' : `Share comments (${commentedCount}/${submissions.length + 1})`}
           </button>
         </div>
         )}

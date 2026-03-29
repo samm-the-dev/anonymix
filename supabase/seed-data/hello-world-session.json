@@ -1,0 +1,190 @@
+{
+  "session": {
+    "id": "e446bc3c-40a6-40bf-9198-43a4cd67f77e",
+    "name": "hello world",
+    "description": "the first session for this app",
+    "admin_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+    "ended": false,
+    "created_at": "2026-03-29T02:56:07.478434+00:00",
+    "slug": "hello-world-e446"
+  },
+  "players": [
+    {
+      "id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "name": "Sam",
+      "avatar": "🎺",
+      "avatar_color": "#6366f1",
+      "created_at": "2026-03-27T02:55:16.988903+00:00",
+      "auth_id": "b8874afe-66e2-47e6-bcce-f0422789c414"
+    },
+    {
+      "id": "b39dc477-605d-4a0e-9ac3-90df78f0130b",
+      "name": "Sammie",
+      "avatar": "🎶",
+      "avatar_color": "#10b981",
+      "created_at": "2026-03-27T14:34:39.973064+00:00",
+      "auth_id": "fd47ddf2-7378-4733-b513-7cf39f55cbd7"
+    }
+  ],
+  "members": [
+    { "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e" },
+    { "player_id": "b39dc477-605d-4a0e-9ac3-90df78f0130b" }
+  ],
+  "tapes": [
+    {
+      "id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "session_id": "e446bc3c-40a6-40bf-9198-43a4cd67f77e",
+      "title": "allow me to introduce myself",
+      "prompt": "songs establishing identity",
+      "status": "results",
+      "deadline": "2026-04-04T04:16:44.426+00:00",
+      "submit_window_hours": 48,
+      "comment_window_hours": 120,
+      "created_at": "2026-03-29T02:56:07.783762+00:00"
+    },
+    {
+      "id": "ad2b5c85-9f07-4623-a960-50aafaaba86c",
+      "session_id": "e446bc3c-40a6-40bf-9198-43a4cd67f77e",
+      "title": "and you are?",
+      "prompt": "personally inquisitive songs",
+      "status": "skipped",
+      "deadline": null,
+      "submit_window_hours": 48,
+      "comment_window_hours": 120,
+      "created_at": "2026-03-29T02:56:07.930365+00:00"
+    },
+    {
+      "id": "39a36854-75af-47f1-b777-2e2bc1653e77",
+      "session_id": "e446bc3c-40a6-40bf-9198-43a4cd67f77e",
+      "title": "nice to meet you",
+      "prompt": "songs about new friendship",
+      "status": "playlist_ready",
+      "deadline": "2026-04-03T04:48:45.102694+00:00",
+      "submit_window_hours": 48,
+      "comment_window_hours": 120,
+      "created_at": "2026-03-29T02:56:08.063361+00:00"
+    },
+    {
+      "id": "8d48064d-396f-4abf-b8ff-927602d8d006",
+      "session_id": "e446bc3c-40a6-40bf-9198-43a4cd67f77e",
+      "title": "let's fucking go",
+      "prompt": "songs about starting something exciting",
+      "status": "submitting",
+      "deadline": null,
+      "submit_window_hours": 48,
+      "comment_window_hours": 120,
+      "created_at": "2026-03-29T02:56:08.19257+00:00"
+    },
+    {
+      "id": "65a7f09e-112a-496c-a7b2-da6a7f57e697",
+      "session_id": "e446bc3c-40a6-40bf-9198-43a4cd67f77e",
+      "title": "we did it",
+      "prompt": "songs about accomplishing something",
+      "status": "upcoming",
+      "deadline": null,
+      "submit_window_hours": 48,
+      "comment_window_hours": 120,
+      "created_at": "2026-03-29T02:56:08.308829+00:00"
+    }
+  ],
+  "submissions": [
+    {
+      "id": "44c82eff-b125-4d51-9b29-858794552c03",
+      "tape_id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "player_id": "b39dc477-605d-4a0e-9ac3-90df78f0130b",
+      "song_name": "Sympathy For The Devil",
+      "artist_name": "The Rolling Stones",
+      "musicbrainz_id": "9956063",
+      "cover_art_url": "https://cdn-images.dzcdn.net/images/cover/007ca308040f3efeff845f2fb4e87a2a/250x250-000000-80-0-0.jpg",
+      "created_at": "2026-03-29T03:09:34.788129+00:00"
+    },
+    {
+      "id": "f33e3bcb-04e8-469c-8f6d-c62fb6f3544d",
+      "tape_id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "song_name": "My Name Is",
+      "artist_name": "Eminem",
+      "musicbrainz_id": "1109729",
+      "cover_art_url": "https://cdn-images.dzcdn.net/images/cover/e2b36a9fda865cb2e9ed1476b6291a7d/250x250-000000-80-0-0.jpg",
+      "created_at": "2026-03-29T03:10:10.087823+00:00"
+    },
+    {
+      "id": "21ff7cc9-74b2-490b-b286-85438ed92ace",
+      "tape_id": "39a36854-75af-47f1-b777-2e2bc1653e77",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "song_name": "My Best Friend",
+      "artist_name": "Weezer",
+      "musicbrainz_id": "79779244",
+      "cover_art_url": "https://cdn-images.dzcdn.net/images/cover/03c500903d0504fd7939c4168b6cce89/250x250-000000-80-0-0.jpg",
+      "created_at": "2026-03-29T04:48:03.500848+00:00"
+    },
+    {
+      "id": "9a1bba6e-7dff-474e-9f18-3812cbdb188a",
+      "tape_id": "39a36854-75af-47f1-b777-2e2bc1653e77",
+      "player_id": "b39dc477-605d-4a0e-9ac3-90df78f0130b",
+      "song_name": "Nice to Meet You",
+      "artist_name": "Imagine Dragons",
+      "musicbrainz_id": "2857441232",
+      "cover_art_url": "https://cdn-images.dzcdn.net/images/cover/4a3e5538d0d0caa37a76de4a34266191/250x250-000000-80-0-0.jpg",
+      "created_at": "2026-03-29T04:48:25.500067+00:00"
+    }
+  ],
+  "comments": [
+    {
+      "id": "789cc604-67cc-4e01-b057-11c324e63c10",
+      "tape_id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "text": "🔥💯👏🙌🤌",
+      "submission_id": null,
+      "created_at": "2026-03-29T04:29:09.447695+00:00"
+    },
+    {
+      "id": "a16b34c6-e9ef-478d-8837-d429facdbce3",
+      "tape_id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "text": "🤯🥴😮‍💨💿🤌",
+      "submission_id": "44c82eff-b125-4d51-9b29-858794552c03",
+      "created_at": "2026-03-29T04:29:09.447695+00:00"
+    },
+    {
+      "id": "2cce6a46-5e98-4944-bfd7-6963444f5a82",
+      "tape_id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "player_id": "b39dc477-605d-4a0e-9ac3-90df78f0130b",
+      "text": "HELL yeah",
+      "submission_id": "f33e3bcb-04e8-469c-8f6d-c62fb6f3544d",
+      "created_at": "2026-03-29T04:30:28.971914+00:00"
+    },
+    {
+      "id": "e5760f84-cb69-4530-96e6-5e0c79c5dadf",
+      "tape_id": "c320c8b5-0597-43ce-abe0-b0431a7ff050",
+      "player_id": "b39dc477-605d-4a0e-9ac3-90df78f0130b",
+      "text": "great mix! 🎶⚡",
+      "submission_id": null,
+      "created_at": "2026-03-29T04:30:28.971914+00:00"
+    },
+    {
+      "id": "d68a7ebb-44e2-4cbc-a3c2-d9f458c7845f",
+      "tape_id": "39a36854-75af-47f1-b777-2e2bc1653e77",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "text": "🙌🔥💯",
+      "submission_id": "21ff7cc9-74b2-490b-b286-85438ed92ace",
+      "created_at": "2026-03-29T04:56:45.413545+00:00"
+    },
+    {
+      "id": "8c4d9756-7eeb-49c0-9add-e6a953c5cef3",
+      "tape_id": "39a36854-75af-47f1-b777-2e2bc1653e77",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "text": "hah how appropriate 😂",
+      "submission_id": "9a1bba6e-7dff-474e-9f18-3812cbdb188a",
+      "created_at": "2026-03-29T04:56:45.413545+00:00"
+    },
+    {
+      "id": "4c26dc6d-df40-4dd1-9571-ddaac014af2c",
+      "tape_id": "39a36854-75af-47f1-b777-2e2bc1653e77",
+      "player_id": "d65ea8f9-edf4-4474-aa03-ea5b9644284e",
+      "text": "very nice",
+      "submission_id": null,
+      "created_at": "2026-03-29T04:56:45.413545+00:00"
+    }
+  ]
+}
