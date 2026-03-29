@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { Spinner } from '@/components/Spinner';
 
 interface InviteData {
   sessionName: string;
@@ -77,7 +78,7 @@ export function JoinSessionPage() {
           .select('player_id')
           .eq('session_id', sid)
           .eq('player_id', player.id)
-          .single();
+          .maybeSingle();
 
         if (alreadyMember) {
           navigate(`/${session.slug}`, { replace: true });
@@ -110,7 +111,7 @@ export function JoinSessionPage() {
         .select('player_id')
         .eq('session_id', sessionId)
         .eq('player_id', player.id)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         // Already a member, just navigate
@@ -134,9 +135,7 @@ export function JoinSessionPage() {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
+      <Spinner />
     );
   }
 
@@ -163,7 +162,7 @@ export function JoinSessionPage() {
   const remainingTapes = invite.tapes.length - shownTapes.length;
 
   return (
-    <div className="mx-auto flex flex-1 max-w-sm flex-col items-center justify-center px-6">
+    <div className="flex flex-col items-center justify-center p-6">
       {/* Invited by */}
       <p className="text-sm text-muted-foreground">
         {invite.adminName} invited you to join

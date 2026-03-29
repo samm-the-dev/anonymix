@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { supabase } from '@/lib/supabase';
+import { Spinner } from '@/components/Spinner';
 import { ListenCommentPage } from './ListenCommentPage';
 import { ResultsPage } from './ResultsPage';
 
@@ -45,9 +46,7 @@ export function TapePage() {
 
   if (!status || !sessionId || !tapeId) {
     return (
-      <div className="flex min-h-screen items-center justify-center text-muted-foreground">
-        Loading...
-      </div>
+      <Spinner />
     );
   }
 

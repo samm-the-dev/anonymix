@@ -4,6 +4,7 @@ import * as Collapsible from '@radix-ui/react-collapsible';
 import { SessionCard } from '@/components/SessionCard';
 import { useSessionList } from '@/hooks/useSessionList';
 import { InstallBanner } from '@/components/InstallBanner';
+import { Spinner } from '@/components/Spinner';
 
 interface CollapsibleSectionProps {
   title: string;
@@ -37,7 +38,7 @@ export function SessionHomePage() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center p-8 text-muted-foreground">Loading...</div>
+      <Spinner />
     );
   }
 
