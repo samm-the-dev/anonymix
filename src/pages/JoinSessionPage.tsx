@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Moon, Sun } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useTheme } from '@/hooks/useTheme';
 
 interface InviteData {
   sessionName: string;
@@ -18,7 +16,6 @@ export function JoinSessionPage() {
   const { sessionId } = useParams<{ sessionId: string }>();
   const navigate = useNavigate();
   const { player } = useAuthContext();
-  const { theme, toggleTheme } = useTheme();
 
   const [invite, setInvite] = useState<InviteData | null>(null);
   const [sessionSlug, setSessionSlug] = useState<string | null>(null);
@@ -165,15 +162,7 @@ export function JoinSessionPage() {
   const remainingTapes = invite.tapes.length - shownTapes.length;
 
   return (
-    <div className="relative mx-auto flex min-h-screen max-w-sm flex-col items-center justify-center px-6">
-      <button
-        onClick={toggleTheme}
-        className="absolute top-4 right-4 rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-        aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-      >
-        {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-      </button>
-
+    <div className="mx-auto flex flex-1 max-w-sm flex-col items-center justify-center px-6">
       {/* Invited by */}
       <p className="text-sm text-muted-foreground">
         {invite.adminName} invited you to join

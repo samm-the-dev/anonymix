@@ -1,10 +1,9 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Minus, Moon, Plus, Sun, Trash2, Copy, Share2, Upload } from 'lucide-react';
+import { Minus, Plus, Trash2, Copy, Share2, Upload } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useTheme } from '@/hooks/useTheme';
 import { pickAndImportBlueprint, type SessionBlueprint } from '@/lib/sessionBlueprint';
 import { sessionSlug } from '@/lib/slugify';
 
@@ -18,7 +17,6 @@ type Step = 'create' | 'celebration';
 export function CreateSessionPage() {
   const navigate = useNavigate();
   const { player } = useAuthContext();
-  const { theme, toggleTheme } = useTheme();
 
   // Step state
   const [step, setStep] = useState<Step>('create');
@@ -211,29 +209,7 @@ export function CreateSessionPage() {
   }
 
   return (
-    <div className="flex h-screen flex-col bg-background">
-      {/* Header */}
-      <header className="shrink-0 relative flex items-center border-b border-border px-4 py-3">
-        {step !== 'celebration' && (
-          <button
-            onClick={() => navigate('/')}
-            className="w-8 text-muted-foreground hover:text-foreground"
-          >
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-        )}
-        <h1 className="absolute left-1/2 -translate-x-1/2 font-display text-sm font-semibold">
-          {step === 'celebration' ? '' : 'New Session'}
-        </h1>
-        <button
-          onClick={toggleTheme}
-          className="ml-auto rounded-md p-1.5 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? <Moon className="h-4 w-4" /> : <Sun className="h-4 w-4" />}
-        </button>
-      </header>
-
+    <div className="flex flex-1 flex-col">
       {/* Main flow */}
       {step !== 'celebration' && (
         <div className="flex min-h-0 flex-1 flex-col">

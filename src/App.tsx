@@ -2,6 +2,7 @@ import { useEffect } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
+import { TaskLayout } from '@/components/TaskLayout';
 import { SessionHomePage } from '@/pages/SessionHomePage';
 import { SessionViewPage } from '@/pages/SessionViewPage';
 import { CreateSessionPage } from '@/pages/CreateSessionPage';
@@ -52,12 +53,14 @@ function AppRoutes() {
 
   return (
     <Routes>
-      <Route path="create" element={<CreateSessionPage />} />
-      <Route path="join/:sessionId" element={<JoinSessionPage />} />
+      <Route element={<TaskLayout />}>
+        <Route path="create" element={<CreateSessionPage />} />
+        <Route path="join/:sessionId" element={<JoinSessionPage />} />
+        <Route path=":sessionSlug/tape/:tapeIndex" element={<TapePage />} />
+      </Route>
       <Route element={<Layout />}>
         <Route index element={<SessionHomePage />} />
         <Route path=":sessionSlug" element={<SessionViewPage />} />
-        <Route path=":sessionSlug/tape/:tapeIndex" element={<TapePage />} />
         <Route path="profile" element={<ProfilePage />} />
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>

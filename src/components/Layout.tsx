@@ -1,39 +1,18 @@
-import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom';
-import { ArrowLeft, CassetteTape, Home, Moon, Sun } from 'lucide-react';
+import { NavLink, Outlet, useLocation } from 'react-router-dom';
+import { Home } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useTheme } from '@/hooks/useTheme';
 import { useAuthContext } from '@/contexts/AuthContext';
+import { AppBar } from './AppBar';
 
 export function Layout() {
-  const { theme, toggleTheme } = useTheme();
   const { player } = useAuthContext();
   const location = useLocation();
-  const navigate = useNavigate();
 
   const isHome = location.pathname === '/' || location.pathname === '/profile';
 
   return (
     <div className="flex min-h-screen flex-col bg-background text-foreground">
-      <header className="relative flex items-center border-b border-border px-4 py-3">
-        {isHome ? (
-          <div className="" />
-        ) : (
-          <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
-            <ArrowLeft className="h-5 w-5" />
-          </button>
-        )}
-        <h1 className="absolute left-1/2 -translate-x-1/2 flex items-center gap-1.5 font-display text-lg font-semibold">
-          Anonymix
-          <CassetteTape className="h-5 w-5" />
-        </h1>
-        <button
-          onClick={toggleTheme}
-          className="ml-auto rounded-md text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-          aria-label={`Switch to ${theme === 'light' ? 'dark' : 'light'} mode`}
-        >
-          {theme === 'light' ? <Moon className="h-5 w-5" /> : <Sun className="h-5 w-5" />}
-        </button>
-      </header>
+      <AppBar showBack={!isHome} />
 
       <main className="flex flex-1 flex-col pb-16">
         <Outlet />
