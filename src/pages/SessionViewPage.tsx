@@ -1,18 +1,19 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useRef } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Search, Users, X } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Search, Users, X } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useSongSearch, type SongResult } from '@/hooks/useSongSearch';
 import { StatusBadge } from '@/components/StatusBadge';
 import { SubmissionProgress } from '@/components/SubmissionProgress';
 import { cn } from '@/lib/utils';
+import type { TapeStatus } from '@/lib/types';
 
 interface TapeData {
   id: string;
   title: string;
   prompt: string;
-  status: string;
+  status: TapeStatus;
   deadline: string | null;
 }
 
@@ -52,6 +53,9 @@ export function SessionViewPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [showToast, setShowToast] = useState(false);
+  const [showHostMenu, setShowHostMenu] = useState(false);
+  const [showLockConfirm, setShowLockConfirm] = useState(false);
+  const hostMenuRef = useRef<HTMLDivElement>(null);
   const { results, searching, search, clear } = useSongSearch();
 
   const activeTape = tapes[activeTapeIdx] ?? null;
@@ -136,6 +140,16 @@ export function SessionViewPage() {
   useEffect(() => {
     fetchData();
   }, [fetchData]);
+
+  // Close host menu on outside click
+  useEffect(() => {
+    if (!showHostMenu) return;
+    function handleClick(e: MouseEvent) {
+      if (hostMenuRef.current && !hostMenuRef.current.contains(e.target as Node)) setShowHostMenu(false);
+    }
+    document.addEventListener('mousedown', handleClick);
+    return () => document.removeEventListener('mousedown', handleClick);
+  }, [showHostMenu]);
 
   // Auto-open action from query param
   useEffect(() => {
@@ -269,12 +283,59 @@ export function SessionViewPage() {
           {/* Active tape card */}
           {activeTape && (
             <div className="flex h-[260px] flex-col overflow-hidden rounded-2xl border border-border bg-card p-4 shadow-md">
-            {/* Card header: tape number + status badge with countdown */}
+            {/* Card header: tape number + status badge + host menu */}
             <div className="mb-3 flex items-center justify-between">
               <span className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">
                 Tape {activeTapeIdx + 1}
               </span>
-              <StatusBadge status={activeTape.status as 'submitting' | 'playlist_ready' | 'results'} />
+              <div className="flex items-center gap-1.5">
+                <StatusBadge status={activeTape.status} />
+                {isHost && (activeTape.status === 'submitting' || activeTape.status === 'playlist_ready') && (
+                  <div className="relative" ref={hostMenuRef}>
+                    <button onClick={() => setShowHostMenu(!showHostMenu)} className="text-muted-foreground hover:text-foreground">
+                      <MoreVertical className="h-4 w-4" />
+                    </button>
+                    {showHostMenu && (
+                      <div className="absolute right-0 z-10 mt-1 w-48 rounded-lg border border-border bg-card py-1 shadow-lg">
+                        <button
+                          onClick={async () => {
+                            setShowHostMenu(false);
+                            await supabase.from('tapes').update({
+                              deadline: new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString(),
+                            }).eq('id', activeTape.id);
+                            await fetchData();
+                          }}
+                          className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent"
+                        >
+                          Wait another day
+                        </button>
+                        {activeTape.status === 'submitting' && tapeSubmissions.length >= 2 && (
+                          <button
+                            onClick={() => {
+                              setShowHostMenu(false);
+                              setShowLockConfirm(true);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent"
+                          >
+                            Lock in submissions
+                          </button>
+                        )}
+                        {activeTape.status === 'playlist_ready' && tapeSubmissions.length >= 2 && (
+                          <button
+                            onClick={() => {
+                              setShowHostMenu(false);
+                              setShowLockConfirm(true);
+                            }}
+                            className="w-full px-3 py-2 text-left text-sm text-foreground hover:bg-accent"
+                          >
+                            Complete
+                          </button>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
+              </div>
             </div>
 
             {/* Prompt */}
@@ -330,37 +391,13 @@ export function SessionViewPage() {
                     </button>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
-                    {isHost && tapeSubmissions.length >= 2 && (
-                      <button
-                        onClick={async () => {
-                          await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
-                          await fetchData();
-                        }}
-                        className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
-                      >
-                        Close
-                      </button>
-                    )}
-                    {isHost && tapeSubmissions.length < 2 && (
-                      <button
-                        onClick={async () => {
-                          await supabase.from('tapes').update({ status: 'skipped' }).eq('id', activeTape.id);
-                          await fetchData();
-                        }}
-                        className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
-                      >
-                        Skip
-                      </button>
-                    )}
-                    <button
-                      onClick={() => setShowSearch(true)}
-                      disabled={deadlinePassed}
-                      className="flex-1 rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 dark:bg-green-600 dark:hover:bg-green-500"
-                    >
-                      {deadlinePassed ? 'Submissions closing...' : 'Submit your pick'}
-                    </button>
-                  </div>
+                  <button
+                    onClick={() => setShowSearch(true)}
+                    disabled={deadlinePassed}
+                    className="w-full rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 dark:bg-green-600 dark:hover:bg-green-500"
+                  >
+                    {deadlinePassed ? 'Submissions closing...' : 'Submit your pick'}
+                  </button>
                 )}
               </>
             )}
@@ -368,46 +405,20 @@ export function SessionViewPage() {
             {activeTape.status === 'playlist_ready' && tapeSubmissions.length > 0 && (
               <div className="mt-2">
                 <SubmissionProgress submitted={commentersCount} total={members.length || 1} colorClass="bg-amber-500" textColorClass="text-amber-600 dark:text-amber-400" />
-                <div className="flex gap-2">
-                  {isHost && tapeSubmissions.length >= 2 && (
-                    <button
-                      onClick={async () => {
-                        await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
-                        navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
-                      }}
-                      className="shrink-0 rounded-xl border border-border px-3 py-2.5 text-xs font-medium text-muted-foreground hover:bg-accent"
-                    >
-                      Complete
-                    </button>
-                  )}
-                  <button
-                    onClick={() => navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`)}
-                    className="flex-1 rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
-                  >
-                    Listen &amp; Comment
-                  </button>
-                </div>
+                <button
+                  onClick={() => navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`)}
+                  className="w-full rounded-xl bg-amber-500 py-2.5 text-sm font-semibold text-white hover:bg-amber-600 dark:bg-amber-600 dark:hover:bg-amber-500"
+                >
+                  Listen &amp; Comment
+                </button>
               </div>
             )}
             {activeTape.status === 'playlist_ready' && tapeSubmissions.length === 0 && (
-              <div className="mt-2 text-center">
-                <p className="text-xs text-muted-foreground">No one submitted this round</p>
-                {isHost && (
-                  <button
-                    onClick={async () => {
-                      await supabase.from('tapes').update({ status: 'skipped' }).eq('id', activeTape.id);
-                      await fetchData();
-                    }}
-                    className="mt-2 rounded-xl border border-border px-4 py-2 text-xs font-medium text-muted-foreground hover:bg-accent"
-                  >
-                    Skip
-                  </button>
-                )}
-              </div>
+              <p className="mt-2 text-center text-xs text-muted-foreground">No one submitted this round</p>
             )}
 
             {activeTape.status === 'upcoming' && (
-              <p className="mt-2 text-center text-xs text-muted-foreground">Coming up next</p>
+              <p className="mt-2 text-center text-xs text-muted-foreground">Coming up...</p>
             )}
 
             {activeTape.status === 'skipped' && (
@@ -496,6 +507,45 @@ export function SessionViewPage() {
                 className="w-full rounded-xl border border-primary/20 py-2.5 text-sm font-medium text-primary hover:bg-primary/5"
               >
                 Copy invite link
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Lock confirm dialog */}
+      {showLockConfirm && activeTape && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6">
+          <div className="w-full max-w-sm rounded-xl border border-border bg-card p-5">
+            <h3 className="font-display text-base font-semibold text-foreground">
+              {activeTape.status === 'submitting' ? 'Lock in submissions?' : 'Complete this tape?'}
+            </h3>
+            <p className="mt-1 text-sm text-muted-foreground">
+              {activeTape.status === 'submitting'
+                ? 'This will close submissions and move to the listening phase. Players who haven\'t submitted will miss this round.'
+                : 'This will end the listening phase and reveal who submitted each song.'}
+            </p>
+            <div className="mt-5 flex gap-2">
+              <button
+                onClick={() => setShowLockConfirm(false)}
+                className="flex-1 rounded-xl border border-border py-2.5 text-sm font-medium text-foreground hover:bg-accent"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  setShowLockConfirm(false);
+                  if (activeTape.status === 'submitting') {
+                    await supabase.from('tapes').update({ status: 'playlist_ready' }).eq('id', activeTape.id);
+                    await fetchData();
+                  } else {
+                    await supabase.from('tapes').update({ status: 'results' }).eq('id', activeTape.id);
+                    navigate(`/${sessionSlug}/tape/${activeTapeIdx + 1}`);
+                  }
+                }}
+                className="flex-1 rounded-xl bg-primary py-2.5 text-sm font-semibold text-primary-foreground hover:opacity-90"
+              >
+                Confirm
               </button>
             </div>
           </div>
