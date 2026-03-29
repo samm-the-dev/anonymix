@@ -1,9 +1,9 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Copy, ExternalLink } from 'lucide-react';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { EmojiPicker } from '@/components/EmojiPicker';
+import { PlaylistImport } from '@/components/PlaylistImport';
 
 function CommentField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -59,7 +59,6 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [copied, setCopied] = useState(false);
 
   const [infoTab, setInfoTab] = useState<'how' | 'import'>(ended ? 'import' : 'how');
 
@@ -113,16 +112,6 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
     setInfoTab(tab);
   }
 
-  function copyPlaylistAndOpen() {
-    const text = submissions
-      .map((s) => (s.artist_name ? `${s.artist_name} - ${s.song_name}` : s.song_name))
-      .join('\n');
-    navigator.clipboard?.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    window.open('https://www.tunemymusic.com/', '_blank');
-    switchTab('how');
-  }
 
   function updateComment(key: string, text: string) {
     setComments((prev) => ({ ...prev, [key]: text }));
@@ -210,34 +199,18 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
               Import playlist
             </button>
           </div>
-          <div className="px-4 py-3">
-            {infoTab === 'how' ? (
-              <>
-                <p className="text-sm text-muted-foreground">
-                  Comment on a song that surprised you, a pick that nailed the theme, or just what you vibed with.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  If you're low on time or energy, feel free to just leave an emoji or nothing at all. No worries.
-                </p>
-              </>
-            ) : (
-              <>
-                <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-                  <li>Click the button below to copy the songs and open TuneMyMusic</li>
-                  <li>Scroll down and select the "Free text" option, then paste</li>
-                  <li>Choose your destination service, log in, and transfer</li>
-                </ol>
-                <button
-                  onClick={copyPlaylistAndOpen}
-                  className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
-                >
-                  <Copy className="h-4 w-4" />
-                  {copied ? 'Copied!' : 'Copy Songs & Open Transfer'}
-                  {copied ? '' : <ExternalLink className="h-4 w-4" />}
-                </button>
-              </>
-            )}
-          </div>
+          {infoTab === 'how' ? (
+            <div className="px-4 py-3">
+              <p className="text-sm text-muted-foreground">
+                Comment on a song that surprised you, a pick that nailed the theme, or just what you vibed with.
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                If you're low on time or energy, feel free to just leave an emoji or nothing at all. No worries.
+              </p>
+            </div>
+          ) : (
+            <PlaylistImport songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} />
+          )}
         </div>
         )}
 
