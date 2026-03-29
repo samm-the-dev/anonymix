@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
-import * as Accordion from '@radix-ui/react-accordion';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -28,7 +27,7 @@ interface PlayerInfo {
 
 import { seededShuffle } from '@/lib/seededShuffle';
 
-function SongAccordionItem({
+function AccordionItem({
   submission,
   player,
   comments,
@@ -39,9 +38,14 @@ function SongAccordionItem({
   comments: CommentRow[];
   players: Map<string, PlayerInfo>;
 }) {
+  const [open, setOpen] = useState(false);
+
   return (
-    <Accordion.Item value={submission.id} className="border-b border-border/50 last:border-0">
-      <Accordion.Trigger className="flex w-full items-center gap-3 py-3 text-left [&[data-state=open]>svg]:rotate-180">
+    <div className="border-b border-border/50 last:border-0">
+      <button
+        onClick={() => setOpen(!open)}
+        className={`flex w-full items-center gap-3 pt-3 text-left transition-[padding-bottom] duration-250 ease-out ${open ? 'pb-0' : 'pb-3'}`}
+      >
         {submission.cover_art_url ? (
           <img src={submission.cover_art_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
         ) : (
@@ -51,56 +55,62 @@ function SongAccordionItem({
           <p className="text-sm font-semibold text-foreground">{submission.song_name}</p>
           {submission.artist_name && <p className="text-xs text-muted-foreground">{submission.artist_name}</p>}
         </div>
-        <ChevronDown className="h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200" />
-      </Accordion.Trigger>
+        <ChevronDown
+          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+        />
+      </button>
 
-      <Accordion.Content className="overflow-hidden data-[state=closed]:animate-accordion-up data-[state=open]:animate-accordion-down">
-        <div className="pb-3 pl-[60px]">
-          {/* Submitter reveal */}
-          <div className="mb-3">
-            <span className="text-xs text-muted-foreground">Submitted by</span>
-            {player && (
-              <span className="ml-1.5 inline-flex items-center gap-1">
-                <span
-                  className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
-                  style={{ backgroundColor: player.avatar_color + '22', borderColor: player.avatar_color, borderWidth: 1 }}
-                >
-                  {player.avatar}
+      <div
+        className={`grid transition-[grid-template-rows] duration-250 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
+      >
+        <div className="min-h-0 overflow-hidden">
+          <div className="pb-3 pl-[60px]">
+            {/* Submitter reveal */}
+            <div className="mb-3">
+              <span className="text-xs text-muted-foreground">Submitted by</span>
+              {player && (
+                <span className="ml-1.5 inline-flex items-center gap-1">
+                  <span
+                    className="inline-flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
+                    style={{ backgroundColor: player.avatar_color + '22', borderColor: player.avatar_color, borderWidth: 1 }}
+                  >
+                    {player.avatar}
+                  </span>
+                  <span className="text-xs font-semibold text-foreground">{player.name}</span>
                 </span>
-                <span className="text-xs font-semibold text-foreground">{player.name}</span>
-              </span>
+              )}
+            </div>
+
+            {/* Per-song comments */}
+            {comments.length > 0 ? (
+              <div>
+                {comments.map((c) => {
+                  const commenter = players.get(c.player_id);
+                  return (
+                    <div key={c.id} className="pb-3">
+                      <div className="mb-1 flex items-center gap-2">
+                        {commenter && (
+                          <span
+                            className="flex h-6 w-6 items-center justify-center rounded-full text-xs"
+                            style={{ backgroundColor: commenter.avatar_color + '22', borderColor: commenter.avatar_color, borderWidth: 1 }}
+                          >
+                            {commenter.avatar}
+                          </span>
+                        )}
+                        <span className="text-xs font-semibold text-foreground">{commenter?.name ?? 'Unknown'}</span>
+                      </div>
+                      <p className="text-sm leading-relaxed text-foreground">{c.text}</p>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <p className="text-xs text-muted-foreground/60">No comments</p>
             )}
           </div>
-
-          {/* Per-song comments */}
-          {comments.length > 0 ? (
-            <div>
-              {comments.map((c) => {
-                const commenter = players.get(c.player_id);
-                return (
-                  <div key={c.id} className="pb-3">
-                    <div className="mb-1 flex items-center gap-2">
-                      {commenter && (
-                        <span
-                          className="flex h-6 w-6 items-center justify-center rounded-full text-xs"
-                          style={{ backgroundColor: commenter.avatar_color + '22', borderColor: commenter.avatar_color, borderWidth: 1 }}
-                        >
-                          {commenter.avatar}
-                        </span>
-                      )}
-                      <span className="text-xs font-semibold text-foreground">{commenter?.name ?? 'Unknown'}</span>
-                    </div>
-                    <p className="text-sm leading-relaxed text-muted-foreground">{c.text}</p>
-                  </div>
-                );
-              })}
-            </div>
-          ) : (
-            <p className="text-xs text-muted-foreground/60">No comments</p>
-          )}
         </div>
-      </Accordion.Content>
-    </Accordion.Item>
+      </div>
+    </div>
   );
 }
 
@@ -190,17 +200,15 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
         {submissions.length === 0 ? (
           <p className="py-8 text-center text-sm text-muted-foreground">No songs submitted</p>
         ) : (
-          <Accordion.Root type="multiple">
-            {submissions.map((s) => (
-              <SongAccordionItem
-                key={s.id}
-                submission={s}
-                player={players.get(s.player_id)}
-                comments={comments.filter((c) => c.submission_id === s.id)}
-                players={players}
-              />
-            ))}
-          </Accordion.Root>
+          submissions.map((s) => (
+            <AccordionItem
+              key={s.id}
+              submission={s}
+              player={players.get(s.player_id)}
+              comments={comments.filter((c) => c.submission_id === s.id)}
+              players={players}
+            />
+          ))
         )}
 
         {/* The Tape comments */}
@@ -224,7 +232,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
                     )}
                     <span className="text-xs font-semibold text-foreground">{commenter?.name ?? 'Unknown'}</span>
                   </div>
-                  <p className="text-sm leading-relaxed text-muted-foreground">{c.text}</p>
+                  <p className="text-sm leading-relaxed text-foreground">{c.text}</p>
                 </div>
               );
             })}

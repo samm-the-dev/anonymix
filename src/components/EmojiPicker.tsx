@@ -2,11 +2,17 @@ import * as Popover from '@radix-ui/react-popover';
 import { Smile } from 'lucide-react';
 
 const EMOJIS = [
-  '🔥', '❤️', '😂', '👏', '🙌', '💯',
-  '😍', '🤯', '😭', '🥹', '💀', '👀',
-  '✨', '🎵', '🎶', '🎸', '🎤', '🎧',
-  '👑', '💜', '🫶', '🤌', '😤', '🫠',
-  '💿', '🪩', '⚡', '🌊', '🍄', '🦋',
+  // hearts
+  '❤️', '💖', '🩷', '🧡', '💛', '💚',
+  '💙', '💜', '🖤', '🤍', '🤎', '🫶',
+  // faces
+  '😂', '😍', '🤯', '😭', '🥹', '💀',
+  '😤', '🫠', '🥴', '😮‍💨', '👻', '💅',
+  // gestures + reactions
+  '🔥', '💯', '👏', '🙌', '🤌', '👀',
+  // music + vibes
+  '🎵', '🎶', '🎸', '🎤', '💿', '🪩',
+  '✨', '⚡', '🌊', '👑', '🦋', '🍄',
 ];
 
 interface EmojiPickerProps {
@@ -15,7 +21,7 @@ interface EmojiPickerProps {
 
 export function EmojiPicker({ onSelect }: EmojiPickerProps) {
   return (
-    <Popover.Root>
+    <Popover.Root modal={false}>
       <Popover.Trigger asChild>
         <button
           type="button"
@@ -29,6 +35,7 @@ export function EmojiPicker({ onSelect }: EmojiPickerProps) {
           side="top"
           align="end"
           sideOffset={4}
+          onFocusOutside={(e) => e.preventDefault()}
           className="z-50 grid grid-cols-6 gap-0.5 rounded-lg border border-border bg-background p-2 shadow-lg"
         >
           {EMOJIS.map((emoji) => (
