@@ -1,8 +1,9 @@
 import { useEffect, useState, useCallback } from 'react';
-import { ChevronDown } from 'lucide-react';
+import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
-import { ListeningSection } from '@/components/ListeningSection';
+import { ListeningSection, getSongLink } from '@/components/ListeningSection';
+import type { OdesliResult, MusicPlatform } from '@/hooks/useOdesliLinks';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -11,7 +12,7 @@ interface SubmissionRow {
   song_name: string;
   artist_name: string;
   player_id: string;
-  musicbrainz_id: string | null;
+  deezer_id: string | null;
   cover_art_url: string | null;
 }
 
@@ -36,11 +37,13 @@ function AccordionItem({
   player,
   comments,
   players,
+  songUrl,
 }: {
   submission: SubmissionRow;
   player: PlayerInfo | undefined;
   comments: CommentRow[];
   players: Map<string, PlayerInfo>;
+  songUrl: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -59,6 +62,11 @@ function AccordionItem({
           <p className="text-sm font-semibold text-foreground">{submission.song_name}</p>
           {submission.artist_name && <p className="text-xs text-muted-foreground">{submission.artist_name}</p>}
         </div>
+        {songUrl && (
+          <a href={songUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="shrink-0 text-muted-foreground hover:text-foreground">
+            <ExternalLink className="h-4 w-4" />
+          </a>
+        )}
         <ChevronDown
           className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
         />
@@ -128,6 +136,8 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [players, setPlayers] = useState<Map<string, PlayerInfo>>(new Map());
   const [loading, setLoading] = useState(true);
+  const [songLinks, setSongLinks] = useState<Map<string, OdesliResult>>(new Map());
+  const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
 
   const fetchData = useCallback(async () => {
     if (!sessionId || !tapeId || !player) return;
@@ -137,7 +147,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
       supabase.from('tapes').select('title, prompt').eq('id', tapeId).single(),
       supabase
         .from('submissions')
-        .select('id, song_name, artist_name, player_id, musicbrainz_id, cover_art_url')
+        .select('id, song_name, artist_name, player_id, deezer_id, cover_art_url')
         .eq('tape_id', tapeId),
       supabase
         .from('comments')
@@ -211,6 +221,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               playlistTitle={tapeTitle}
               playlistDescription={tapePrompt}
               currentPlayerId={player?.id}
+              onLinksReady={(l, s) => { setSongLinks(l); setMusicService(s); }}
             />
           </Collapsible.Content>
         </Collapsible.Root>
@@ -228,6 +239,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               player={players.get(s.player_id)}
               comments={comments.filter((c) => c.submission_id === s.id)}
               players={players}
+              songUrl={getSongLink(songLinks, s.id, musicService)}
             />
           ))
         )}

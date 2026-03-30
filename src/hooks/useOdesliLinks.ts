@@ -31,7 +31,7 @@ export interface OdesliResult {
 
 interface OdesliInput {
   id: string;
-  musicbrainzId: string | null;
+  deezerId: string | null;
 }
 
 /**
@@ -45,7 +45,7 @@ export function useOdesliLinks(submissions: OdesliInput[]) {
 
   useEffect(() => {
     const toResolve = submissions.filter(
-      (s) => s.musicbrainzId && !resolvedRef.current.has(s.id),
+      (s) => s.deezerId && !resolvedRef.current.has(s.id),
     );
 
     if (toResolve.length === 0) return;
@@ -55,10 +55,10 @@ export function useOdesliLinks(submissions: OdesliInput[]) {
     async function resolve() {
       for (const sub of toResolve) {
         if (cancelled) break;
-        if (!sub.musicbrainzId) continue;
+        if (!sub.deezerId) continue;
 
         try {
-          const deezerUrl = `https://www.deezer.com/track/${sub.musicbrainzId}`;
+          const deezerUrl = `https://www.deezer.com/track/${sub.deezerId}`;
           const res = await fetch(
             `${ODESLI_BASE}?${new URLSearchParams({ url: deezerUrl })}`,
           );
