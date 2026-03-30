@@ -141,12 +141,17 @@ export function ListeningSection({
   };
   const filename = slugify(meta.title) || 'anonymix-playlist';
 
-  function handleCopy() {
+  async function handleCopy() {
     const text = generatePlainText(songs);
-    navigator.clipboard.writeText(text);
-    setCopied(true);
-    setTimeout(() => setCopied(false), 2000);
-    window.open('https://www.tunemymusic.com/', '_blank');
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+      window.open('https://www.tunemymusic.com/', '_blank');
+    } catch {
+      // Fallback: still open TMM even if copy fails
+      window.open('https://www.tunemymusic.com/', '_blank');
+    }
   }
 
   function handleDownload() {

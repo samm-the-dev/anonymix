@@ -61,7 +61,7 @@ export function generateCsv(tracks: Track[]): string {
 }
 
 export function generatePlainText(tracks: Track[]): string {
-  return tracks.map((t) => `${t.artist_name} - ${t.song_name}`).join('\n');
+  return tracks.map((t) => t.artist_name ? `${t.artist_name} - ${t.song_name}` : t.song_name).join('\n');
 }
 
 export function downloadFile(content: string, filename: string, mimeType: string) {

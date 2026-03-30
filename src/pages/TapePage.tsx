@@ -23,7 +23,7 @@ export function TapePage() {
         .select('id, ended')
         .eq('slug', sessionSlug!)
         .maybeSingle();
-      if (!session) return;
+      if (!session) { navigate('/', { replace: true }); return; }
       setSessionId(session.id);
       setSessionEnded(session.ended);
 
