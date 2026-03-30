@@ -18,7 +18,7 @@ export interface Database {
           avatar_color: string;
           auth_id: string | null;
           listening_tab: string;
-          music_service: string;
+          music_service: string | null;
           created_at: string;
         };
         Insert: {
