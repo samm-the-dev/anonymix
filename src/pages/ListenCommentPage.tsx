@@ -176,11 +176,12 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
 
     try {
       // Always delete existing comments first, then re-insert non-empty ones
-      await supabase
+      const { error: delError } = await supabase
         .from('comments')
         .delete()
         .eq('tape_id', tapeId)
         .eq('player_id', player.id);
+      if (delError) throw delError;
 
       const inserts: { tape_id: string; player_id: string; submission_id: string | null; text: string }[] = [];
       for (const [key, text] of Object.entries(comments)) {
