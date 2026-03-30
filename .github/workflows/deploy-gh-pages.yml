@@ -34,6 +34,27 @@ jobs:
       - name: Install dependencies
         run: npm ci
 
+      - name: Setup Supabase CLI
+        uses: supabase/setup-cli@v1
+
+      - name: Link Supabase project
+        run: supabase link --project-ref ${{ secrets.SUPABASE_PROJECT_REF }}
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
+      - name: Push migrations to prod
+        run: supabase db push --linked
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+          SUPABASE_DB_PASSWORD: ${{ secrets.SUPABASE_DB_PASSWORD }}
+
+      - name: Deploy Edge Functions
+        run: |
+          supabase functions deploy deezer-search --no-verify-jwt
+          supabase functions deploy send-push --no-verify-jwt
+        env:
+          SUPABASE_ACCESS_TOKEN: ${{ secrets.SUPABASE_ACCESS_TOKEN }}
+
       - name: Build
         run: npm run build
         env:
