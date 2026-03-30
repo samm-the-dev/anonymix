@@ -13,7 +13,7 @@ interface Submission {
   id: string;
   song_name: string;
   artist_name: string;
-  musicbrainz_id: string | null;
+  deezer_id: string | null;
   player_id: string;
 }
 
@@ -22,6 +22,7 @@ interface ListeningSectionProps {
   playlistTitle?: string;
   playlistDescription?: string;
   currentPlayerId?: string;
+  onLinksReady?: (links: Map<string, OdesliResult>, service: MusicPlatform | null) => void;
 }
 
 const TAB_OPTIONS: { value: ListeningTab; label: string }[] = [
@@ -45,8 +46,8 @@ function ServiceDropdown({
   value,
   onChange,
 }: {
-  value: MusicPlatform;
-  onChange: (v: MusicPlatform) => void;
+  value: MusicPlatform | null;
+  onChange: (v: MusicPlatform | null) => void;
 }) {
   const [open, setOpen] = useState(false);
 
@@ -56,11 +57,17 @@ function ServiceDropdown({
         onClick={() => setOpen(!open)}
         className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-foreground"
       >
-        {PLATFORM_LABELS[value]}
+        {value ? PLATFORM_LABELS[value] : 'Choose service'}
         <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
       </button>
       {open && (
-        <div className="absolute left-0 top-full z-10 mt-1 w-44 rounded-lg border border-border bg-background py-1 shadow-lg">
+        <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-border bg-background py-1 shadow-lg">
+          <button
+            onClick={() => { onChange(null); setOpen(false); }}
+            className={`w-full px-3 py-1.5 text-left text-xs ${value === null ? 'font-semibold text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            None
+          </button>
           {SERVICE_OPTIONS.map((s) => (
             <button
               key={s}
@@ -79,62 +86,20 @@ function ServiceDropdown({
   );
 }
 
-function SongLink({
-  song,
-  link,
-  service,
-  isYourPick,
-}: {
-  song: Submission;
-  link: OdesliResult | undefined;
-  service: MusicPlatform;
-  isYourPick: boolean;
-}) {
-  const url = link?.platformLinks[service] ?? link?.pageUrl;
-
-  return (
-    <div className="flex items-center gap-3 py-2">
-      <div className="min-w-0 flex-1">
-        <p className="text-sm font-semibold text-foreground">{song.song_name}</p>
-        {song.artist_name && (
-          <p className="text-xs text-muted-foreground">{song.artist_name}</p>
-        )}
-      </div>
-      {isYourPick && (
-        <span className="shrink-0 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
-          Your pick
-        </span>
-      )}
-      {url ? (
-        <a
-          href={url}
-          target="_blank"
-          rel="noopener noreferrer"
-          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg text-muted-foreground hover:text-foreground"
-        >
-          <ExternalLink className="h-4 w-4" />
-        </a>
-      ) : (
-        <div className="h-8 w-8 shrink-0" />
-      )}
-    </div>
-  );
-}
-
 export function ListeningSection({
   songs,
   playlistTitle,
   playlistDescription,
-  currentPlayerId,
+  onLinksReady,
 }: ListeningSectionProps) {
   const { player } = useAuthContext();
   const [tab, setTab] = useState<ListeningTab>('links');
-  const [service, setService] = useState<MusicPlatform>('spotify');
+  const [service, setService] = useState<MusicPlatform | null>(null);
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
 
-  const odesliInputs = songs.map((s) => ({ id: s.id, musicbrainzId: s.musicbrainz_id }));
+  const odesliInputs = songs.map((s) => ({ id: s.id, deezerId: s.deezer_id }));
   const links = useOdesliLinks(odesliInputs);
 
   // Load saved preferences
@@ -155,6 +120,11 @@ export function ListeningSection({
       });
   }, [player, prefsLoaded]);
 
+  // Notify parent when links or service change
+  useEffect(() => {
+    onLinksReady?.(links, service);
+  }, [links, service, onLinksReady]);
+
   // Persist tab preference
   const saveTab = useCallback(
     (value: ListeningTab) => {
@@ -168,10 +138,10 @@ export function ListeningSection({
 
   // Persist service preference
   const saveService = useCallback(
-    (value: MusicPlatform) => {
+    (value: MusicPlatform | null) => {
       setService(value);
       if (player) {
-        supabase.from('players').update({ music_service: value }).eq('id', player.id).then();
+        supabase.from('players').update({ music_service: value ?? undefined }).eq('id', player.id).then();
       }
     },
     [player],
@@ -202,6 +172,9 @@ export function ListeningSection({
 
   return (
     <div className="border-b border-border px-4 py-3">
+      <p className="text-sm text-muted-foreground">
+        Listen to your playlist on your preferred music service
+      </p>
       {/* Segmented control */}
       <ToggleGroup.Root
         type="single"
@@ -224,22 +197,9 @@ export function ListeningSection({
 
       {/* Links tab */}
       {tab === 'links' && (
-        <div>
-          <div className="mb-2 flex items-center justify-between">
-            <p className="text-xs text-muted-foreground">Open each song in</p>
-            <ServiceDropdown value={service} onChange={saveService} />
-          </div>
-          <div className="divide-y divide-border/50">
-            {songs.map((s) => (
-              <SongLink
-                key={s.id}
-                song={s}
-                link={links.get(s.id)}
-                service={service}
-                isYourPick={s.player_id === currentPlayerId}
-              />
-            ))}
-          </div>
+        <div className="flex items-center justify-end gap-2">
+          <p className="text-xs text-muted-foreground">Link to</p>
+          <ServiceDropdown value={service} onChange={saveService} />
         </div>
       )}
 
@@ -247,19 +207,8 @@ export function ListeningSection({
       {tab === 'copy' && (
         <div>
           <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-            <li>Tap below to copy the song list</li>
-            <li>
-              Open{' '}
-              <a
-                href="https://www.tunemymusic.com/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="underline"
-              >
-                TuneMyMusic
-              </a>
-              , select &ldquo;Free text&rdquo;, paste the list
-            </li>
+            <li>Tap below to copy the song list and open TuneMyMusic</li>
+            <li>Scroll down, select &ldquo;Free text&rdquo;, paste the list</li>
             <li>Choose your destination service and start transfer</li>
           </ol>
           <button
@@ -267,7 +216,8 @@ export function ListeningSection({
             className="flex w-full items-center justify-center gap-1.5 rounded-xl bg-blue-500 py-2.5 text-sm font-semibold text-white hover:bg-blue-600 dark:bg-blue-600 dark:hover:bg-blue-500"
           >
             {copied ? <Check className="h-4 w-4" /> : <Copy className="h-4 w-4" />}
-            {copied ? 'Copied!' : 'Copy Song List'}
+            {copied ? 'Copied!' : 'Copy Songs & Open Transfer'}
+            {!copied && <ExternalLink className="h-4 w-4" />}
           </button>
         </div>
       )}
@@ -276,7 +226,7 @@ export function ListeningSection({
       {tab === 'file' && (
         <div>
           <ol className="mb-3 list-decimal space-y-1 pl-5 text-sm text-muted-foreground">
-            <li>Tap below to save the playlist file and open TuneMyMusic</li>
+            <li>Tap below to save the playlist and open TuneMyMusic</li>
             <li>Scroll down, select &ldquo;Upload file&rdquo;, upload the file</li>
             <li>Choose your destination service and start transfer</li>
           </ol>
@@ -292,4 +242,15 @@ export function ListeningSection({
       )}
     </div>
   );
+}
+
+/** Get the platform link for a song from the Odesli results */
+export function getSongLink(
+  links: Map<string, OdesliResult>,
+  songId: string,
+  service: MusicPlatform | null,
+): string | null {
+  if (!service) return null;
+  const result = links.get(songId);
+  return result?.platformLinks[service] ?? result?.pageUrl ?? null;
 }

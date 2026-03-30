@@ -27,7 +27,7 @@ interface SubmissionData {
   song_name: string;
   artist_name: string;
   player_id: string;
-  musicbrainz_id: string | null;
+  deezer_id: string | null;
   release_id: string | null;
   cover_art_url: string | null;
 }
@@ -77,7 +77,7 @@ export function SessionViewPage() {
       .from('sessions')
       .select('id, name, admin_id, slug, ended')
       .eq('slug', sessionSlug)
-      .single();
+      .maybeSingle();
 
     if (!session) {
       setToastMessage('Session not found');
@@ -132,7 +132,7 @@ export function SessionViewPage() {
       const tapeIds = fetchedTapes.map((t) => t.id);
       const { data: subs } = await supabase
         .from('submissions')
-        .select('id, song_name, artist_name, player_id, tape_id, musicbrainz_id, release_id, cover_art_url')
+        .select('id, song_name, artist_name, player_id, tape_id, deezer_id, release_id, cover_art_url')
         .in('tape_id', tapeIds);
 
       setSubmissions(subs ?? []);
@@ -181,10 +181,10 @@ export function SessionViewPage() {
       if (existing) {
         setQuery(`${existing.artist_name ? existing.artist_name + ' - ' : ''}${existing.song_name}`);
         setSelectedSong({
-          id: existing.musicbrainz_id ?? 'manual',
+          id: existing.deezer_id ?? 'manual',
           title: existing.song_name,
           artist: existing.artist_name,
-          deezerId: existing.musicbrainz_id ?? undefined,
+          deezerId: existing.deezer_id ?? undefined,
         });
         setCoverArtUrl(existing.cover_art_url);
       }
@@ -248,7 +248,7 @@ export function SessionViewPage() {
           .update({
             song_name: selectedSong.title,
             artist_name: selectedSong.artist,
-            musicbrainz_id: selectedSong.deezerId ?? null,
+            deezer_id: selectedSong.deezerId ?? null,
             release_id: null,
             cover_art_url: coverArtUrl,
           })
@@ -261,7 +261,7 @@ export function SessionViewPage() {
           player_id: player.id,
           song_name: selectedSong.title,
           artist_name: selectedSong.artist,
-          musicbrainz_id: selectedSong.deezerId ?? null,
+          deezer_id: selectedSong.deezerId ?? null,
           release_id: null,
           cover_art_url: coverArtUrl,
         });
@@ -540,10 +540,10 @@ export function SessionViewPage() {
                         setShowSearch(true);
                         setQuery(`${mySubmission.artist_name ? mySubmission.artist_name + ' - ' : ''}${mySubmission.song_name}`);
                         setSelectedSong({
-                          id: mySubmission.musicbrainz_id ?? 'manual',
+                          id: mySubmission.deezer_id ?? 'manual',
                           title: mySubmission.song_name,
                           artist: mySubmission.artist_name,
-                          deezerId: mySubmission.musicbrainz_id ?? undefined,
+                          deezerId: mySubmission.deezer_id ?? undefined,
                         });
                         setCoverArtUrl(mySubmission.cover_art_url);
                       }}

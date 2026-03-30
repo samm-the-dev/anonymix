@@ -22,7 +22,7 @@ export function TapePage() {
         .from('sessions')
         .select('id, ended')
         .eq('slug', sessionSlug!)
-        .single();
+        .maybeSingle();
       if (!session) return;
       setSessionId(session.id);
       setSessionEnded(session.ended);
