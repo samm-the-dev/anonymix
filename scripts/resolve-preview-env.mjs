@@ -5,16 +5,19 @@
  * then writes VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY to .env.local
  * so Vite picks them up during build.
  *
+ * Polls until the preview branch is ready (Supabase may still be provisioning).
+ *
  * Required env vars:
  *   SUPABASE_ACCESS_TOKEN  — personal access token
  *   SUPABASE_PROJECT_REF   — parent project ref (e.g. mryuusvhdadbjpupzpol)
- *
- * Falls back to existing env vars if no preview branch is found (code-only PRs).
  */
 
 const gitBranch = process.env.VERCEL_GIT_COMMIT_REF;
 const accessToken = process.env.SUPABASE_ACCESS_TOKEN;
 const projectRef = process.env.SUPABASE_PROJECT_REF;
+
+const MAX_WAIT_MS = 5 * 60 * 1000; // 5 minutes
+const POLL_INTERVAL_MS = 10 * 1000; // 10 seconds
 
 if (!gitBranch) {
   console.log('[preview-env] No VERCEL_GIT_COMMIT_REF — skipping (not a Vercel build)');
@@ -28,32 +31,51 @@ if (!accessToken || !projectRef) {
 
 console.log(`[preview-env] Looking up Supabase preview branch for: ${gitBranch}`);
 
-const res = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/branches`, {
-  headers: { Authorization: `Bearer ${accessToken}` },
-});
+const apiBase = `https://api.supabase.com/v1/projects/${projectRef}/branches`;
+const headers = { Authorization: `Bearer ${accessToken}` };
 
-if (!res.ok) {
-  const body = await res.text();
-  console.error(`[preview-env] Failed to list branches: ${res.status} ${res.statusText} — ${body}`);
+async function findBranch() {
+  const res = await fetch(apiBase, { headers });
+  if (!res.ok) {
+    const body = await res.text();
+    throw new Error(`Failed to list branches: ${res.status} ${res.statusText} — ${body}`);
+  }
+  const branches = await res.json();
+  return branches.find((b) => b.git_branch === gitBranch);
+}
+
+// Poll until branch exists and is ready
+const start = Date.now();
+let branch;
+
+while (Date.now() - start < MAX_WAIT_MS) {
+  branch = await findBranch();
+
+  if (branch && branch.status === 'FUNCTIONS_DEPLOYED') {
+    break;
+  }
+
+  const status = branch ? branch.status : 'not found';
+  const elapsed = Math.round((Date.now() - start) / 1000);
+  console.log(`[preview-env] Branch status: ${status} (${elapsed}s elapsed) — waiting...`);
+  await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+}
+
+if (!branch) {
+  console.error(`[preview-env] Timed out waiting for preview branch: ${gitBranch}`);
   process.exit(1);
 }
 
-const branches = await res.json();
-console.log(`[preview-env] Found ${branches.length} branches: ${branches.map((b) => b.git_branch).join(', ')}`);
-const branch = branches.find((b) => b.git_branch === gitBranch);
-
-if (!branch) {
-  console.error(`[preview-env] No preview branch found for ${gitBranch}`);
+if (branch.status !== 'FUNCTIONS_DEPLOYED') {
+  console.error(`[preview-env] Branch not ready after ${MAX_WAIT_MS / 1000}s — status: ${branch.status}`);
   process.exit(1);
 }
 
 const branchRef = branch.project_ref;
-console.log(`[preview-env] Found preview branch: ${branchRef}`);
+console.log(`[preview-env] Preview branch ready: ${branchRef}`);
 
 // Get the branch's API keys
-const keysRes = await fetch(`https://api.supabase.com/v1/projects/${branchRef}/api-keys`, {
-  headers: { Authorization: `Bearer ${accessToken}` },
-});
+const keysRes = await fetch(`https://api.supabase.com/v1/projects/${branchRef}/api-keys`, { headers });
 
 if (!keysRes.ok) {
   console.error(`[preview-env] Failed to get API keys: ${keysRes.status}`);
