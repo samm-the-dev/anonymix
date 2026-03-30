@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
-import { PlaylistImport } from '@/components/PlaylistImport';
+import { ListeningSection } from '@/components/ListeningSection';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -11,6 +11,7 @@ interface SubmissionRow {
   song_name: string;
   artist_name: string;
   player_id: string;
+  musicbrainz_id: string | null;
   cover_art_url: string | null;
 }
 
@@ -136,7 +137,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
       supabase.from('tapes').select('title, prompt').eq('id', tapeId).single(),
       supabase
         .from('submissions')
-        .select('id, song_name, artist_name, player_id, cover_art_url')
+        .select('id, song_name, artist_name, player_id, musicbrainz_id, cover_art_url')
         .eq('tape_id', tapeId),
       supabase
         .from('comments')
@@ -197,15 +198,20 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
         <p className="mt-0.5 text-sm text-muted-foreground">{tapePrompt}</p>
       </div>
 
-      {/* Playlist import — collapsible */}
+      {/* Listening — collapsible */}
       {submissions.length > 0 && (
-        <Collapsible.Root>
+        <Collapsible.Root defaultOpen>
           <Collapsible.Trigger className="flex w-full items-center justify-between border-t border-border px-4 py-2 text-xs font-medium text-muted-foreground [&[data-state=closed]>svg]:-rotate-90">
-            <span>Import playlist</span>
+            <span>Listening</span>
             <ChevronDown className="h-3 w-3 transition-transform duration-200" />
           </Collapsible.Trigger>
           <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
-            <PlaylistImport songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} />
+            <ListeningSection
+              songs={submissions}
+              playlistTitle={tapeTitle}
+              playlistDescription={tapePrompt}
+              currentPlayerId={player?.id}
+            />
           </Collapsible.Content>
         </Collapsible.Root>
       )}

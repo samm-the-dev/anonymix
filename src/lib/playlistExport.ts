@@ -60,6 +60,10 @@ export function generateCsv(tracks: Track[]): string {
   return lines.join('\n');
 }
 
+export function generatePlainText(tracks: Track[]): string {
+  return tracks.map((t) => `${t.artist_name} - ${t.song_name}`).join('\n');
+}
+
 export function downloadFile(content: string, filename: string, mimeType: string) {
   const blob = new Blob([content], { type: mimeType });
   const url = URL.createObjectURL(blob);
