@@ -9,7 +9,7 @@ import { ListeningSection } from '@/components/ListeningSection';
 import { buildSongSearchUrl, PLATFORM_LABELS, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { seededShuffle } from '@/lib/seededShuffle';
 
-function CommentField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function CommentField({ value, onChange, isDraft }: { value: string; onChange: (v: string) => void; isDraft?: boolean }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
   function autoResize() {
@@ -41,7 +41,7 @@ function CommentField({ value, onChange }: { value: string; onChange: (v: string
 
   return (
     <div className="mt-3">
-      <div className="flex rounded-lg border border-border bg-card focus-within:border-border/80">
+      <div className={`flex rounded-lg border bg-card focus-within:border-border/80 ${isDraft ? 'border-amber-500/40' : 'border-border'}`}>
         <textarea
           ref={textareaRef}
           value={value}
@@ -290,7 +290,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
                     </a>
                   )}
                 </div>
-                <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} />
+                <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} isDraft={(comments[s.id] ?? '') !== (existingComments[s.id] ?? '')} />
               </div>
             ))
           )}
@@ -299,7 +299,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
           {submissions.length > 0 && (
             <div className="py-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">The Tape</p>
-              <CommentField value={comments['_tape'] ?? ''} onChange={(v) => updateComment('_tape', v)} />
+              <CommentField value={comments['_tape'] ?? ''} onChange={(v) => updateComment('_tape', v)} isDraft={(comments['_tape'] ?? '') !== (existingComments['_tape'] ?? '')} />
             </div>
           )}
         </div>
