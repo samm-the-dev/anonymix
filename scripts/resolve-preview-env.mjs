@@ -22,8 +22,8 @@ if (!gitBranch) {
 }
 
 if (!accessToken || !projectRef) {
-  console.log('[preview-env] Missing SUPABASE_ACCESS_TOKEN or SUPABASE_PROJECT_REF — using existing env');
-  process.exit(0);
+  console.error('[preview-env] Missing SUPABASE_ACCESS_TOKEN or SUPABASE_PROJECT_REF');
+  process.exit(1);
 }
 
 console.log(`[preview-env] Looking up Supabase preview branch for: ${gitBranch}`);
@@ -33,16 +33,18 @@ const res = await fetch(`https://api.supabase.com/v1/projects/${projectRef}/bran
 });
 
 if (!res.ok) {
-  console.log(`[preview-env] Failed to list branches: ${res.status} ${res.statusText}`);
-  process.exit(0);
+  const body = await res.text();
+  console.error(`[preview-env] Failed to list branches: ${res.status} ${res.statusText} — ${body}`);
+  process.exit(1);
 }
 
 const branches = await res.json();
+console.log(`[preview-env] Found ${branches.length} branches: ${branches.map((b) => b.git_branch).join(', ')}`);
 const branch = branches.find((b) => b.git_branch === gitBranch);
 
 if (!branch) {
-  console.log(`[preview-env] No preview branch found for ${gitBranch} — using existing env`);
-  process.exit(0);
+  console.error(`[preview-env] No preview branch found for ${gitBranch}`);
+  process.exit(1);
 }
 
 const branchRef = branch.project_ref;
@@ -54,8 +56,8 @@ const keysRes = await fetch(`https://api.supabase.com/v1/projects/${branchRef}/a
 });
 
 if (!keysRes.ok) {
-  console.log(`[preview-env] Failed to get API keys: ${keysRes.status} — using existing env`);
-  process.exit(0);
+  console.error(`[preview-env] Failed to get API keys: ${keysRes.status}`);
+  process.exit(1);
 }
 
 const keys = await keysRes.json();
@@ -63,8 +65,8 @@ const anonKey = keys.find((k) => k.name === 'anon')?.api_key
   ?? keys.find((k) => k.name === 'default' && !k.api_key.includes('secret'))?.api_key;
 
 if (!anonKey) {
-  console.log('[preview-env] Could not find anon key — using existing env');
-  process.exit(0);
+  console.error('[preview-env] Could not find anon key');
+  process.exit(1);
 }
 
 const url = `https://${branchRef}.supabase.co`;
