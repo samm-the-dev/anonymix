@@ -1,101 +1,89 @@
--- Seed data matching the prototype's status variants
--- Runs automatically after migrations via `supabase db reset`
+-- Seed: hello world session with tapes in all 5 statuses
+-- Source: supabase/seed-data/hello-world-session.json
+-- auth_id nulled — preview branches won't have matching auth users
 
 -- Players
 insert into players (id, name, avatar, avatar_color) values
-  ('00000000-0000-0000-0000-000000000001', 'Sam', '🎸', '#6366f1'),
-  ('00000000-0000-0000-0000-000000000002', 'Alex', '🎧', '#f59e0b'),
-  ('00000000-0000-0000-0000-000000000003', 'Jordan', '🎹', '#10b981'),
-  ('00000000-0000-0000-0000-000000000004', 'Riley', '🎤', '#ef4444'),
-  ('00000000-0000-0000-0000-000000000005', 'Casey', '🥁', '#8b5cf6'),
-  ('00000000-0000-0000-0000-000000000006', 'Morgan', '🎺', '#ec4899');
+  ('d65ea8f9-edf4-4474-aa03-ea5b9644284e', 'Sam', '🎺', '#6366f1'),
+  ('b39dc477-605d-4a0e-9ac3-90df78f0130b', 'Sammie', '🎶', '#10b981');
 
--- Session 1: Active — submitting
-insert into sessions (id, name, description, admin_id, ended) values
-  ('10000000-0000-0000-0000-000000000001', 'Friday Night Vinyl', 'Weekly picks with the crew',
-   '00000000-0000-0000-0000-000000000001', false);
+-- Session
+insert into sessions (id, name, description, admin_id, ended, slug, created_at) values
+  ('e446bc3c-40a6-40bf-9198-43a4cd67f77e', 'hello world', 'the first session for this app',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', false, 'hello-world-e446',
+   '2026-03-29T02:56:07.478434+00:00');
 
+-- Members
 insert into session_players (session_id, player_id) values
-  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000002'),
-  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000003'),
-  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000004'),
-  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000005'),
-  ('10000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000006');
+  ('e446bc3c-40a6-40bf-9198-43a4cd67f77e', 'd65ea8f9-edf4-4474-aa03-ea5b9644284e'),
+  ('e446bc3c-40a6-40bf-9198-43a4cd67f77e', 'b39dc477-605d-4a0e-9ac3-90df78f0130b');
 
-insert into tapes (id, session_id, title, prompt, status, deadline) values
-  ('20000000-0000-0000-0000-000000000001', '10000000-0000-0000-0000-000000000001',
-   'Magneto, Master of Magnetism', 'polarizing "love it or hate it" songs',
-   'submitting', now() + interval '3 days');
+-- Tapes: results → skipped → playlist_ready → submitting → upcoming
+insert into tapes (id, session_id, title, prompt, status, deadline, submit_window_hours, comment_window_hours, created_at) values
+  ('c320c8b5-0597-43ce-abe0-b0431a7ff050', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
+   'allow me to introduce myself', 'songs establishing identity',
+   'results', '2026-04-04T04:16:44.426+00:00', 48, 120,
+   '2026-03-29T02:56:07.783762+00:00'),
+  ('ad2b5c85-9f07-4623-a960-50aafaaba86c', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
+   'and you are?', 'personally inquisitive songs',
+   'skipped', null, 48, 120,
+   '2026-03-29T02:56:07.930365+00:00'),
+  ('39a36854-75af-47f1-b777-2e2bc1653e77', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
+   'nice to meet you', 'songs about new friendship',
+   'playlist_ready', '2026-04-03T04:48:45.102694+00:00', 48, 120,
+   '2026-03-29T02:56:08.063361+00:00'),
+  ('8d48064d-396f-4abf-b8ff-927602d8d006', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
+   'let''s fucking go', 'songs about starting something exciting',
+   'submitting', null, 48, 120,
+   '2026-03-29T02:56:08.19257+00:00'),
+  ('65a7f09e-112a-496c-a7b2-da6a7f57e697', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
+   'we did it', 'songs about accomplishing something',
+   'upcoming', null, 48, 120,
+   '2026-03-29T02:56:08.308829+00:00');
 
--- Sam has submitted for this tape
-insert into submissions (tape_id, player_id, song_name) values
-  ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Radiohead - Creep');
+-- Submissions (deezer_id = former musicbrainz_id column)
+insert into submissions (id, tape_id, player_id, song_name, artist_name, deezer_id, cover_art_url, created_at) values
+  ('44c82eff-b125-4d51-9b29-858794552c03', 'c320c8b5-0597-43ce-abe0-b0431a7ff050',
+   'b39dc477-605d-4a0e-9ac3-90df78f0130b', 'Sympathy For The Devil', 'The Rolling Stones',
+   '9956063', 'https://cdn-images.dzcdn.net/images/cover/007ca308040f3efeff845f2fb4e87a2a/250x250-000000-80-0-0.jpg',
+   '2026-03-29T03:09:34.788129+00:00'),
+  ('f33e3bcb-04e8-469c-8f6d-c62fb6f3544d', 'c320c8b5-0597-43ce-abe0-b0431a7ff050',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', 'My Name Is', 'Eminem',
+   '1109729', 'https://cdn-images.dzcdn.net/images/cover/e2b36a9fda865cb2e9ed1476b6291a7d/250x250-000000-80-0-0.jpg',
+   '2026-03-29T03:10:10.087823+00:00'),
+  ('21ff7cc9-74b2-490b-b286-85438ed92ace', '39a36854-75af-47f1-b777-2e2bc1653e77',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', 'My Best Friend', 'Weezer',
+   '79779244', 'https://cdn-images.dzcdn.net/images/cover/03c500903d0504fd7939c4168b6cce89/250x250-000000-80-0-0.jpg',
+   '2026-03-29T04:48:03.500848+00:00'),
+  ('9a1bba6e-7dff-474e-9f18-3812cbdb188a', '39a36854-75af-47f1-b777-2e2bc1653e77',
+   'b39dc477-605d-4a0e-9ac3-90df78f0130b', 'Nice to Meet You', 'Imagine Dragons',
+   '2857441232', 'https://cdn-images.dzcdn.net/images/cover/4a3e5538d0d0caa37a76de4a34266191/250x250-000000-80-0-0.jpg',
+   '2026-03-29T04:48:25.500067+00:00');
 
--- Session 2: Active — playlist_ready
-insert into sessions (id, name, description, admin_id, ended) values
-  ('10000000-0000-0000-0000-000000000002', 'Road Trip Jams', 'Songs for the open road',
-   '00000000-0000-0000-0000-000000000003', false);
-
-insert into session_players (session_id, player_id) values
-  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000002'),
-  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000003'),
-  ('10000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000004');
-
-insert into tapes (id, session_id, title, prompt, status, deadline) values
-  ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002',
-   'Two-Face aka Harvey Dent', 'songs that start in one style then switch halfway through',
-   'playlist_ready', now() + interval '1 day');
-
--- Sam has commented on this tape
-insert into comments (tape_id, player_id, text) values
-  ('20000000-0000-0000-0000-000000000002', '00000000-0000-0000-0000-000000000001',
-   'This one hits different on the second listen');
-
--- Session 3: Active — playlist ready
-insert into sessions (id, name, description, admin_id, ended) values
-  ('10000000-0000-0000-0000-000000000003', 'Deep Cuts Club', 'No singles allowed',
-   '00000000-0000-0000-0000-000000000005', false);
-
-insert into session_players (session_id, player_id) values
-  ('10000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000004'),
-  ('10000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000005'),
-  ('10000000-0000-0000-0000-000000000003', '00000000-0000-0000-0000-000000000006');
-
-insert into tapes (id, session_id, title, prompt, status) values
-  ('20000000-0000-0000-0000-000000000003', '10000000-0000-0000-0000-000000000003',
-   'Guilty pleasures', 'songs you''d never admit to loving',
-   'playlist_ready');
-
--- Session 4: Active — results
-insert into sessions (id, name, description, admin_id, ended) values
-  ('10000000-0000-0000-0000-000000000004', 'Throwback Thursday', 'Nostalgia only',
-   '00000000-0000-0000-0000-000000000002', false);
-
-insert into session_players (session_id, player_id) values
-  ('10000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000002'),
-  ('10000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000003'),
-  ('10000000-0000-0000-0000-000000000004', '00000000-0000-0000-0000-000000000006');
-
-insert into tapes (id, session_id, title, prompt, status, completed_at) values
-  ('20000000-0000-0000-0000-000000000004', '10000000-0000-0000-0000-000000000004',
-   'Spider-Man, Your Friendly Neighborhood Web-Slinger', 'fun, youthful, upbeat bangers',
-   'results', now() - interval '6 days');
-
--- Session 5: Completed
-insert into sessions (id, name, description, admin_id, ended) values
-  ('10000000-0000-0000-0000-000000000005', 'Summer 2025 Mix', 'The soundtrack to last summer',
-   '00000000-0000-0000-0000-000000000001', true);
-
-insert into session_players (session_id, player_id) values
-  ('10000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000001'),
-  ('10000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000002'),
-  ('10000000-0000-0000-0000-000000000005', '00000000-0000-0000-0000-000000000004');
-
-insert into tapes (id, session_id, title, prompt, status, completed_at) values
-  ('20000000-0000-0000-0000-000000000005', '10000000-0000-0000-0000-000000000005',
-   'Final Round', 'the song of the summer',
-   'results', now() - interval '90 days');
+-- Comments
+insert into comments (id, tape_id, player_id, text, submission_id, created_at) values
+  ('789cc604-67cc-4e01-b057-11c324e63c10', 'c320c8b5-0597-43ce-abe0-b0431a7ff050',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', '🔥💯👏🙌🤌', null,
+   '2026-03-29T04:29:09.447695+00:00'),
+  ('a16b34c6-e9ef-478d-8837-d429facdbce3', 'c320c8b5-0597-43ce-abe0-b0431a7ff050',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', '🤯🥴😮‍💨💿🤌',
+   '44c82eff-b125-4d51-9b29-858794552c03',
+   '2026-03-29T04:29:09.447695+00:00'),
+  ('2cce6a46-5e98-4944-bfd7-6963444f5a82', 'c320c8b5-0597-43ce-abe0-b0431a7ff050',
+   'b39dc477-605d-4a0e-9ac3-90df78f0130b', 'HELL yeah',
+   'f33e3bcb-04e8-469c-8f6d-c62fb6f3544d',
+   '2026-03-29T04:30:28.971914+00:00'),
+  ('e5760f84-cb69-4530-96e6-5e0c79c5dadf', 'c320c8b5-0597-43ce-abe0-b0431a7ff050',
+   'b39dc477-605d-4a0e-9ac3-90df78f0130b', 'great mix! 🎶⚡', null,
+   '2026-03-29T04:30:28.971914+00:00'),
+  ('d68a7ebb-44e2-4cbc-a3c2-d9f458c7845f', '39a36854-75af-47f1-b777-2e2bc1653e77',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', '🙌🔥💯',
+   '21ff7cc9-74b2-490b-b286-85438ed92ace',
+   '2026-03-29T04:56:45.413545+00:00'),
+  ('8c4d9756-7eeb-49c0-9add-e6a953c5cef3', '39a36854-75af-47f1-b777-2e2bc1653e77',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', 'hah how appropriate 😂',
+   '9a1bba6e-7dff-474e-9f18-3812cbdb188a',
+   '2026-03-29T04:56:45.413545+00:00'),
+  ('4c26dc6d-df40-4dd1-9571-ddaac014af2c', '39a36854-75af-47f1-b777-2e2bc1653e77',
+   'd65ea8f9-edf4-4474-aa03-ea5b9644284e', 'very nice', null,
+   '2026-03-29T04:56:45.413545+00:00');
