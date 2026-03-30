@@ -174,37 +174,19 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
     if (!tapeId || !player) return;
     setSubmitting(true);
 
-    // Collect non-empty comments that are new or changed
-    const inserts: { tape_id: string; player_id: string; submission_id: string | null; text: string }[] = [];
-
-    for (const [key, text] of Object.entries(comments)) {
-      const trimmed = text.trim();
-      if (!trimmed) continue;
-      // Skip if unchanged from existing
-      if (existingComments[key] === trimmed) continue;
-
-      inserts.push({
-        tape_id: tapeId,
-        player_id: player.id,
-        submission_id: key === '_tape' ? null : key,
-        text: trimmed,
-      });
-    }
-
-    if (inserts.length > 0) {
-      // Delete existing comments by this user on this tape first, then re-insert
+    try {
+      // Always delete existing comments first, then re-insert non-empty ones
       await supabase
         .from('comments')
         .delete()
         .eq('tape_id', tapeId)
         .eq('player_id', player.id);
 
-      // Re-insert all non-empty comments (both changed and unchanged)
-      const allInserts: typeof inserts = [];
+      const inserts: { tape_id: string; player_id: string; submission_id: string | null; text: string }[] = [];
       for (const [key, text] of Object.entries(comments)) {
         const trimmed = text.trim();
         if (!trimmed) continue;
-        allInserts.push({
+        inserts.push({
           tape_id: tapeId,
           player_id: player.id,
           submission_id: key === '_tape' ? null : key,
@@ -212,17 +194,22 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         });
       }
 
-      await supabase.from('comments').insert(allInserts);
+      if (inserts.length > 0) {
+        const { error } = await supabase.from('comments').insert(inserts);
+        if (error) throw error;
+      }
+
+      // Clear drafts after successful submit
+      localStorage.removeItem(draftKey);
+      setExistingComments(comments);
+
+      setShowToast(true);
+      setTimeout(() => {
+        navigate(-1);
+      }, 1200);
+    } catch {
+      setSubmitting(false);
     }
-
-    // Clear drafts after successful submit
-    localStorage.removeItem(draftKey);
-    setExistingComments(comments);
-
-    setShowToast(true);
-    setTimeout(() => {
-      navigate(-1);
-    }, 1200);
   }
 
   if (loading) {
