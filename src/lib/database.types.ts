@@ -17,6 +17,8 @@ export interface Database {
           avatar: string;
           avatar_color: string;
           auth_id: string | null;
+          listening_tab: string;
+          music_service: string;
           created_at: string;
         };
         Insert: {
@@ -25,6 +27,8 @@ export interface Database {
           avatar: string;
           avatar_color: string;
           auth_id?: string | null;
+          listening_tab?: string;
+          music_service?: string;
           created_at?: string;
         };
         Update: {
@@ -33,6 +37,8 @@ export interface Database {
           avatar?: string;
           avatar_color?: string;
           auth_id?: string | null;
+          listening_tab?: string;
+          music_service?: string;
         };
         Relationships: [];
       };
