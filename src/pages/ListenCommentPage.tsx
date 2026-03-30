@@ -84,6 +84,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
 
   // Comment state: submissionId -> text, plus '_tape' for tape-level
   const [comments, setComments] = useState<Record<string, string>>({});
+  const draftKey = `anonymix-draft-comments-${tapeId}`;
 
   // Existing comments (already submitted by this user)
   const [existingComments, setExistingComments] = useState<Record<string, string>>({});
@@ -119,19 +120,51 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
       existing[key] = c.text;
     }
     setExistingComments(existing);
-    setComments(existing);
+
+    // Load drafts from localStorage, overlay on top of submitted comments
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const drafts = JSON.parse(saved) as Record<string, string>;
+        setComments({ ...existing, ...drafts });
+      } else {
+        setComments(existing);
+      }
+    } catch {
+      setComments(existing);
+    }
 
     setLoading(false);
-  }, [sessionId, tapeId, player]);
+  }, [sessionId, tapeId, player, draftKey]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
+  // Debounced draft save to localStorage
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => {
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      // Only save keys that differ from submitted comments
+      const drafts: Record<string, string> = {};
+      for (const [key, text] of Object.entries(comments)) {
+        if (text !== (existingComments[key] ?? '')) {
+          drafts[key] = text;
+        }
+      }
+      if (Object.keys(drafts).length > 0) {
+        localStorage.setItem(draftKey, JSON.stringify(drafts));
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+    }, 500);
+    return () => clearTimeout(saveTimerRef.current);
+  }, [comments, existingComments, draftKey]);
+
   function switchTab(tab: 'commenting' | 'listening') {
     setInfoTab(tab);
   }
-
 
   function updateComment(key: string, text: string) {
     setComments((prev) => ({ ...prev, [key]: text }));
@@ -181,6 +214,10 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
 
       await supabase.from('comments').insert(allInserts);
     }
+
+    // Clear drafts after successful submit
+    localStorage.removeItem(draftKey);
+    setExistingComments(comments);
 
     setShowToast(true);
     setTimeout(() => {
