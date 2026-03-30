@@ -32,7 +32,7 @@ insert into tapes (id, session_id, title, prompt, status, deadline) values
 insert into submissions (tape_id, player_id, song_name) values
   ('20000000-0000-0000-0000-000000000001', '00000000-0000-0000-0000-000000000001', 'Radiohead - Creep');
 
--- Session 2: Active — commenting
+-- Session 2: Active — playlist_ready
 insert into sessions (id, name, description, admin_id, ended) values
   ('10000000-0000-0000-0000-000000000002', 'Road Trip Jams', 'Songs for the open road',
    '00000000-0000-0000-0000-000000000003', false);
@@ -46,7 +46,7 @@ insert into session_players (session_id, player_id) values
 insert into tapes (id, session_id, title, prompt, status, deadline) values
   ('20000000-0000-0000-0000-000000000002', '10000000-0000-0000-0000-000000000002',
    'Two-Face aka Harvey Dent', 'songs that start in one style then switch halfway through',
-   'commenting', now() + interval '1 day');
+   'playlist_ready', now() + interval '1 day');
 
 -- Sam has commented on this tape
 insert into comments (tape_id, player_id, text) values
