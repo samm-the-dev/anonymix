@@ -22,7 +22,7 @@ insert into session_players (session_id, player_id) values
 insert into tapes (id, session_id, title, prompt, status, deadline, submit_window_hours, comment_window_hours, created_at) values
   ('c320c8b5-0597-43ce-abe0-b0431a7ff050', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
    'allow me to introduce myself', 'songs establishing identity',
-   'results', '2026-04-04T04:16:44.426+00:00', 48, 120,
+   'results', now() - interval '2 days', 48, 120,
    '2026-03-29T02:56:07.783762+00:00'),
   ('ad2b5c85-9f07-4623-a960-50aafaaba86c', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
    'and you are?', 'personally inquisitive songs',
@@ -30,7 +30,7 @@ insert into tapes (id, session_id, title, prompt, status, deadline, submit_windo
    '2026-03-29T02:56:07.930365+00:00'),
   ('39a36854-75af-47f1-b777-2e2bc1653e77', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
    'nice to meet you', 'songs about new friendship',
-   'playlist_ready', '2026-04-03T04:48:45.102694+00:00', 48, 120,
+   'playlist_ready', now() + interval '5 days', 48, 120,
    '2026-03-29T02:56:08.063361+00:00'),
   ('8d48064d-396f-4abf-b8ff-927602d8d006', 'e446bc3c-40a6-40bf-9198-43a4cd67f77e',
    'let''s fucking go', 'songs about starting something exciting',

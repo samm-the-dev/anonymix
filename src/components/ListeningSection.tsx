@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { ExternalLink, Download, Copy, Check, ChevronDown } from 'lucide-react';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
+import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { PLATFORM_LABELS, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { generateXspf, generatePlainText, downloadFile } from '@/lib/playlistExport';
@@ -47,40 +48,32 @@ function ServiceDropdown({
   value: MusicPlatform | null;
   onChange: (v: MusicPlatform | null) => void;
 }) {
-  const [open, setOpen] = useState(false);
-
   return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen(!open)}
-        className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-foreground"
-      >
+    <DropdownMenu.Root>
+      <DropdownMenu.Trigger className="flex items-center gap-1.5 rounded-lg bg-secondary px-3 py-1.5 text-xs font-medium text-foreground">
         {value ? PLATFORM_LABELS[value] : 'Choose service'}
-        <ChevronDown className={`h-3 w-3 transition-transform ${open ? 'rotate-180' : ''}`} />
-      </button>
-      {open && (
-        <div className="absolute right-0 top-full z-10 mt-1 w-44 rounded-lg border border-border bg-background py-1 shadow-lg">
-          <button
-            onClick={() => { onChange(null); setOpen(false); }}
-            className={`w-full px-3 py-1.5 text-left text-xs ${value === null ? 'font-semibold text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+        <ChevronDown className="h-3 w-3" />
+      </DropdownMenu.Trigger>
+      <DropdownMenu.Portal>
+        <DropdownMenu.Content align="end" sideOffset={4} className="z-50 max-h-64 w-44 overflow-y-auto rounded-lg border border-border bg-background py-1 shadow-lg">
+          <DropdownMenu.Item
+            onSelect={() => onChange(null)}
+            className={`w-full px-3 py-1.5 text-left text-xs outline-none cursor-default ${value === null ? 'font-semibold text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
           >
             None
-          </button>
+          </DropdownMenu.Item>
           {SERVICE_OPTIONS.map((s) => (
-            <button
+            <DropdownMenu.Item
               key={s}
-              onClick={() => {
-                onChange(s);
-                setOpen(false);
-              }}
-              className={`w-full px-3 py-1.5 text-left text-xs ${s === value ? 'font-semibold text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
+              onSelect={() => onChange(s)}
+              className={`w-full px-3 py-1.5 text-left text-xs outline-none cursor-default ${s === value ? 'font-semibold text-foreground' : 'text-muted-foreground hover:text-foreground'}`}
             >
               {PLATFORM_LABELS[s]}
-            </button>
+            </DropdownMenu.Item>
           ))}
-        </div>
-      )}
-    </div>
+        </DropdownMenu.Content>
+      </DropdownMenu.Portal>
+    </DropdownMenu.Root>
   );
 }
 
@@ -136,7 +129,7 @@ export function ListeningSection({
     (value: MusicPlatform | null) => {
       setService(value);
       if (player) {
-        supabase.from('players').update({ music_service: value ?? undefined }).eq('id', player.id).then();
+        supabase.from('players').update({ music_service: value }).eq('id', player.id).then();
       }
     },
     [player],
@@ -153,6 +146,7 @@ export function ListeningSection({
     navigator.clipboard.writeText(text);
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
+    window.open('https://www.tunemymusic.com/', '_blank');
   }
 
   function handleDownload() {

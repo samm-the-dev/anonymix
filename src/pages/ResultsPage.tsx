@@ -3,7 +3,7 @@ import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
 import { ListeningSection } from '@/components/ListeningSection';
-import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/musicPlatforms';
+import { buildSongSearchUrl, PLATFORM_LABELS, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -38,39 +38,43 @@ function AccordionItem({
   comments,
   players,
   songUrl,
+  musicServiceLabel,
 }: {
   submission: SubmissionRow;
   player: PlayerInfo | undefined;
   comments: CommentRow[];
   players: Map<string, PlayerInfo>;
   songUrl: string | null;
+  musicServiceLabel: string | null;
 }) {
   const [open, setOpen] = useState(false);
 
   return (
     <div className="border-b border-border/50 last:border-0">
-      <button
-        onClick={() => setOpen(!open)}
-        className={`flex w-full items-center gap-3 pt-3 text-left transition-[padding-bottom] duration-250 ease-out ${open ? 'pb-0' : 'pb-3'}`}
-      >
-        {submission.cover_art_url ? (
-          <img src={submission.cover_art_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
-        ) : (
-          <div className="h-12 w-12 shrink-0 rounded-lg bg-secondary" />
-        )}
-        <div className="min-w-0 flex-1">
-          <p className="text-sm font-semibold text-foreground">{submission.song_name}</p>
-          {submission.artist_name && <p className="text-xs text-muted-foreground">{submission.artist_name}</p>}
-        </div>
+      <div className={`flex w-full items-center gap-3 pt-3 transition-[padding-bottom] duration-250 ease-out ${open ? 'pb-0' : 'pb-3'}`}>
+        <button
+          onClick={() => setOpen(!open)}
+          className="flex min-w-0 flex-1 items-center gap-3 text-left"
+        >
+          {submission.cover_art_url ? (
+            <img src={submission.cover_art_url} alt="" className="h-12 w-12 shrink-0 rounded-lg object-cover" />
+          ) : (
+            <div className="h-12 w-12 shrink-0 rounded-lg bg-secondary" />
+          )}
+          <div className="min-w-0 flex-1">
+            <p className="text-sm font-semibold text-foreground">{submission.song_name}</p>
+            {submission.artist_name && <p className="text-xs text-muted-foreground">{submission.artist_name}</p>}
+          </div>
+          <ChevronDown
+            className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
+          />
+        </button>
         {songUrl && (
-          <a href={songUrl} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} className="shrink-0 text-muted-foreground hover:text-foreground">
+          <a href={songUrl} target="_blank" rel="noopener noreferrer" aria-label={`Search on ${musicServiceLabel}`} className="shrink-0 text-muted-foreground hover:text-foreground">
             <ExternalLink className="h-4 w-4" />
           </a>
         )}
-        <ChevronDown
-          className={`h-4 w-4 shrink-0 text-muted-foreground transition-transform duration-200 ${open ? 'rotate-180' : ''}`}
-        />
-      </button>
+      </div>
 
       <div
         className={`grid transition-[grid-template-rows] duration-250 ease-out ${open ? 'grid-rows-[1fr]' : 'grid-rows-[0fr]'}`}
@@ -238,6 +242,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               comments={comments.filter((c) => c.submission_id === s.id)}
               players={players}
               songUrl={musicService ? buildSongSearchUrl(s.song_name, s.artist_name, musicService) : null}
+              musicServiceLabel={musicService ? PLATFORM_LABELS[musicService] : null}
             />
           ))
         )}
