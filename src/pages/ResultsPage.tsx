@@ -218,7 +218,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
             <span>Listening</span>
             <ChevronDown className="h-3 w-3 transition-transform duration-200" />
           </Collapsible.Trigger>
-          <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
+          <Collapsible.Content className="data-[state=closed]:overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
             <ListeningSection
               songs={submissions}
               playlistTitle={tapeTitle}
