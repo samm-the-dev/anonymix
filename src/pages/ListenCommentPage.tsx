@@ -4,10 +4,23 @@ import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/Spinner';
 import { EmojiPicker } from '@/components/EmojiPicker';
-import { PlaylistImport } from '@/components/PlaylistImport';
+import { ExternalLink } from 'lucide-react';
+import { ListeningSection } from '@/components/ListeningSection';
+import { buildSongSearchUrl, PLATFORM_LABELS, type MusicPlatform } from '@/hooks/musicPlatforms';
+import { seededShuffle } from '@/lib/seededShuffle';
 
-function CommentField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
+function CommentField({ value, onChange, isDraft }: { value: string; onChange: (v: string) => void; isDraft?: boolean }) {
   const textareaRef = useRef<HTMLTextAreaElement>(null);
+
+  function autoResize() {
+    const el = textareaRef.current;
+    if (el) {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    }
+  }
+
+  useEffect(() => { autoResize(); }, [value]);
 
   function insertEmoji(emoji: string) {
     const textarea = textareaRef.current;
@@ -19,6 +32,7 @@ function CommentField({ value, onChange }: { value: string; onChange: (v: string
         const pos = start + emoji.length;
         textarea.setSelectionRange(pos, pos);
         textarea.focus();
+        autoResize();
       });
     } else {
       onChange(value + emoji);
@@ -27,13 +41,16 @@ function CommentField({ value, onChange }: { value: string; onChange: (v: string
 
   return (
     <div className="mt-3">
-      <div className="flex rounded-lg border border-border bg-card focus-within:border-border/80">
+      <div className={`flex rounded-lg border bg-card focus-within:border-border/80 ${isDraft ? 'border-amber-500/40' : 'border-border'}`}>
         <textarea
           ref={textareaRef}
           value={value}
-          onChange={(e) => onChange(e.target.value)}
+          onChange={(e) => {
+            onChange(e.target.value);
+            autoResize();
+          }}
           placeholder=""
-          rows={2}
+          rows={1}
           className="w-full resize-none rounded-lg bg-transparent px-3 py-2 text-sm text-foreground placeholder:text-muted-foreground focus:outline-none"
         />
         <EmojiPicker onSelect={insertEmoji} />
@@ -47,6 +64,7 @@ interface SubmissionRow {
   song_name: string;
   artist_name: string;
   player_id: string;
+  deezer_id: string | null;
   cover_art_url: string | null;
 }
 
@@ -60,11 +78,13 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
+  const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
 
-  const [infoTab, setInfoTab] = useState<'how' | 'import'>(ended ? 'import' : 'how');
+  const [infoTab, setInfoTab] = useState<'commenting' | 'listening'>('listening');
 
   // Comment state: submissionId -> text, plus '_tape' for tape-level
   const [comments, setComments] = useState<Record<string, string>>({});
+  const draftKey = `anonymix-draft-comments-${tapeId}`;
 
   // Existing comments (already submitted by this user)
   const [existingComments, setExistingComments] = useState<Record<string, string>>({});
@@ -76,7 +96,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
       supabase.from('tapes').select('title, prompt').eq('id', tapeId).single(),
       supabase
         .from('submissions')
-        .select('id, song_name, artist_name, player_id, cover_art_url')
+        .select('id, song_name, artist_name, player_id, deezer_id, cover_art_url')
         .eq('tape_id', tapeId),
       supabase
         .from('comments')
@@ -91,7 +111,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
       document.title = `${tapeRes.data.title} | Anonymix`;
     }
 
-    setSubmissions(subsRes.data ?? []);
+    setSubmissions(seededShuffle(subsRes.data ?? [], tapeId));
 
     // Map existing comments
     const existing: Record<string, string> = {};
@@ -100,19 +120,51 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
       existing[key] = c.text;
     }
     setExistingComments(existing);
-    setComments(existing);
+
+    // Load drafts from localStorage, overlay on top of submitted comments
+    try {
+      const saved = localStorage.getItem(draftKey);
+      if (saved) {
+        const drafts = JSON.parse(saved) as Record<string, string>;
+        setComments({ ...existing, ...drafts });
+      } else {
+        setComments(existing);
+      }
+    } catch {
+      setComments(existing);
+    }
 
     setLoading(false);
-  }, [sessionId, tapeId, player]);
+  }, [sessionId, tapeId, player, draftKey]);
 
   useEffect(() => {
     fetchData();
   }, [fetchData]);
 
-  function switchTab(tab: 'how' | 'import') {
+  // Debounced draft save to localStorage
+  const saveTimerRef = useRef<ReturnType<typeof setTimeout>>(undefined);
+  useEffect(() => {
+    clearTimeout(saveTimerRef.current);
+    saveTimerRef.current = setTimeout(() => {
+      // Only save keys that differ from submitted comments
+      const drafts: Record<string, string> = {};
+      for (const [key, text] of Object.entries(comments)) {
+        if (text !== (existingComments[key] ?? '')) {
+          drafts[key] = text;
+        }
+      }
+      if (Object.keys(drafts).length > 0) {
+        localStorage.setItem(draftKey, JSON.stringify(drafts));
+      } else {
+        localStorage.removeItem(draftKey);
+      }
+    }, 500);
+    return () => clearTimeout(saveTimerRef.current);
+  }, [comments, existingComments, draftKey]);
+
+  function switchTab(tab: 'commenting' | 'listening') {
     setInfoTab(tab);
   }
-
 
   function updateComment(key: string, text: string) {
     setComments((prev) => ({ ...prev, [key]: text }));
@@ -122,37 +174,20 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
     if (!tapeId || !player) return;
     setSubmitting(true);
 
-    // Collect non-empty comments that are new or changed
-    const inserts: { tape_id: string; player_id: string; submission_id: string | null; text: string }[] = [];
-
-    for (const [key, text] of Object.entries(comments)) {
-      const trimmed = text.trim();
-      if (!trimmed) continue;
-      // Skip if unchanged from existing
-      if (existingComments[key] === trimmed) continue;
-
-      inserts.push({
-        tape_id: tapeId,
-        player_id: player.id,
-        submission_id: key === '_tape' ? null : key,
-        text: trimmed,
-      });
-    }
-
-    if (inserts.length > 0) {
-      // Delete existing comments by this user on this tape first, then re-insert
-      await supabase
+    try {
+      // Always delete existing comments first, then re-insert non-empty ones
+      const { error: delError } = await supabase
         .from('comments')
         .delete()
         .eq('tape_id', tapeId)
         .eq('player_id', player.id);
+      if (delError) throw delError;
 
-      // Re-insert all non-empty comments (both changed and unchanged)
-      const allInserts: typeof inserts = [];
+      const inserts: { tape_id: string; player_id: string; submission_id: string | null; text: string }[] = [];
       for (const [key, text] of Object.entries(comments)) {
         const trimmed = text.trim();
         if (!trimmed) continue;
-        allInserts.push({
+        inserts.push({
           tape_id: tapeId,
           player_id: player.id,
           submission_id: key === '_tape' ? null : key,
@@ -160,13 +195,22 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         });
       }
 
-      await supabase.from('comments').insert(allInserts);
-    }
+      if (inserts.length > 0) {
+        const { error } = await supabase.from('comments').insert(inserts);
+        if (error) throw error;
+      }
 
-    setShowToast(true);
-    setTimeout(() => {
-      navigate(-1);
-    }, 1200);
+      // Clear drafts after successful submit
+      localStorage.removeItem(draftKey);
+      setExistingComments(comments);
+
+      setShowToast(true);
+      setTimeout(() => {
+        navigate(-1);
+      }, 1200);
+    } catch {
+      setSubmitting(false);
+    }
   }
 
   if (loading) {
@@ -184,22 +228,22 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         {/* Info card with tabs — only show when there are songs */}
         {hasSongs && (
         <div className="border-b border-border">
-          <div className="flex border-b border-border">
+          <div className="flex border-b border-border mb-3">
             <button
-              onClick={() => switchTab('how')}
-              className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${infoTab === 'how' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'}`}
+              onClick={() => switchTab('listening')}
+              className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${infoTab === 'listening' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'}`}
+            >
+              Listening
+            </button>
+            <button
+              onClick={() => switchTab('commenting')}
+              className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${infoTab === 'commenting' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'}`}
             >
               Commenting
             </button>
-            <button
-              onClick={() => switchTab('import')}
-              className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${infoTab === 'import' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'}`}
-            >
-              Import playlist
-            </button>
           </div>
-          {infoTab === 'how' ? (
-            <div className="px-4 py-3">
+          {infoTab === 'commenting' ? (
+            <div className="px-4 pb-3">
               <p className="text-sm text-muted-foreground">
                 Comment on a song that surprised you, a pick that nailed the theme, or just what you vibed with.
               </p>
@@ -208,7 +252,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
               </p>
             </div>
           ) : (
-            <PlaylistImport songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} />
+            <ListeningSection songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} onServiceChange={setMusicService} />
           )}
         </div>
         )}
@@ -237,10 +281,17 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
                     {s.artist_name && <p className="text-xs text-muted-foreground">{s.artist_name}</p>}
                   </div>
                   {s.player_id === player?.id && (
-                    <span className="shrink-0 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground">Your pick</span>
+                    <span className="shrink-0 text-xs leading-none font-semibold uppercase tracking-wide text-muted-foreground">
+                      Your pick
+                    </span>
+                  )}
+                  {musicService && (
+                    <a href={buildSongSearchUrl(s.song_name, s.artist_name, musicService)} target="_blank" rel="noopener noreferrer" aria-label={`Search on ${PLATFORM_LABELS[musicService]}`} className="-mt-px shrink-0 text-muted-foreground hover:text-foreground">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
                   )}
                 </div>
-                <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} />
+                <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} isDraft={(comments[s.id] ?? '') !== (existingComments[s.id] ?? '')} />
               </div>
             ))
           )}
@@ -249,7 +300,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
           {submissions.length > 0 && (
             <div className="py-3">
               <p className="text-xs font-semibold uppercase tracking-wide text-muted-foreground">The Tape</p>
-              <CommentField value={comments['_tape'] ?? ''} onChange={(v) => updateComment('_tape', v)} />
+              <CommentField value={comments['_tape'] ?? ''} onChange={(v) => updateComment('_tape', v)} isDraft={(comments['_tape'] ?? '') !== (existingComments['_tape'] ?? '')} />
             </div>
           )}
         </div>

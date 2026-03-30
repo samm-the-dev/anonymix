@@ -22,8 +22,8 @@ export function TapePage() {
         .from('sessions')
         .select('id, ended')
         .eq('slug', sessionSlug!)
-        .single();
-      if (!session) return;
+        .maybeSingle();
+      if (!session) { navigate('/', { replace: true }); return; }
       setSessionId(session.id);
       setSessionEnded(session.ended);
 

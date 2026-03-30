@@ -17,6 +17,8 @@ export interface Database {
           avatar: string;
           avatar_color: string;
           auth_id: string | null;
+          listening_tab: string;
+          music_service: string | null;
           created_at: string;
         };
         Insert: {
@@ -25,6 +27,8 @@ export interface Database {
           avatar: string;
           avatar_color: string;
           auth_id?: string | null;
+          listening_tab?: string;
+          music_service?: string | null;
           created_at?: string;
         };
         Update: {
@@ -33,6 +37,8 @@ export interface Database {
           avatar?: string;
           avatar_color?: string;
           auth_id?: string | null;
+          listening_tab?: string;
+          music_service?: string | null;
         };
         Relationships: [];
       };
@@ -193,7 +199,7 @@ export interface Database {
           player_id: string;
           song_name: string;
           artist_name: string;
-          musicbrainz_id: string | null;
+          deezer_id: string | null;
           release_id: string | null;
           cover_art_url: string | null;
           created_at: string;
@@ -204,7 +210,7 @@ export interface Database {
           player_id: string;
           song_name: string;
           artist_name?: string;
-          musicbrainz_id?: string | null;
+          deezer_id?: string | null;
           release_id?: string | null;
           cover_art_url?: string | null;
           created_at?: string;
@@ -215,7 +221,7 @@ export interface Database {
           player_id?: string;
           song_name?: string;
           artist_name?: string;
-          musicbrainz_id?: string | null;
+          deezer_id?: string | null;
           release_id?: string | null;
           cover_art_url?: string | null;
         };

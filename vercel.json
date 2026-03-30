@@ -1,0 +1,8 @@
+{
+  "buildCommand": "node scripts/resolve-preview-env.mjs && npm run build",
+  "outputDirectory": "dist",
+  "installCommand": "npm install",
+  "framework": "vite",
+  "rewrites": [{ "source": "/(.*)", "destination": "/index.html" }],
+  "ignoreCommand": "[ \"$VERCEL_ENV\" = \"production\" ]"
+}
