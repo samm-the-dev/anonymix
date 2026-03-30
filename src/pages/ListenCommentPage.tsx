@@ -6,7 +6,7 @@ import { Spinner } from '@/components/Spinner';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { ExternalLink } from 'lucide-react';
 import { ListeningSection } from '@/components/ListeningSection';
-import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/useOdesliLinks';
+import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { seededShuffle } from '@/lib/seededShuffle';
 
 function CommentField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -203,7 +203,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         {/* Info card with tabs — only show when there are songs */}
         {hasSongs && (
         <div className="border-b border-border">
-          <div className="flex border-b border-border">
+          <div className="flex border-b border-border mb-3">
             <button
               onClick={() => switchTab('listening')}
               className={`flex-1 py-2.5 text-center text-xs font-semibold transition-colors ${infoTab === 'listening' ? 'border-b-2 border-primary text-foreground' : 'text-muted-foreground'}`}
@@ -218,7 +218,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
             </button>
           </div>
           {infoTab === 'commenting' ? (
-            <div className="px-4 py-3">
+            <div className="px-4 pb-3">
               <p className="text-sm text-muted-foreground">
                 Comment on a song that surprised you, a pick that nailed the theme, or just what you vibed with.
               </p>

@@ -3,7 +3,7 @@ import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
 import { ListeningSection } from '@/components/ListeningSection';
-import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/useOdesliLinks';
+import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 

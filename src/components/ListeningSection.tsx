@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ExternalLink, Download, Copy, Check, ChevronDown } from 'lucide-react';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { PLATFORM_LABELS, type MusicPlatform } from '@/hooks/useOdesliLinks';
+import { PLATFORM_LABELS, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { generateXspf, generatePlainText, downloadFile } from '@/lib/playlistExport';
 import { slugify } from '@/lib/slugify';
 import { supabase } from '@/lib/supabase';
@@ -166,7 +166,10 @@ export function ListeningSection({
   if (songs.length === 0) return null;
 
   return (
-    <div className="border-b border-border px-4 py-3">
+    <div className="px-4 pb-3">
+      <p className="text-xs text-muted-foreground mb-1">
+        Select an option for getting the submitted songs into a playlist:
+      </p>
       {/* Segmented control */}
       <ToggleGroup.Root
         type="single"
