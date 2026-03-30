@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from 'react';
 import { ChevronDown, ExternalLink } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
-import { ListeningSection, getSongLink } from '@/components/ListeningSection';
-import type { OdesliResult, MusicPlatform } from '@/hooks/useOdesliLinks';
+import { ListeningSection } from '@/components/ListeningSection';
+import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/useOdesliLinks';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 
@@ -136,7 +136,6 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
   const [comments, setComments] = useState<CommentRow[]>([]);
   const [players, setPlayers] = useState<Map<string, PlayerInfo>>(new Map());
   const [loading, setLoading] = useState(true);
-  const [songLinks, setSongLinks] = useState<Map<string, OdesliResult>>(new Map());
   const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
 
   const fetchData = useCallback(async () => {
@@ -220,8 +219,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               songs={submissions}
               playlistTitle={tapeTitle}
               playlistDescription={tapePrompt}
-              currentPlayerId={player?.id}
-              onLinksReady={(l, s) => { setSongLinks(l); setMusicService(s); }}
+              onServiceChange={setMusicService}
             />
           </Collapsible.Content>
         </Collapsible.Root>
@@ -239,7 +237,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               player={players.get(s.player_id)}
               comments={comments.filter((c) => c.submission_id === s.id)}
               players={players}
-              songUrl={getSongLink(songLinks, s.id, musicService)}
+              songUrl={musicService ? buildSongSearchUrl(s.song_name, s.artist_name, musicService) : null}
             />
           ))
         )}

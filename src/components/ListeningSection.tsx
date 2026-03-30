@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ExternalLink, Download, Copy, Check, ChevronDown } from 'lucide-react';
 import * as ToggleGroup from '@radix-ui/react-toggle-group';
 import { useAuthContext } from '@/contexts/AuthContext';
-import { useOdesliLinks, PLATFORM_LABELS, type MusicPlatform, type OdesliResult } from '@/hooks/useOdesliLinks';
+import { PLATFORM_LABELS, type MusicPlatform } from '@/hooks/useOdesliLinks';
 import { generateXspf, generatePlainText, downloadFile } from '@/lib/playlistExport';
 import { slugify } from '@/lib/slugify';
 import { supabase } from '@/lib/supabase';
@@ -13,7 +13,6 @@ interface Submission {
   id: string;
   song_name: string;
   artist_name: string;
-  deezer_id: string | null;
   player_id: string;
 }
 
@@ -21,12 +20,11 @@ interface ListeningSectionProps {
   songs: Submission[];
   playlistTitle?: string;
   playlistDescription?: string;
-  currentPlayerId?: string;
-  onLinksReady?: (links: Map<string, OdesliResult>, service: MusicPlatform | null) => void;
+  onServiceChange?: (service: MusicPlatform | null) => void;
 }
 
 const TAB_OPTIONS: { value: ListeningTab; label: string }[] = [
-  { value: 'links', label: 'Links' },
+  { value: 'links', label: 'Search' },
   { value: 'copy', label: 'Copy Text' },
   { value: 'file', label: 'Download File' },
 ];
@@ -90,7 +88,7 @@ export function ListeningSection({
   songs,
   playlistTitle,
   playlistDescription,
-  onLinksReady,
+  onServiceChange,
 }: ListeningSectionProps) {
   const { player } = useAuthContext();
   const [tab, setTab] = useState<ListeningTab>('links');
@@ -98,9 +96,6 @@ export function ListeningSection({
   const [prefsLoaded, setPrefsLoaded] = useState(false);
   const [copied, setCopied] = useState(false);
   const [downloaded, setDownloaded] = useState(false);
-
-  const odesliInputs = songs.map((s) => ({ id: s.id, deezerId: s.deezer_id }));
-  const links = useOdesliLinks(odesliInputs);
 
   // Load saved preferences
   useEffect(() => {
@@ -120,10 +115,10 @@ export function ListeningSection({
       });
   }, [player, prefsLoaded]);
 
-  // Notify parent when links or service change
+  // Notify parent when service changes
   useEffect(() => {
-    onLinksReady?.(links, service);
-  }, [links, service, onLinksReady]);
+    onServiceChange?.(service);
+  }, [service, onServiceChange]);
 
   // Persist tab preference
   const saveTab = useCallback(
@@ -172,9 +167,6 @@ export function ListeningSection({
 
   return (
     <div className="border-b border-border px-4 py-3">
-      <p className="text-sm text-muted-foreground">
-        Listen to your playlist on your preferred music service
-      </p>
       {/* Segmented control */}
       <ToggleGroup.Root
         type="single"
@@ -198,7 +190,7 @@ export function ListeningSection({
       {/* Links tab */}
       {tab === 'links' && (
         <div className="flex items-center justify-end gap-2">
-          <p className="text-xs text-muted-foreground">Link to</p>
+          <p className="text-xs text-muted-foreground">Search via</p>
           <ServiceDropdown value={service} onChange={saveService} />
         </div>
       )}
@@ -242,15 +234,4 @@ export function ListeningSection({
       )}
     </div>
   );
-}
-
-/** Get the platform link for a song from the Odesli results */
-export function getSongLink(
-  links: Map<string, OdesliResult>,
-  songId: string,
-  service: MusicPlatform | null,
-): string | null {
-  if (!service) return null;
-  const result = links.get(songId);
-  return result?.platformLinks[service] ?? result?.pageUrl ?? null;
 }

@@ -5,8 +5,8 @@ import { useAuthContext } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/Spinner';
 import { EmojiPicker } from '@/components/EmojiPicker';
 import { ExternalLink } from 'lucide-react';
-import { ListeningSection, getSongLink } from '@/components/ListeningSection';
-import type { OdesliResult, MusicPlatform } from '@/hooks/useOdesliLinks';
+import { ListeningSection } from '@/components/ListeningSection';
+import { buildSongSearchUrl, type MusicPlatform } from '@/hooks/useOdesliLinks';
 import { seededShuffle } from '@/lib/seededShuffle';
 
 function CommentField({ value, onChange }: { value: string; onChange: (v: string) => void }) {
@@ -78,10 +78,9 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [showToast, setShowToast] = useState(false);
-  const [songLinks, setSongLinks] = useState<Map<string, OdesliResult>>(new Map());
   const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
 
-  const [infoTab, setInfoTab] = useState<'commenting' | 'listening'>('commenting');
+  const [infoTab, setInfoTab] = useState<'commenting' | 'listening'>('listening');
 
   // Comment state: submissionId -> text, plus '_tape' for tape-level
   const [comments, setComments] = useState<Record<string, string>>({});
@@ -228,7 +227,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
               </p>
             </div>
           ) : (
-            <ListeningSection songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} currentPlayerId={player?.id} onLinksReady={(l, s) => { setSongLinks(l); setMusicService(s); }} />
+            <ListeningSection songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} onServiceChange={setMusicService} />
           )}
         </div>
         )}
@@ -261,14 +260,11 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
                       Your pick
                     </span>
                   )}
-                  {(() => {
-                    const url = getSongLink(songLinks, s.id, musicService);
-                    return url ? (
-                      <a href={url} target="_blank" rel="noopener noreferrer" className="-mt-px shrink-0 text-muted-foreground hover:text-foreground">
-                        <ExternalLink className="h-4 w-4" />
-                      </a>
-                    ) : null;
-                  })()}
+                  {musicService && (
+                    <a href={buildSongSearchUrl(s.song_name, s.artist_name, musicService)} target="_blank" rel="noopener noreferrer" className="-mt-px shrink-0 text-muted-foreground hover:text-foreground">
+                      <ExternalLink className="h-4 w-4" />
+                    </a>
+                  )}
                 </div>
                 <CommentField value={comments[s.id] ?? ''} onChange={(v) => updateComment(s.id, v)} />
               </div>
