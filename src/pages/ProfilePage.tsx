@@ -1,8 +1,9 @@
 import { useState } from 'react';
-import { Download, LogOut, Pencil, Share } from 'lucide-react';
+import { Bell, BellOff, Download, LogOut, Pencil, Share } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
+import { usePushSubscription } from '@/hooks/usePushSubscription';
 
 const AVATARS = ['🎸', '🎧', '🎹', '🎤', '🥁', '🎺', '🎵', '🎶', '🎻', '🪗', '🎷', '🪘'];
 
@@ -14,6 +15,7 @@ const COLORS = [
 export function ProfilePage() {
   const { player, user, signOut, updatePlayer } = useAuthContext();
   const { installMode, installApp } = useInstallPrompt();
+  const push = usePushSubscription(player);
   const [editing, setEditing] = useState(false);
   const [name, setName] = useState(player?.name ?? '');
   const [avatar, setAvatar] = useState(player?.avatar ?? '🎸');
@@ -171,10 +173,43 @@ export function ProfilePage() {
         </Popover.Root>
       )}
 
+      {/* Push Notifications */}
+      {push.permission !== 'unsupported' && (
+        <div className="mt-8">
+          {push.permission === 'denied' ? (
+            <div className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm text-muted-foreground">
+              <BellOff className="h-4 w-4" />
+              Notifications blocked in browser settings
+            </div>
+          ) : push.subscribed ? (
+            <button
+              onClick={push.unsubscribe}
+              disabled={push.loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent disabled:opacity-50"
+            >
+              <BellOff className="h-4 w-4" />
+              {push.loading ? 'Updating...' : 'Turn off notifications'}
+            </button>
+          ) : (
+            <button
+              onClick={push.subscribe}
+              disabled={push.loading}
+              className="flex w-full items-center justify-center gap-2 rounded-xl border border-primary/30 bg-primary/5 py-3 text-sm font-medium text-primary transition-colors hover:bg-primary/10 disabled:opacity-50"
+            >
+              <Bell className="h-4 w-4" />
+              {push.loading ? 'Updating...' : 'Enable notifications'}
+            </button>
+          )}
+          {push.error && (
+            <p className="mt-2 text-center text-sm text-red-500">{push.error}</p>
+          )}
+        </div>
+      )}
+
       {/* Sign Out */}
       <button
         onClick={signOut}
-        className={`${installMode ? 'mt-3' : 'mt-8'} flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent`}
+        className={`${installMode || push.permission !== 'unsupported' ? 'mt-3' : 'mt-8'} flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-muted-foreground transition-colors hover:bg-accent`}
       >
         <LogOut className="h-4 w-4" />
         Sign out
