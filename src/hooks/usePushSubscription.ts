@@ -89,7 +89,7 @@ export function usePushSubscription(player: Player | null): UsePushSubscriptionR
       // Subscribe via PushManager
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY),
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
       });
 
       const key = sub.getKey('p256dh');
