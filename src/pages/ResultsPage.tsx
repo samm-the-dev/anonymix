@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { ChevronDown, ExternalLink } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
 import { ListeningSection } from '@/components/ListeningSection';
@@ -71,7 +71,7 @@ function AccordionItem({
         </button>
         {songUrl && (
           <a href={songUrl} target="_blank" rel="noopener noreferrer" aria-label={`Search on ${musicServiceLabel}`} className="shrink-0 text-muted-foreground hover:text-foreground">
-            <ExternalLink className="h-4 w-4" />
+            <Search className="h-4 w-4" />
           </a>
         )}
       </div>
@@ -141,6 +141,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
   const [players, setPlayers] = useState<Map<string, PlayerInfo>>(new Map());
   const [loading, setLoading] = useState(true);
   const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
+  const [listeningTab, setListeningTab] = useState<'links' | 'copy' | 'file'>('links');
 
   const fetchData = useCallback(async () => {
     if (!sessionId || !tapeId || !player) return;
@@ -224,6 +225,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               playlistTitle={tapeTitle}
               playlistDescription={tapePrompt}
               onServiceChange={setMusicService}
+              onTabChange={setListeningTab}
             />
           </Collapsible.Content>
         </Collapsible.Root>
@@ -241,7 +243,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               player={players.get(s.player_id)}
               comments={comments.filter((c) => c.submission_id === s.id)}
               players={players}
-              songUrl={musicService ? buildSongSearchUrl(s.song_name, s.artist_name, musicService) : null}
+              songUrl={musicService && listeningTab === 'links' ? buildSongSearchUrl(s.song_name, s.artist_name, musicService) : null}
               musicServiceLabel={musicService ? PLATFORM_LABELS[musicService] : null}
             />
           ))
