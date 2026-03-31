@@ -141,6 +141,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
   const [players, setPlayers] = useState<Map<string, PlayerInfo>>(new Map());
   const [loading, setLoading] = useState(true);
   const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
+  const [listeningTab, setListeningTab] = useState<'links' | 'copy' | 'file'>('links');
 
   const fetchData = useCallback(async () => {
     if (!sessionId || !tapeId || !player) return;
@@ -224,6 +225,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               playlistTitle={tapeTitle}
               playlistDescription={tapePrompt}
               onServiceChange={setMusicService}
+              onTabChange={setListeningTab}
             />
           </Collapsible.Content>
         </Collapsible.Root>
@@ -241,7 +243,7 @@ export function ResultsPage({ sessionId, tapeId }: { sessionId: string; tapeId: 
               player={players.get(s.player_id)}
               comments={comments.filter((c) => c.submission_id === s.id)}
               players={players}
-              songUrl={musicService ? buildSongSearchUrl(s.song_name, s.artist_name, musicService) : null}
+              songUrl={musicService && listeningTab === 'links' ? buildSongSearchUrl(s.song_name, s.artist_name, musicService) : null}
               musicServiceLabel={musicService ? PLATFORM_LABELS[musicService] : null}
             />
           ))

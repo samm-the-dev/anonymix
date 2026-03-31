@@ -79,6 +79,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
   const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
+  const [listeningTab, setListeningTab] = useState<'links' | 'copy' | 'file'>('links');
 
   const [infoTab, setInfoTab] = useState<'commenting' | 'listening'>('listening');
 
@@ -260,7 +261,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
               </p>
             </div>
           ) : (
-            <ListeningSection songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} onServiceChange={setMusicService} />
+            <ListeningSection songs={submissions} playlistTitle={tapeTitle} playlistDescription={tapePrompt} onServiceChange={setMusicService} onTabChange={setListeningTab} />
           )}
         </div>
         )}
@@ -293,7 +294,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
                       Your pick
                     </span>
                   )}
-                  {musicService && (
+                  {musicService && listeningTab === 'links' && (
                     <a href={buildSongSearchUrl(s.song_name, s.artist_name, musicService)} target="_blank" rel="noopener noreferrer" aria-label={`Search on ${PLATFORM_LABELS[musicService]}`} className="-mt-px shrink-0 text-muted-foreground hover:text-foreground">
                       <Search className="h-4 w-4" />
                     </a>

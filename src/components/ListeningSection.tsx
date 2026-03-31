@@ -22,6 +22,7 @@ interface ListeningSectionProps {
   playlistTitle?: string;
   playlistDescription?: string;
   onServiceChange?: (service: MusicPlatform | null) => void;
+  onTabChange?: (tab: 'links' | 'copy' | 'file') => void;
 }
 
 const TAB_OPTIONS: { value: ListeningTab; label: string }[] = [
@@ -82,6 +83,7 @@ export function ListeningSection({
   playlistTitle,
   playlistDescription,
   onServiceChange,
+  onTabChange,
 }: ListeningSectionProps) {
   const { player } = useAuthContext();
   const [tab, setTab] = useState<ListeningTab>('links');
@@ -108,10 +110,15 @@ export function ListeningSection({
       });
   }, [player, prefsLoaded]);
 
-  // Notify parent when service or tab changes — only expose service on the links tab
+  // Notify parent when service changes
   useEffect(() => {
-    onServiceChange?.(tab === 'links' ? service : null);
-  }, [service, tab, onServiceChange]);
+    onServiceChange?.(service);
+  }, [service, onServiceChange]);
+
+  // Notify parent when tab changes
+  useEffect(() => {
+    onTabChange?.(tab);
+  }, [tab, onTabChange]);
 
   // Persist tab preference
   const saveTab = useCallback(
