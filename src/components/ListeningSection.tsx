@@ -108,10 +108,10 @@ export function ListeningSection({
       });
   }, [player, prefsLoaded]);
 
-  // Notify parent when service changes
+  // Notify parent when service or tab changes — only expose service on the links tab
   useEffect(() => {
-    onServiceChange?.(service);
-  }, [service, onServiceChange]);
+    onServiceChange?.(tab === 'links' ? service : null);
+  }, [service, tab, onServiceChange]);
 
   // Persist tab preference
   const saveTab = useCallback(

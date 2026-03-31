@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react';
-import { ChevronDown, ExternalLink } from 'lucide-react';
+import { ChevronDown, Search } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
 import { Spinner } from '@/components/Spinner';
 import { ListeningSection } from '@/components/ListeningSection';
@@ -71,7 +71,7 @@ function AccordionItem({
         </button>
         {songUrl && (
           <a href={songUrl} target="_blank" rel="noopener noreferrer" aria-label={`Search on ${musicServiceLabel}`} className="shrink-0 text-muted-foreground hover:text-foreground">
-            <ExternalLink className="h-4 w-4" />
+            <Search className="h-4 w-4" />
           </a>
         )}
       </div>

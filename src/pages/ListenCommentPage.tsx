@@ -5,7 +5,7 @@ import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/Spinner';
 import { EmojiPicker } from '@/components/EmojiPicker';
-import { ExternalLink } from 'lucide-react';
+import { Search } from 'lucide-react';
 import { ListeningSection } from '@/components/ListeningSection';
 import { buildSongSearchUrl, PLATFORM_LABELS, type MusicPlatform } from '@/hooks/musicPlatforms';
 import { seededShuffle } from '@/lib/seededShuffle';
@@ -295,7 +295,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
                   )}
                   {musicService && (
                     <a href={buildSongSearchUrl(s.song_name, s.artist_name, musicService)} target="_blank" rel="noopener noreferrer" aria-label={`Search on ${PLATFORM_LABELS[musicService]}`} className="-mt-px shrink-0 text-muted-foreground hover:text-foreground">
-                      <ExternalLink className="h-4 w-4" />
+                      <Search className="h-4 w-4" />
                     </a>
                   )}
                 </div>
