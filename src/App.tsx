@@ -4,6 +4,7 @@ import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { TaskLayout } from '@/components/TaskLayout';
 import { Spinner } from '@/components/Spinner';
+import { useTheme } from '@/hooks/useTheme';
 import { Toaster } from 'sonner';
 import { SessionHomePage } from '@/pages/SessionHomePage';
 import { SessionViewPage } from '@/pages/SessionViewPage';
@@ -49,9 +50,13 @@ function AppRoutes() {
 
   if (!user) return <LoginPage />;
   if (needsProfile) return <ProfileSetupPage />;
+  const { theme } = useTheme();
+
   if (!player) return null;
 
   return (
+    <>
+    <Toaster position="bottom-center" theme={theme} richColors />
     <Routes>
       <Route element={<TaskLayout />}>
         <Route path="create" element={<CreateSessionPage />} />
@@ -65,13 +70,13 @@ function AppRoutes() {
         <Route path="*" element={<Navigate to="/" replace />} />
       </Route>
     </Routes>
+    </>
   );
 }
 
 export function App() {
   return (
     <BrowserRouter>
-      <Toaster position="bottom-center" theme="system" richColors />
       <Routes>
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />

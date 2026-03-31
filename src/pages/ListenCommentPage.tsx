@@ -215,8 +215,9 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         navigate(-1);
       }, 1200);
     } catch {
-      setSubmitting(false);
       toast.error('Failed to save comments');
+    } finally {
+      setSubmitting(false);
     }
   }
 

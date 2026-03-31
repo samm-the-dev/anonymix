@@ -14,8 +14,6 @@ import { execSync } from 'child_process';
 import { writeFileSync, readFileSync } from 'fs';
 
 const PROJECT_REF = 'mryuusvhdadbjpupzpol';
-const PROD_URL = 'https://mryuusvhdadbjpupzpol.supabase.co';
-const PROD_ANON_KEY = 'sb_publishable_7PyRer7MQfOvQHKzlrKhMw_T-iNUTBh';
 const VAPID_KEY = 'BE2z5xOQVkgl-GbMsaRi0nFmc8DpocUFkI_Li1vSHZSm-vE7H2EdYwpnQeTmSSSmtqXbCt4-wZC-Lk78US83ryc';
 
 // Try to read access token from env or .env file
@@ -43,31 +41,36 @@ function writeEnv(url, key, label) {
   console.log(`Wrote .env.local → ${url} (${label})`);
 }
 
-if (gitBranch === 'main' || !accessToken) {
-  if (!accessToken) console.log('No SUPABASE_ACCESS_TOKEN — defaulting to prod');
-  writeEnv(PROD_URL, PROD_ANON_KEY, 'prod');
-  process.exit(0);
+if (!accessToken) {
+  console.error('No SUPABASE_ACCESS_TOKEN — set it in your shell or .env file');
+  process.exit(1);
 }
 
-// Look for a preview branch matching the current git branch
-console.log(`Looking for preview branch...`);
+// Look for a preview branch matching the current git branch, fall back to dev
+const lookupBranch = gitBranch === 'main' ? 'dev' : gitBranch;
+console.log(`Looking for preview branch: ${lookupBranch}${gitBranch === 'main' ? ' (on main, using dev)' : ''}...`);
+
 const res = await fetch(`https://api.supabase.com/v1/projects/${PROJECT_REF}/branches`, {
   headers: { Authorization: `Bearer ${accessToken}` },
 });
 
 if (!res.ok) {
-  console.log(`Failed to list branches (${res.status}) — defaulting to prod`);
-  writeEnv(PROD_URL, PROD_ANON_KEY, 'prod (branch lookup failed)');
-  process.exit(0);
+  console.error(`Failed to list branches (${res.status})`);
+  process.exit(1);
 }
 
 const branches = await res.json();
-const branch = branches.find((b) => b.git_branch === gitBranch);
+let branch = branches.find((b) => b.git_branch === lookupBranch);
+
+// Fall back to dev branch if current branch has no preview
+if (!branch && lookupBranch !== 'dev') {
+  console.log(`No preview branch for "${lookupBranch}" — falling back to dev`);
+  branch = branches.find((b) => b.git_branch === 'dev');
+}
 
 if (!branch) {
-  console.log(`No preview branch for "${gitBranch}" — defaulting to prod`);
-  writeEnv(PROD_URL, PROD_ANON_KEY, 'prod (no preview branch)');
-  process.exit(0);
+  console.error('No preview branch found (not even dev). Open a draft PR or create a dev branch.');
+  process.exit(1);
 }
 
 const branchRef = branch.project_ref;
@@ -79,9 +82,8 @@ const keysRes = await fetch(`https://api.supabase.com/v1/projects/${branchRef}/a
 });
 
 if (!keysRes.ok) {
-  console.log(`Failed to get API keys (${keysRes.status}) — defaulting to prod`);
-  writeEnv(PROD_URL, PROD_ANON_KEY, 'prod (key lookup failed)');
-  process.exit(0);
+  console.error(`Failed to get API keys (${keysRes.status})`);
+  process.exit(1);
 }
 
 const keys = await keysRes.json();
@@ -89,8 +91,7 @@ const anonKey = keys.find((k) => k.name === 'anon')?.api_key
   ?? keys.find((k) => k.name === 'default' && !k.api_key.includes('secret'))?.api_key;
 
 if (!anonKey) {
-  console.log('Could not find anon key — defaulting to prod');
-  writeEnv(PROD_URL, PROD_ANON_KEY, 'prod (no anon key)');
+  console.error('Could not find anon key');
   process.exit(0);
 }
 
