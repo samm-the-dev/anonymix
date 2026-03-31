@@ -95,4 +95,5 @@ if (!anonKey) {
   process.exit(0);
 }
 
-writeEnv(`https://${branchRef}.supabase.co`, anonKey, `preview branch: ${gitBranch}`);
+const branchLabel = branch.git_branch === gitBranch ? gitBranch : `${branch.git_branch} (fallback for ${gitBranch})`;
+writeEnv(`https://${branchRef}.supabase.co`, anonKey, `preview branch: ${branchLabel}`);

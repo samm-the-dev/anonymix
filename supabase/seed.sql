@@ -6,7 +6,7 @@ insert into auth.users (id, instance_id, email, encrypted_password, email_confir
 values (
   '00000000-0000-0000-0000-000000000099',
   '00000000-0000-0000-0000-000000000000',
-  'smarsh09@gmail.com',
+  'dev@anonymix.test',
   crypt('testpassword', gen_salt('bf')),
   now(),
   'authenticated',
@@ -22,7 +22,7 @@ insert into auth.identities (id, user_id, identity_data, provider, provider_id, 
 values (
   '00000000-0000-0000-0000-000000000099',
   '00000000-0000-0000-0000-000000000099',
-  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000099', 'email', 'smarsh09@gmail.com'),
+  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000099', 'email', 'dev@anonymix.test'),
   'email',
   '00000000-0000-0000-0000-000000000099',
   now(),
