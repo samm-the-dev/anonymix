@@ -42,10 +42,25 @@ Anonymous music sharing with friends — themed submissions, comments, reveals.
 
 ### Local Dev Setup
 
-1. `.env.local` should point to the current PR's Supabase preview branch URL + anon key
-2. When starting a new PR with migrations, open a draft PR first so Supabase creates the preview branch
-3. Get preview branch credentials from Supabase dashboard (Branches) or CLI: `npx supabase branches list --project-ref mryuusvhdadbjpupzpol`
-4. Supabase CLI is linked to the preview branch project (not prod)
+1. Run `npm run env:local` to auto-configure `.env.local` (requires `SUPABASE_ACCESS_TOKEN` in env or `.env` file)
+2. The script finds the Supabase preview branch matching your git branch, or falls back to the persistent `dev` branch
+3. **Never points to prod** — if no branch is found, the script fails rather than falling back
+4. When starting a new PR with migrations, open a draft PR first so Supabase creates the preview branch
+
+### Dev Branch
+
+A persistent `dev` git branch (synced with main) provides a stable Supabase preview branch for local dev when no PR is open. Keep it in sync: `git push origin main:dev` after merging PRs.
+
+### After Merging a PR
+
+1. Switch to main and pull: `git checkout main && git pull`
+2. Update the dev branch: `git push origin main:dev`
+3. Run `npm run env:local` to point at the dev branch DB
+4. Delete the merged local branch: `git branch -d <branch-name>`
+
+### Switching Branches
+
+Run `npm run env:local` after switching branches. It reads the current git branch, looks for a matching Supabase preview branch, writes `.env.local`. Falls back to `dev` branch if no PR-specific branch exists. Requires `SUPABASE_ACCESS_TOKEN` env var (or in `.env` file).
 
 ### Prod Deploy
 

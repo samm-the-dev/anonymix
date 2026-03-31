@@ -1,5 +1,6 @@
 import { useEffect, useState, useCallback, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { toast } from 'sonner';
 import { supabase } from '@/lib/supabase';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { Spinner } from '@/components/Spinner';
@@ -77,7 +78,6 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
   const [submissions, setSubmissions] = useState<SubmissionRow[]>([]);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
-  const [showToast, setShowToast] = useState(false);
   const [musicService, setMusicService] = useState<MusicPlatform | null>(null);
 
   const [infoTab, setInfoTab] = useState<'commenting' | 'listening'>('listening');
@@ -200,15 +200,23 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         if (error) throw error;
       }
 
-      // Clear drafts after successful submit
+      // Clear drafts after successful submit — store trimmed non-empty values
       localStorage.removeItem(draftKey);
-      setExistingComments(comments);
+      const saved: Record<string, string> = {};
+      for (const [key, text] of Object.entries(comments)) {
+        const trimmed = text.trim();
+        if (trimmed) saved[key] = trimmed;
+      }
+      setExistingComments(saved);
+      setComments(saved);
 
-      setShowToast(true);
+      toast.success('Comments shared!');
       setTimeout(() => {
         navigate(-1);
       }, 1200);
     } catch {
+      toast.error('Failed to save comments');
+    } finally {
       setSubmitting(false);
     }
   }
@@ -318,15 +326,6 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         </div>
         )}
 
-      {/* Success toast */}
-      {showToast && (
-        <div className="fixed bottom-6 left-1/2 z-50 flex -translate-x-1/2 items-center gap-2 rounded-lg bg-foreground px-6 py-3 text-background shadow-lg">
-          <svg className="h-5 w-5 text-amber-400" fill="currentColor" viewBox="0 0 20 20">
-            <path fillRule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clipRule="evenodd" />
-          </svg>
-          <span className="text-sm font-medium">Comments shared!</span>
-        </div>
-      )}
     </div>
   );
 }

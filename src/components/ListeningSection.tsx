@@ -172,6 +172,7 @@ export function ListeningSection({
       {/* Segmented control */}
       <ToggleGroup.Root
         type="single"
+        aria-label="Playlist export method"
         value={tab}
         onValueChange={(v) => {
           if (v) saveTab(v as ListeningTab);

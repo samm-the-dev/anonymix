@@ -33,7 +33,7 @@ export function useAuth(): UseAuthResult {
       .from('players')
       .select('*')
       .eq('auth_id', user.id)
-      .single();
+      .maybeSingle();
 
     if (data) {
       setState({

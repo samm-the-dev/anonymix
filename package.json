@@ -20,7 +20,8 @@
     "db:advisors": "bash scripts/db-advisors.sh",
     "db:gen-types": "supabase gen types typescript --project-id mryuusvhdadbjpupzpol > src/lib/database.types.ts",
     "gen:icons": "node scripts/gen-icons.mjs",
-    "gen:og": "node scripts/gen-og.mjs"
+    "gen:og": "node scripts/gen-og.mjs",
+    "env:local": "node scripts/env-local.mjs"
   },
   "devDependencies": {
     "@eslint/js": "^9.39.4",

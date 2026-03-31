@@ -1,11 +1,39 @@
 -- Seed: hello world session with tapes in all 5 statuses
 -- Source: supabase/seed-data/hello-world-session.json
--- auth_id nulled — preview branches won't have matching auth users
 
--- Players
-insert into players (id, name, avatar, avatar_color) values
-  ('d65ea8f9-edf4-4474-aa03-ea5b9644284e', 'Sam', '🎺', '#6366f1'),
-  ('b39dc477-605d-4a0e-9ac3-90df78f0130b', 'Sammie', '🎶', '#10b981');
+-- Auth user for dev/preview (magic link, pre-confirmed)
+insert into auth.users (id, instance_id, email, encrypted_password, email_confirmed_at, aud, role, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token)
+values (
+  '00000000-0000-0000-0000-000000000099',
+  '00000000-0000-0000-0000-000000000000',
+  'smarsh09@gmail.com',
+  crypt('testpassword', gen_salt('bf')),
+  now(),
+  'authenticated',
+  'authenticated',
+  '{"provider":"email","providers":["email"]}',
+  '{}',
+  now(),
+  now(),
+  ''
+);
+
+insert into auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
+values (
+  '00000000-0000-0000-0000-000000000099',
+  '00000000-0000-0000-0000-000000000099',
+  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000099', 'email', 'smarsh09@gmail.com'),
+  'email',
+  '00000000-0000-0000-0000-000000000099',
+  now(),
+  now(),
+  now()
+);
+
+-- Players (Sam linked to seed auth user)
+insert into players (id, name, avatar, avatar_color, auth_id) values
+  ('d65ea8f9-edf4-4474-aa03-ea5b9644284e', 'Sam', '🎺', '#6366f1', '00000000-0000-0000-0000-000000000099'),
+  ('b39dc477-605d-4a0e-9ac3-90df78f0130b', 'Sammie', '🎶', '#10b981', null);
 
 -- Session
 insert into sessions (id, name, description, admin_id, ended, slug, created_at) values

@@ -34,40 +34,43 @@ console.log(`[preview-env] Looking up Supabase preview branch for: ${gitBranch}`
 const apiBase = `https://api.supabase.com/v1/projects/${projectRef}/branches`;
 const headers = { Authorization: `Bearer ${accessToken}` };
 
-async function findBranch() {
+async function listBranches() {
   const res = await fetch(apiBase, { headers });
   if (!res.ok) {
     const body = await res.text();
     throw new Error(`Failed to list branches: ${res.status} ${res.statusText} — ${body}`);
   }
-  const branches = await res.json();
-  return branches.find((b) => b.git_branch === gitBranch);
+  return res.json();
 }
 
-// Poll until branch exists and is ready
-const start = Date.now();
-let branch;
+async function findReadyBranch(branchName) {
+  const start = Date.now();
+  while (Date.now() - start < MAX_WAIT_MS) {
+    const branches = await listBranches();
+    const branch = branches.find((b) => b.git_branch === branchName);
 
-while (Date.now() - start < MAX_WAIT_MS) {
-  branch = await findBranch();
+    if (branch && branch.status === 'FUNCTIONS_DEPLOYED') {
+      return branch;
+    }
 
-  if (branch && branch.status === 'FUNCTIONS_DEPLOYED') {
-    break;
+    const status = branch ? branch.status : 'not found';
+    const elapsed = Math.round((Date.now() - start) / 1000);
+    console.log(`[preview-env] Branch "${branchName}" status: ${status} (${elapsed}s elapsed) — waiting...`);
+    await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
   }
+  return null;
+}
 
-  const status = branch ? branch.status : 'not found';
-  const elapsed = Math.round((Date.now() - start) / 1000);
-  console.log(`[preview-env] Branch status: ${status} (${elapsed}s elapsed) — waiting...`);
-  await new Promise((r) => setTimeout(r, POLL_INTERVAL_MS));
+// Try the PR branch first, fall back to dev
+let branch = await findReadyBranch(gitBranch);
+
+if (!branch) {
+  console.log(`[preview-env] No ready branch for "${gitBranch}" — falling back to dev`);
+  branch = await findReadyBranch('dev');
 }
 
 if (!branch) {
-  console.error(`[preview-env] Timed out waiting for preview branch: ${gitBranch}`);
-  process.exit(1);
-}
-
-if (branch.status !== 'FUNCTIONS_DEPLOYED') {
-  console.error(`[preview-env] Branch not ready after ${MAX_WAIT_MS / 1000}s — status: ${branch.status}`);
+  console.error(`[preview-env] No ready branch found (not even dev)`);
   process.exit(1);
 }
 
