@@ -200,6 +200,9 @@ export function ProfilePage() {
               {push.loading ? 'Updating...' : 'Enable notifications'}
             </button>
           )}
+          {push.error && (
+            <p className="mt-2 text-center text-sm text-red-500">{push.error}</p>
+          )}
         </div>
       )}
 

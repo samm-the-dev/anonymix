@@ -5,12 +5,14 @@ import type { Player } from '@/lib/types';
 type PermissionState = NotificationPermission | 'unsupported';
 
 interface UsePushSubscriptionResult {
-  /** Current Notification.permission (or 'unsupported' if push not available) */
+  /** Current Notification.permission (or 'unsupported' if push not available/configured) */
   permission: PermissionState;
   /** Whether this device has an active subscription saved in the DB */
   subscribed: boolean;
   /** Loading state for subscribe/unsubscribe operations */
   loading: boolean;
+  /** Error message from the last subscribe/unsubscribe attempt */
+  error: string | null;
   /** Subscribe this device to push notifications */
   subscribe: () => Promise<void>;
   /** Unsubscribe this device from push notifications */
@@ -20,7 +22,7 @@ interface UsePushSubscriptionResult {
 const VAPID_PUBLIC_KEY = import.meta.env.VITE_VAPID_PUBLIC_KEY as string | undefined;
 
 function isPushSupported(): boolean {
-  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window;
+  return 'serviceWorker' in navigator && 'PushManager' in window && 'Notification' in window && !!VAPID_PUBLIC_KEY;
 }
 
 /** Convert a base64 URL-safe string to a Uint8Array (for applicationServerKey) */
@@ -39,6 +41,7 @@ export function usePushSubscription(player: Player | null): UsePushSubscriptionR
   );
   const [subscribed, setSubscribed] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   // Check if this device already has a subscription stored in the DB
   useEffect(() => {
@@ -75,9 +78,10 @@ export function usePushSubscription(player: Player | null): UsePushSubscriptionR
   }, [player]);
 
   const subscribe = useCallback(async () => {
-    if (!player || !isPushSupported() || !VAPID_PUBLIC_KEY) return;
+    if (!player || !isPushSupported()) return;
 
     setLoading(true);
+    setError(null);
     try {
       // Request permission if not already granted
       const perm = await Notification.requestPermission();
@@ -89,12 +93,15 @@ export function usePushSubscription(player: Player | null): UsePushSubscriptionR
       // Subscribe via PushManager
       const sub = await reg.pushManager.subscribe({
         userVisibleOnly: true,
-        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY).buffer as ArrayBuffer,
+        applicationServerKey: urlBase64ToUint8Array(VAPID_PUBLIC_KEY!).buffer as ArrayBuffer,
       });
 
       const key = sub.getKey('p256dh');
       const auth = sub.getKey('auth');
-      if (!key || !auth) throw new Error('Missing push subscription keys');
+      if (!key || !auth) {
+        await sub.unsubscribe();
+        throw new Error('Missing push subscription keys');
+      }
 
       // base64url-encode the keys
       const p256dh = btoa(String.fromCharCode(...new Uint8Array(key)))
@@ -103,15 +110,22 @@ export function usePushSubscription(player: Player | null): UsePushSubscriptionR
         .replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
 
       // Upsert into Supabase
-      const { error } = await supabase
+      const { error: dbError } = await supabase
         .from('push_subscriptions')
         .upsert(
           { player_id: player.id, endpoint: sub.endpoint, p256dh, auth: authStr },
           { onConflict: 'player_id,endpoint' },
         );
 
-      if (error) throw error;
+      if (dbError) {
+        // Clean up browser subscription to avoid orphaned subs not tracked server-side
+        try { await sub.unsubscribe(); } catch { /* preserve original error */ }
+        throw dbError;
+      }
+
       setSubscribed(true);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
@@ -121,27 +135,31 @@ export function usePushSubscription(player: Player | null): UsePushSubscriptionR
     if (!player || !isPushSupported()) return;
 
     setLoading(true);
+    setError(null);
     try {
       const reg = await navigator.serviceWorker.ready;
       const sub = await reg.pushManager.getSubscription();
 
       if (sub) {
-        // Remove from DB
-        await supabase
+        // Remove from DB first — only unsubscribe browser if DB succeeds
+        const { error: dbError } = await supabase
           .from('push_subscriptions')
           .delete()
           .eq('player_id', player.id)
           .eq('endpoint', sub.endpoint);
 
-        // Unsubscribe from browser
+        if (dbError) throw dbError;
+
         await sub.unsubscribe();
       }
 
       setSubscribed(false);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : String(err));
     } finally {
       setLoading(false);
     }
   }, [player]);
 
-  return { permission, subscribed, loading, subscribe, unsubscribe };
+  return { permission, subscribed, loading, error, subscribe, unsubscribe };
 }
