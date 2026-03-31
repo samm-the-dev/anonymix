@@ -42,6 +42,8 @@ function AppRoutes() {
     }
   }, [player, navigate]);
 
+  const { theme } = useTheme();
+
   if (loading) {
     return (
       <Spinner />
@@ -50,8 +52,6 @@ function AppRoutes() {
 
   if (!user) return <LoginPage />;
   if (needsProfile) return <ProfileSetupPage />;
-  const { theme } = useTheme();
-
   if (!player) return null;
 
   return (
