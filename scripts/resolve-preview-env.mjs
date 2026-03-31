@@ -61,11 +61,21 @@ async function findReadyBranch(branchName) {
   return null;
 }
 
-// Try the PR branch first, fall back to dev
-let branch = await findReadyBranch(gitBranch);
+// Try the PR branch first, fall back to dev.
+// Quick-check: if the branch doesn't exist at all, skip straight to dev
+// instead of polling for 5 minutes.
+let branch = null;
+const allBranches = await listBranches();
+const hasBranch = allBranches.some((b) => b.git_branch === gitBranch);
+
+if (hasBranch) {
+  branch = await findReadyBranch(gitBranch);
+} else {
+  console.log(`[preview-env] No Supabase branch for "${gitBranch}" — skipping to dev fallback`);
+}
 
 if (!branch) {
-  console.log(`[preview-env] No ready branch for "${gitBranch}" — falling back to dev`);
+  console.log(`[preview-env] Falling back to dev`);
   branch = await findReadyBranch('dev');
 }
 
