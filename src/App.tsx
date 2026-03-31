@@ -4,6 +4,7 @@ import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { TaskLayout } from '@/components/TaskLayout';
 import { Spinner } from '@/components/Spinner';
+import { Toaster } from 'sonner';
 import { SessionHomePage } from '@/pages/SessionHomePage';
 import { SessionViewPage } from '@/pages/SessionViewPage';
 import { CreateSessionPage } from '@/pages/CreateSessionPage';
@@ -70,6 +71,7 @@ function AppRoutes() {
 export function App() {
   return (
     <BrowserRouter>
+      <Toaster position="bottom-center" theme="dark" richColors />
       <Routes>
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
