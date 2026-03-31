@@ -5,10 +5,9 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-function isIosSafari() {
+function isIos() {
   const ua = navigator.userAgent;
-  const isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  return isIos && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS|Chrome/.test(ua);
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
 }
 
 function isStandalone() {
@@ -25,8 +24,8 @@ export function useInstallPrompt() {
   useEffect(() => {
     if (isStandalone()) return;
 
-    // iOS Safari never fires beforeinstallprompt — show manual instructions
-    if (isIosSafari()) {
+    // No iOS browser fires beforeinstallprompt (all use WebKit) — show manual instructions
+    if (isIos()) {
       setInstallMode('ios');
       return;
     }
