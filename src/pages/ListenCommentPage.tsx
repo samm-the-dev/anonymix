@@ -208,6 +208,7 @@ export function ListenCommentPage({ sessionId, tapeId, ended = false }: { sessio
         if (trimmed) saved[key] = trimmed;
       }
       setExistingComments(saved);
+      setComments(saved);
 
       toast.success('Comments shared!');
       setTimeout(() => {

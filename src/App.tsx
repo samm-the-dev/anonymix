@@ -71,7 +71,7 @@ function AppRoutes() {
 export function App() {
   return (
     <BrowserRouter>
-      <Toaster position="bottom-center" theme="dark" richColors />
+      <Toaster position="bottom-center" theme="system" richColors />
       <Routes>
         <Route path="privacy" element={<PrivacyPage />} />
         <Route path="terms" element={<TermsPage />} />
