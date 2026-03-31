@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /**
  * Point .env.local at the Supabase preview branch for the current git branch.
- * Falls back to prod if no preview branch exists (e.g. on main).
+ * Falls back to the persistent dev branch if no PR-specific branch exists.
  *
  * Usage: npm run env:local
  *
