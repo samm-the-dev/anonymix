@@ -56,7 +56,7 @@ function AppRoutes() {
 
   return (
     <>
-    <Toaster position="bottom-center" theme={theme} richColors />
+    <Toaster key={theme} position="bottom-center" theme={theme} richColors />
     <Routes>
       <Route element={<TaskLayout />}>
         <Route path="create" element={<CreateSessionPage />} />
