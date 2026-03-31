@@ -47,6 +47,16 @@ Anonymous music sharing with friends — themed submissions, comments, reveals.
 3. Get preview branch credentials from Supabase dashboard (Branches) or CLI: `npx supabase branches list --project-ref mryuusvhdadbjpupzpol`
 4. Supabase CLI is linked to the preview branch project (not prod)
 
+### After Merging a PR
+
+1. Switch to main and pull: `git checkout main && git pull`
+2. Run `npm run env:local` to update `.env.local` (auto-detects preview branch or falls back to prod)
+3. Delete the merged local branch: `git branch -d <branch-name>`
+
+### Switching Branches
+
+Run `npm run env:local` after switching branches. It reads the current git branch, looks for a matching Supabase preview branch, and writes `.env.local`. Falls back to prod on main or if no preview branch exists. Requires `SUPABASE_ACCESS_TOKEN` env var (or in `.env` file).
+
 ### Prod Deploy
 
 - GHA workflow (`.github/workflows/deploy-gh-pages.yml`) builds and deploys to GitHub Pages on push to main
