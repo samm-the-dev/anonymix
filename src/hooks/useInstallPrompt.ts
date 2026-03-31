@@ -14,6 +14,11 @@ function getManualInstallPlatform(): 'ios' | 'android' | null {
   return null;
 }
 
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true);
+}
+
 export type InstallMode = 'prompt' | 'ios' | 'android' | null;
 
 export function useInstallPrompt() {
@@ -21,9 +26,15 @@ export function useInstallPrompt() {
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    if (isStandalone()) return;
 
     const platform = getManualInstallPlatform();
+
+    // On mobile, show the button immediately with manual instructions.
+    // beforeinstallprompt will upgrade it to a native prompt if it fires.
+    if (platform) {
+      setInstallMode(platform);
+    }
 
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
@@ -38,19 +49,7 @@ export function useInstallPrompt() {
 
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
     window.addEventListener('appinstalled', onInstalled);
-
-    // If beforeinstallprompt hasn't fired after a short delay, fall back to
-    // manual instructions for known mobile platforms. This covers iOS Safari
-    // (which never fires the event) and Android Chrome when the event is
-    // suppressed (e.g. user previously dismissed the mini-infobar).
-    const fallbackTimer = setTimeout(() => {
-      if (!deferredPrompt.current && platform) {
-        setInstallMode(platform);
-      }
-    }, 2000);
-
     return () => {
-      clearTimeout(fallbackTimer);
       window.removeEventListener('beforeinstallprompt', onBeforeInstall);
       window.removeEventListener('appinstalled', onInstalled);
     };
