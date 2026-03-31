@@ -21,6 +21,14 @@ export function AppBar({ showBack = false }: AppBarProps) {
           <button onClick={() => navigate(-1)} className="text-muted-foreground hover:text-foreground">
             <ArrowLeft className="h-5 w-5" />
           </button>
+        ) : isInstallable ? (
+          <button
+            onClick={installApp}
+            className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
+            aria-label="Install app"
+          >
+            <Download className="h-5 w-5" />
+          </button>
         ) : (
           <div className="h-5 w-5" />
         )}
@@ -29,15 +37,6 @@ export function AppBar({ showBack = false }: AppBarProps) {
           <CassetteTape className="h-5 w-5 text-violet-400" />
         </h1>
         <div className="ml-auto flex items-center gap-1">
-          {isInstallable && (
-            <button
-              onClick={installApp}
-              className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
-              aria-label="Install app"
-            >
-              <Download className="h-5 w-5" />
-            </button>
-          )}
           <button
             onClick={toggleTheme}
             className="rounded-md p-1 text-muted-foreground hover:bg-accent hover:text-accent-foreground"
