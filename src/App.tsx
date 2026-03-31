@@ -1,10 +1,9 @@
-import { useEffect } from 'react';
+import { useEffect, useState } from 'react';
 import { BrowserRouter, Routes, Route, Navigate, useLocation, useNavigate } from 'react-router-dom';
 import { AuthProvider, useAuthContext } from '@/contexts/AuthContext';
 import { Layout } from '@/components/Layout';
 import { TaskLayout } from '@/components/TaskLayout';
 import { Spinner } from '@/components/Spinner';
-import { useTheme } from '@/hooks/useTheme';
 import { Toaster } from 'sonner';
 import { SessionHomePage } from '@/pages/SessionHomePage';
 import { SessionViewPage } from '@/pages/SessionViewPage';
@@ -42,7 +41,16 @@ function AppRoutes() {
     }
   }, [player, navigate]);
 
-  const { theme } = useTheme();
+  const [toasterTheme, setToasterTheme] = useState<'light' | 'dark'>(
+    document.documentElement.classList.contains('dark') ? 'dark' : 'light',
+  );
+  useEffect(() => {
+    const observer = new MutationObserver(() => {
+      setToasterTheme(document.documentElement.classList.contains('dark') ? 'dark' : 'light');
+    });
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+    return () => observer.disconnect();
+  }, []);
 
   if (loading) {
     return (
@@ -56,7 +64,7 @@ function AppRoutes() {
 
   return (
     <>
-    <Toaster key={theme} position="bottom-center" theme={theme} richColors />
+    <Toaster key={toasterTheme} position="bottom-center" theme={toasterTheme} richColors />
     <Routes>
       <Route element={<TaskLayout />}>
         <Route path="create" element={<CreateSessionPage />} />
