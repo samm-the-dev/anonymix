@@ -5,22 +5,41 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
+function isIos() {
+  const ua = navigator.userAgent;
+  return /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+}
+
+function isStandalone() {
+  return window.matchMedia('(display-mode: standalone)').matches
+    || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true);
+}
+
+export type InstallMode = 'prompt' | 'ios' | null;
+
 export function useInstallPrompt() {
-  const [isInstallable, setIsInstallable] = useState(false);
+  const [installMode, setInstallMode] = useState<InstallMode>(null);
   const deferredPrompt = useRef<BeforeInstallPromptEvent | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
+    if (isStandalone()) return;
 
+    // No iOS browser fires beforeinstallprompt (all use WebKit) — show manual instructions
+    if (isIos()) {
+      setInstallMode('ios');
+      return;
+    }
+
+    // Chrome/Edge: rely on beforeinstallprompt for native install
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
       deferredPrompt.current = e as BeforeInstallPromptEvent;
-      setIsInstallable(true);
+      setInstallMode('prompt');
     };
 
     const onInstalled = () => {
       deferredPrompt.current = null;
-      setIsInstallable(false);
+      setInstallMode(null);
     };
 
     window.addEventListener('beforeinstallprompt', onBeforeInstall);
@@ -36,8 +55,8 @@ export function useInstallPrompt() {
     if (!prompt) return;
     await prompt.prompt();
     deferredPrompt.current = null;
-    setIsInstallable(false);
+    setInstallMode(null);
   }, []);
 
-  return { isInstallable, installApp };
+  return { installMode, installApp } as const;
 }
