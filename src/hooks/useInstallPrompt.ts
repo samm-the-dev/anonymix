@@ -5,13 +5,10 @@ interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-function getManualInstallPlatform(): 'ios' | 'android' | null {
+function isIosSafari() {
   const ua = navigator.userAgent;
   const isIos = /iPad|iPhone|iPod/.test(ua) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-  const isSafari = /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS|Chrome/.test(ua);
-  if (isIos && isSafari) return 'ios';
-  if (/Android/.test(ua)) return 'android';
-  return null;
+  return isIos && /Safari/.test(ua) && !/CriOS|FxiOS|OPiOS|EdgiOS|Chrome/.test(ua);
 }
 
 function isStandalone() {
@@ -19,7 +16,7 @@ function isStandalone() {
     || ('standalone' in navigator && (navigator as { standalone?: boolean }).standalone === true);
 }
 
-export type InstallMode = 'prompt' | 'ios' | 'android' | null;
+export type InstallMode = 'prompt' | 'ios' | null;
 
 export function useInstallPrompt() {
   const [installMode, setInstallMode] = useState<InstallMode>(null);
@@ -28,14 +25,13 @@ export function useInstallPrompt() {
   useEffect(() => {
     if (isStandalone()) return;
 
-    const platform = getManualInstallPlatform();
-
-    // On mobile, show the button immediately with manual instructions.
-    // beforeinstallprompt will upgrade it to a native prompt if it fires.
-    if (platform) {
-      setInstallMode(platform);
+    // iOS Safari never fires beforeinstallprompt — show manual instructions
+    if (isIosSafari()) {
+      setInstallMode('ios');
+      return;
     }
 
+    // Chrome/Edge: rely on beforeinstallprompt for native install
     const onBeforeInstall = (e: Event) => {
       e.preventDefault();
       deferredPrompt.current = e as BeforeInstallPromptEvent;

@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Download, EllipsisVertical, LogOut, Pencil, Share } from 'lucide-react';
+import { Download, LogOut, Pencil, Share } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
 import { useAuthContext } from '@/contexts/AuthContext';
 import { useInstallPrompt } from '@/hooks/useInstallPrompt';
@@ -146,7 +146,7 @@ export function ProfilePage() {
           Install Anonymix
         </button>
       )}
-      {(installMode === 'ios' || installMode === 'android') && (
+      {installMode === 'ios' && (
         <Popover.Root>
           <Popover.Trigger asChild>
             <button className="mt-8 flex w-full items-center justify-center gap-2 rounded-xl border border-border py-3 text-sm font-medium text-foreground transition-colors hover:bg-accent">
@@ -160,19 +160,11 @@ export function ProfilePage() {
               sideOffset={8}
               className="z-50 w-64 rounded-lg border border-border bg-card p-3 text-sm text-card-foreground shadow-lg"
             >
-              {installMode === 'ios' ? (
-                <p className="text-muted-foreground">
-                  Tap <Share className="inline h-4 w-4 align-text-bottom" /> in
-                  your browser toolbar, then choose{' '}
-                  <span className="font-medium text-foreground">Add to Home Screen</span>.
-                </p>
-              ) : (
-                <p className="text-muted-foreground">
-                  Tap <EllipsisVertical className="inline h-4 w-4 align-text-bottom" /> in
-                  your browser toolbar, then choose{' '}
-                  <span className="font-medium text-foreground">Add to Home screen</span>.
-                </p>
-              )}
+              <p className="text-muted-foreground">
+                Tap <Share className="inline h-4 w-4 align-text-bottom" /> in
+                your browser toolbar, then choose{' '}
+                <span className="font-medium text-foreground">Add to Home Screen</span>.
+              </p>
               <Popover.Arrow className="fill-border" />
             </Popover.Content>
           </Popover.Portal>

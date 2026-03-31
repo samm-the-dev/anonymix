@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, CassetteTape, Download, EllipsisVertical, Moon, Share, Sun } from 'lucide-react';
+import { ArrowLeft, CassetteTape, Download, Moon, Share, Sun } from 'lucide-react';
 import * as Popover from '@radix-ui/react-popover';
 import { useTheme } from '@/hooks/useTheme';
 import { useOnlineStatus } from '@/hooks/useOnlineStatus';
@@ -23,7 +23,7 @@ export function AppBar({ showBack = false }: AppBarProps) {
     >
       <Download className="h-5 w-5" />
     </button>
-  ) : installMode === 'ios' || installMode === 'android' ? (
+  ) : installMode === 'ios' ? (
     <Popover.Root>
       <Popover.Trigger asChild>
         <button
@@ -41,19 +41,11 @@ export function AppBar({ showBack = false }: AppBarProps) {
           className="z-50 w-64 rounded-lg border border-border bg-card p-3 text-sm text-card-foreground shadow-lg"
         >
           <p className="font-medium">Install Anonymix</p>
-          {installMode === 'ios' ? (
-            <p className="mt-1 text-muted-foreground">
-              Tap <Share className="inline h-4 w-4 align-text-bottom" /> in
-              your browser toolbar, then choose{' '}
-              <span className="font-medium text-foreground">Add to Home Screen</span>.
-            </p>
-          ) : (
-            <p className="mt-1 text-muted-foreground">
-              Tap <EllipsisVertical className="inline h-4 w-4 align-text-bottom" /> in
-              your browser toolbar, then choose{' '}
-              <span className="font-medium text-foreground">Add to Home screen</span>.
-            </p>
-          )}
+          <p className="mt-1 text-muted-foreground">
+            Tap <Share className="inline h-4 w-4 align-text-bottom" /> in
+            your browser toolbar, then choose{' '}
+            <span className="font-medium text-foreground">Add to Home Screen</span>.
+          </p>
           <Popover.Arrow className="fill-border" />
         </Popover.Content>
       </Popover.Portal>
