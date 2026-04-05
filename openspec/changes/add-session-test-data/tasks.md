@@ -28,6 +28,13 @@
 - [x] 5.5 Add Mika's comments: ~2 sparse comments
 - [x] 5.6 Rio: zero comments (lurker — verify summary handles this)
 
-## 6. Verify
+## 6. Verify seed data
 
 - [x] 6.1 Verify SQL runs without errors against current schema (check column names, FK references, unique constraints)
+
+## 7. Replace gamified stats with word cloud
+
+- [ ] 7.1 Remove "Most commented" and "Most active" sections from summary rendering
+- [ ] 7.2 Add word frequency computation from allComments (tokenize, lowercase, filter stopwords)
+- [ ] 7.3 Render weighted word cloud as styled `<span>` elements with scaled Tailwind font sizes
+- [ ] 7.4 Remove unused summary fields (topSongs, maxSongComments, topCommenters, maxPlayerComments)

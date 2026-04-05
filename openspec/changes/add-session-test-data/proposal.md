@@ -16,18 +16,32 @@ The existing seed data has a single session (`hello world`) that is **still acti
 
 This gives the completed session view meaningful data for: multiple top-commented songs, a clear "most active" commenter, tapes with different submission counts, and the skipped tape edge case.
 
+## Part 2: Replace gamified stats with word cloud
+
+The "Most commented" and "Most active" sections feel competitive/gamified. Replace them with a **weighted word cloud** built from comment text — a more holistic, celebratory snapshot of the session's vibe.
+
+### What Changes (frontend)
+
+- **Remove** the "Most commented" (top songs by comment count) section
+- **Remove** the "Most active" (top commenters) section
+- **Keep** the totals line (tapes / songs / comments)
+- **Add** a weighted word cloud rendered as styled `<span>` elements with scaled font sizes
+  - Source: all comment text from the session
+  - Filter common stopwords (the, is, a, an, of, etc.)
+  - Scale font size by word frequency (more frequent = larger)
+  - DIY with Tailwind — no external library
+
 ## Non-goals
 
 - Modifying the existing `hello world` session seed data
 - Adding auth users for the new players (only Sam needs auth for testing)
-- Changing any frontend code (this is data-only)
 - Adding new migrations
 
 ## Capabilities
 
 ### New Capabilities
 
-_None — seed data only._
+- `session-word-cloud`: Weighted word cloud in the completed session summary, replacing gamified stats
 
 ### Modified Capabilities
 
@@ -35,6 +49,7 @@ _None — seed data only._
 
 ## Impact
 
-- Seed data file: new JSON + new SQL inserts appended to `seed.sql`
+- Seed data file: SQL inserts appended to `seed.sql`
+- `SessionViewPage.tsx`: summary computation + rendering updated
 - Zero migration impact — uses existing schema
 - Preview branches will get the new data on next reset/seed

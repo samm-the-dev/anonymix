@@ -300,29 +300,30 @@ export function SessionViewPage() {
     const totalSongs = submissions.length;
     const totalComments = allComments.length;
 
-    // Most-commented songs
-    const commentsBySub = new Map<string, number>();
+    // Word cloud from comment text
+    const stopwords = new Set([
+      'the','a','an','and','or','but','in','on','at','to','for','of','is','it',
+      'this','that','with','was','are','be','has','have','had','do','does','did',
+      'not','no','so','if','my','me','we','us','he','she','they','them','i','you',
+      'your','its','our','his','her','their','am','been','being','were','will',
+      'would','could','should','can','may','just','all','like','from','up','out',
+    ]);
+    const wordCounts = new Map<string, number>();
     for (const c of allComments) {
-      if (c.submission_id) {
-        commentsBySub.set(c.submission_id, (commentsBySub.get(c.submission_id) ?? 0) + 1);
+      const words = c.text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+      for (const w of words) {
+        if (w.length > 1 && !stopwords.has(w)) {
+          wordCounts.set(w, (wordCounts.get(w) ?? 0) + 1);
+        }
       }
     }
-    const maxSongComments = Math.max(0, ...commentsBySub.values());
-    const topSongs = maxSongComments > 0
-      ? submissions.filter((s) => commentsBySub.get(s.id) === maxSongComments)
-      : [];
+    const topWords = [...wordCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([word, count]) => ({ word, count }));
+    const maxCount = topWords[0]?.count ?? 1;
 
-    // Most active commenters
-    const commentsByPlayer = new Map<string, number>();
-    for (const c of allComments) {
-      commentsByPlayer.set(c.player_id, (commentsByPlayer.get(c.player_id) ?? 0) + 1);
-    }
-    const maxPlayerComments = Math.max(0, ...commentsByPlayer.values());
-    const topCommenters = maxPlayerComments > 0
-      ? members.filter((m) => commentsByPlayer.get(m.id) === maxPlayerComments)
-      : [];
-
-    return { tapesCompleted, totalSongs, totalComments, topSongs, maxSongComments, topCommenters, maxPlayerComments };
+    return { tapesCompleted, totalSongs, totalComments, topWords, maxCount };
   })() : null;
 
   if (loading) {
@@ -361,40 +362,23 @@ export function SessionViewPage() {
                   <span>{summary.totalComments} comment{summary.totalComments !== 1 ? 's' : ''}</span>
                 </div>
 
-                {/* Most-commented songs */}
-                {summary.topSongs.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Most commented</p>
-                    {summary.topSongs.map((s) => (
-                      <div key={s.id} className="mt-1 flex items-center gap-2">
-                        {s.cover_art_url ? (
-                          <img src={s.cover_art_url} alt="" className="h-6 w-6 shrink-0 rounded object-cover" />
-                        ) : (
-                          <div className="h-6 w-6 shrink-0 rounded bg-secondary" />
-                        )}
-                        <span className="truncate text-xs font-medium text-foreground">{s.song_name}</span>
-                        <span className="shrink-0 text-[10px] text-muted-foreground">{summary.maxSongComments}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Most active commenters */}
-                {summary.topCommenters.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Most active</p>
-                    {summary.topCommenters.map((m) => (
-                      <div key={m.id} className="mt-1 flex items-center gap-2">
+                {/* Word cloud */}
+                {summary.topWords.length > 0 && (
+                  <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                    {summary.topWords.map(({ word, count }) => {
+                      const ratio = count / summary.maxCount;
+                      const fontSize = 0.625 + ratio * 0.875; // 0.625rem (10px) to 1.5rem (24px)
+                      const opacity = 0.45 + ratio * 0.55;
+                      return (
                         <span
-                          className="flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
-                          style={{ backgroundColor: m.avatarColor + '22', borderColor: m.avatarColor, borderWidth: 1 }}
+                          key={word}
+                          className="font-medium text-foreground"
+                          style={{ fontSize: `${fontSize}rem`, opacity }}
                         >
-                          {m.avatar}
+                          {word}
                         </span>
-                        <span className="text-xs font-medium text-foreground">{m.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{summary.maxPlayerComments} comments</span>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 )}
               </div>
