@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, ChevronDown, Crown, MoreVertical, Search, UserMinus, Users, X } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
@@ -17,6 +17,15 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 /** Postgres error code for RLS policy violation */
 const POSTGRES_INSUFFICIENT_PRIVILEGE = '42501';
+
+/** Common words filtered from the session word cloud */
+const STOPWORDS = new Set([
+  'the', 'and', 'but', 'not', 'this', 'that', 'with', 'was', 'are',
+  'has', 'have', 'had', 'does', 'did', 'you', 'your', 'our', 'his',
+  'her', 'its', 'their', 'them', 'they', 'she', 'been', 'being',
+  'were', 'will', 'would', 'could', 'should', 'can', 'may', 'just',
+  'all', 'like', 'from', 'out', 'for', 'the',
+]);
 
 interface TapeData {
   id: string;
@@ -55,7 +64,7 @@ export function SessionViewPage() {
   const [loading, setLoading] = useState(true);
   const [showMembers, setShowMembers] = useState(false);
   const [commentersCount, setCommentersCount] = useState(0);
-  const [allComments, setAllComments] = useState<{ submission_id: string | null; player_id: string }[]>([]);
+  const [allComments, setAllComments] = useState<{ submission_id: string | null; player_id: string; text: string }[]>([]);
 
   // Submission form
   const [showSearch, setShowSearch] = useState(false);
@@ -158,7 +167,7 @@ export function SessionViewPage() {
       const tapeIds = fetchedTapes.map((t) => t.id);
       const { data: comments } = await supabase
         .from('comments')
-        .select('submission_id, player_id')
+        .select('submission_id, player_id, text')
         .in('tape_id', tapeIds);
       setAllComments(comments ?? []);
     }
@@ -295,35 +304,30 @@ export function SessionViewPage() {
   );
 
   // Summary stats for completed sessions
-  const summary = sessionEnded ? (() => {
+  const summary = useMemo(() => {
+    if (!sessionEnded) return null;
     const tapesCompleted = tapes.filter((t) => t.status === 'results').length;
     const totalSongs = submissions.length;
     const totalComments = allComments.length;
 
-    // Most-commented songs
-    const commentsBySub = new Map<string, number>();
+    // Word cloud from comment text
+    const wordCounts = new Map<string, number>();
     for (const c of allComments) {
-      if (c.submission_id) {
-        commentsBySub.set(c.submission_id, (commentsBySub.get(c.submission_id) ?? 0) + 1);
+      const words = c.text.toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s]/gu, '').split(/\s+/);
+      for (const w of words) {
+        if (w.length > 2 && !STOPWORDS.has(w)) {
+          wordCounts.set(w, (wordCounts.get(w) ?? 0) + 1);
+        }
       }
     }
-    const maxSongComments = Math.max(0, ...commentsBySub.values());
-    const topSongs = maxSongComments > 0
-      ? submissions.filter((s) => commentsBySub.get(s.id) === maxSongComments)
-      : [];
+    const topWords = [...wordCounts.entries()]
+      .sort((a, b) => b[1] - a[1])
+      .slice(0, 20)
+      .map(([word, count]) => ({ word, count }));
+    const maxCount = topWords[0]?.count ?? 1;
 
-    // Most active commenters
-    const commentsByPlayer = new Map<string, number>();
-    for (const c of allComments) {
-      commentsByPlayer.set(c.player_id, (commentsByPlayer.get(c.player_id) ?? 0) + 1);
-    }
-    const maxPlayerComments = Math.max(0, ...commentsByPlayer.values());
-    const topCommenters = maxPlayerComments > 0
-      ? members.filter((m) => commentsByPlayer.get(m.id) === maxPlayerComments)
-      : [];
-
-    return { tapesCompleted, totalSongs, totalComments, topSongs, maxSongComments, topCommenters, maxPlayerComments };
-  })() : null;
+    return { tapesCompleted, totalSongs, totalComments, topWords, maxCount };
+  }, [sessionEnded, tapes, submissions, allComments]);
 
   if (loading) {
     return (
@@ -355,46 +359,33 @@ export function SessionViewPage() {
             <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
               <div className="px-4 pb-3">
                 {/* Totals */}
+                <p className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">Stats</p>
                 <div className="flex gap-4 text-xs text-muted-foreground">
                   <span>{summary.tapesCompleted} tape{summary.tapesCompleted !== 1 ? 's' : ''}</span>
                   <span>{summary.totalSongs} song{summary.totalSongs !== 1 ? 's' : ''}</span>
                   <span>{summary.totalComments} comment{summary.totalComments !== 1 ? 's' : ''}</span>
                 </div>
 
-                {/* Most-commented songs */}
-                {summary.topSongs.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Most commented</p>
-                    {summary.topSongs.map((s) => (
-                      <div key={s.id} className="mt-1 flex items-center gap-2">
-                        {s.cover_art_url ? (
-                          <img src={s.cover_art_url} alt="" className="h-6 w-6 shrink-0 rounded object-cover" />
-                        ) : (
-                          <div className="h-6 w-6 shrink-0 rounded bg-secondary" />
-                        )}
-                        <span className="truncate text-xs font-medium text-foreground">{s.song_name}</span>
-                        <span className="shrink-0 text-[10px] text-muted-foreground">{summary.maxSongComments}</span>
-                      </div>
-                    ))}
-                  </div>
-                )}
-
-                {/* Most active commenters */}
-                {summary.topCommenters.length > 0 && (
-                  <div className="mt-2">
-                    <p className="text-[10px] uppercase tracking-wide text-muted-foreground">Most active</p>
-                    {summary.topCommenters.map((m) => (
-                      <div key={m.id} className="mt-1 flex items-center gap-2">
-                        <span
-                          className="flex h-5 w-5 items-center justify-center rounded-full text-[10px]"
-                          style={{ backgroundColor: m.avatarColor + '22', borderColor: m.avatarColor, borderWidth: 1 }}
-                        >
-                          {m.avatar}
-                        </span>
-                        <span className="text-xs font-medium text-foreground">{m.name}</span>
-                        <span className="text-[10px] text-muted-foreground">{summary.maxPlayerComments} comments</span>
-                      </div>
-                    ))}
+                {/* Word cloud */}
+                {summary.topWords.length > 0 && (
+                  <div className="mt-3">
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">Session vibes</p>
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      {summary.topWords.map(({ word, count }) => {
+                        const ratio = count / summary.maxCount;
+                        const fontSize = 0.625 + ratio * 0.875; // 0.625rem (10px) to 1.5rem (24px)
+                        const opacity = 0.45 + ratio * 0.55;
+                        return (
+                          <span
+                            key={word}
+                            className="font-medium text-foreground"
+                            style={{ fontSize: `${fontSize}rem`, opacity }}
+                          >
+                            {word}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
