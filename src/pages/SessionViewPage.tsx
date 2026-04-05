@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState, useCallback, useMemo } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, CalendarPlus, CassetteTape, CheckCircle, ChevronDown, Crown, MoreVertical, Search, UserMinus, Users, X } from 'lucide-react';
 import * as Collapsible from '@radix-ui/react-collapsible';
@@ -17,6 +17,15 @@ import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
 /** Postgres error code for RLS policy violation */
 const POSTGRES_INSUFFICIENT_PRIVILEGE = '42501';
+
+/** Common words filtered from the session word cloud */
+const STOPWORDS = new Set([
+  'the', 'and', 'but', 'not', 'this', 'that', 'with', 'was', 'are',
+  'has', 'have', 'had', 'does', 'did', 'you', 'your', 'our', 'his',
+  'her', 'its', 'their', 'them', 'they', 'she', 'been', 'being',
+  'were', 'will', 'would', 'could', 'should', 'can', 'may', 'just',
+  'all', 'like', 'from', 'out', 'for', 'the',
+]);
 
 interface TapeData {
   id: string;
@@ -295,24 +304,18 @@ export function SessionViewPage() {
   );
 
   // Summary stats for completed sessions
-  const summary = sessionEnded ? (() => {
+  const summary = useMemo(() => {
+    if (!sessionEnded) return null;
     const tapesCompleted = tapes.filter((t) => t.status === 'results').length;
     const totalSongs = submissions.length;
     const totalComments = allComments.length;
 
     // Word cloud from comment text
-    const stopwords = new Set([
-      'the','a','an','and','or','but','in','on','at','to','for','of','is','it',
-      'this','that','with','was','are','be','has','have','had','do','does','did',
-      'not','no','so','if','my','me','we','us','he','she','they','them','i','you',
-      'your','its','our','his','her','their','am','been','being','were','will',
-      'would','could','should','can','may','just','all','like','from','up','out',
-    ]);
     const wordCounts = new Map<string, number>();
     for (const c of allComments) {
       const words = c.text.toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s]/gu, '').split(/\s+/);
       for (const w of words) {
-        if (w.length > 2 && !stopwords.has(w)) {
+        if (w.length > 2 && !STOPWORDS.has(w)) {
           wordCounts.set(w, (wordCounts.get(w) ?? 0) + 1);
         }
       }
@@ -324,7 +327,7 @@ export function SessionViewPage() {
     const maxCount = topWords[0]?.count ?? 1;
 
     return { tapesCompleted, totalSongs, totalComments, topWords, maxCount };
-  })() : null;
+  }, [sessionEnded, tapes, submissions, allComments]);
 
   if (loading) {
     return (
