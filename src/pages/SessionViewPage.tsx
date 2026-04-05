@@ -60,7 +60,8 @@ export function SessionViewPage() {
   const [selectedSong, setSelectedSong] = useState<SongResult | null>(null);
   const [coverArtUrl, setCoverArtUrl] = useState<string | null>(null);
   const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+
+  const [submittingTapeId, setSubmittingTapeId] = useState<string | null>(null);
   const [showLockConfirm, setShowLockConfirm] = useState(false);
   const [busy, setBusy] = useState(false);
   const [memberAction, setMemberAction] = useState<{ type: 'make_host' | 'remove'; member: { id: string; name: string } } | null>(null);
@@ -175,6 +176,7 @@ export function SessionViewPage() {
       const existing = submissions.find(
         (s) => s.player_id === player?.id && 'tape_id' in s && (s as unknown as { tape_id: string }).tape_id === activeTape.id,
       );
+      setSubmittingTapeId(activeTape.id);
       setShowSearch(true);
       if (existing) {
         setQuery(`${existing.artist_name ? existing.artist_name + ' - ' : ''}${existing.song_name}`);
@@ -231,10 +233,9 @@ export function SessionViewPage() {
   }
 
   async function handleSubmit() {
-    if (!activeTape || !player || !selectedSong) return;
+    if (!submittingTapeId || !player || !selectedSong) return;
     setSubmitting(true);
     setBusy(true);
-    setError(null);
 
     try {
       if (mySubmission) {
@@ -253,7 +254,7 @@ export function SessionViewPage() {
       } else {
         // Insert new
         const { error: err } = await supabase.from('submissions').insert({
-          tape_id: activeTape.id,
+          tape_id: submittingTapeId,
           player_id: player.id,
           song_name: selectedSong.title,
           artist_name: selectedSong.artist,
@@ -273,7 +274,8 @@ export function SessionViewPage() {
       toast.success('Song submitted!');
 
     } catch (err) {
-      setError(err instanceof Error ? err.message : String(err));
+      toast.error('This tape is no longer accepting submissions');
+      await fetchData();
     } finally {
       setSubmitting(false);
       setBusy(false);
@@ -531,6 +533,7 @@ export function SessionViewPage() {
                     </div>
                     <button
                       onClick={() => {
+                        setSubmittingTapeId(activeTape.id);
                         setShowSearch(true);
                         setQuery(`${mySubmission.artist_name ? mySubmission.artist_name + ' - ' : ''}${mySubmission.song_name}`);
                         setSelectedSong({
@@ -547,7 +550,7 @@ export function SessionViewPage() {
                   </div>
                 ) : (
                   <button
-                    onClick={() => setShowSearch(true)}
+                    onClick={() => { setSubmittingTapeId(activeTape.id); setShowSearch(true); }}
                     disabled={deadlinePassed}
                     className="w-full rounded-xl bg-green-500 py-2.5 text-sm font-semibold text-white hover:bg-green-600 disabled:opacity-40 dark:bg-green-600 dark:hover:bg-green-500"
                   >
@@ -922,7 +925,6 @@ export function SessionViewPage() {
 
           {/* Bottom actions */}
           <div className="mt-auto border-t border-border p-4">
-            {error && <p className="mb-2 text-center text-sm text-red-500">{error}</p>}
             <button
               onClick={handleSubmit}
               disabled={!selectedSong || submitting}
