@@ -189,7 +189,7 @@ export function SessionViewPage() {
         setCoverArtUrl(existing.cover_art_url);
       }
     }
-  }, [loading, searchParams, activeTape]);
+  }, [loading, searchParams, activeTape, submissions, player]);
 
   // Derive my submission for active tape
   useEffect(() => {
@@ -274,7 +274,12 @@ export function SessionViewPage() {
       toast.success('Song submitted!');
 
     } catch (err) {
-      toast.error('This tape is no longer accepting submissions');
+      const pgError = err && typeof err === 'object' && 'code' in err ? (err as { code?: string }).code : null;
+      if (pgError === '42501') {
+        toast.error('This tape is no longer accepting submissions');
+      } else {
+        toast.error(err instanceof Error ? err.message : 'Failed to submit song');
+      }
       await fetchData();
     } finally {
       setSubmitting(false);
