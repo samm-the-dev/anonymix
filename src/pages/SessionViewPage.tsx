@@ -55,7 +55,7 @@ export function SessionViewPage() {
   const [loading, setLoading] = useState(true);
   const [showMembers, setShowMembers] = useState(false);
   const [commentersCount, setCommentersCount] = useState(0);
-  const [allComments, setAllComments] = useState<{ submission_id: string | null; player_id: string }[]>([]);
+  const [allComments, setAllComments] = useState<{ submission_id: string | null; player_id: string; text: string }[]>([]);
 
   // Submission form
   const [showSearch, setShowSearch] = useState(false);
@@ -158,7 +158,7 @@ export function SessionViewPage() {
       const tapeIds = fetchedTapes.map((t) => t.id);
       const { data: comments } = await supabase
         .from('comments')
-        .select('submission_id, player_id')
+        .select('submission_id, player_id, text')
         .in('tape_id', tapeIds);
       setAllComments(comments ?? []);
     }
