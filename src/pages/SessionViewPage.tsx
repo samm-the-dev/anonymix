@@ -312,7 +312,7 @@ export function SessionViewPage() {
     for (const c of allComments) {
       const words = c.text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
       for (const w of words) {
-        if (w.length > 1 && !stopwords.has(w)) {
+        if (w.length > 2 && !stopwords.has(w)) {
           wordCounts.set(w, (wordCounts.get(w) ?? 0) + 1);
         }
       }
@@ -364,21 +364,24 @@ export function SessionViewPage() {
 
                 {/* Word cloud */}
                 {summary.topWords.length > 0 && (
-                  <div className="mt-3 flex flex-wrap items-baseline gap-x-2 gap-y-1">
-                    {summary.topWords.map(({ word, count }) => {
-                      const ratio = count / summary.maxCount;
-                      const fontSize = 0.625 + ratio * 0.875; // 0.625rem (10px) to 1.5rem (24px)
-                      const opacity = 0.45 + ratio * 0.55;
-                      return (
-                        <span
-                          key={word}
-                          className="font-medium text-foreground"
-                          style={{ fontSize: `${fontSize}rem`, opacity }}
-                        >
-                          {word}
-                        </span>
-                      );
-                    })}
+                  <div className="mt-3">
+                    <p className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">Session vibes</p>
+                    <div className="flex flex-wrap items-baseline gap-x-2 gap-y-1">
+                      {summary.topWords.map(({ word, count }) => {
+                        const ratio = count / summary.maxCount;
+                        const fontSize = 0.625 + ratio * 0.875; // 0.625rem (10px) to 1.5rem (24px)
+                        const opacity = 0.45 + ratio * 0.55;
+                        return (
+                          <span
+                            key={word}
+                            className="font-medium text-foreground"
+                            style={{ fontSize: `${fontSize}rem`, opacity }}
+                          >
+                            {word}
+                          </span>
+                        );
+                      })}
+                    </div>
                   </div>
                 )}
               </div>
