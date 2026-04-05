@@ -310,7 +310,7 @@ export function SessionViewPage() {
     ]);
     const wordCounts = new Map<string, number>();
     for (const c of allComments) {
-      const words = c.text.toLowerCase().replace(/[^\w\s]/g, '').split(/\s+/);
+      const words = c.text.toLowerCase().replace(/[^\p{L}\p{M}\p{N}\s]/gu, '').split(/\s+/);
       for (const w of words) {
         if (w.length > 2 && !stopwords.has(w)) {
           wordCounts.set(w, (wordCounts.get(w) ?? 0) + 1);

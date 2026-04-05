@@ -34,7 +34,7 @@
 
 ## 7. Replace gamified stats with word cloud
 
-- [ ] 7.1 Remove "Most commented" and "Most active" sections from summary rendering
-- [ ] 7.2 Add word frequency computation from allComments (tokenize, lowercase, filter stopwords)
-- [ ] 7.3 Render weighted word cloud as styled `<span>` elements with scaled Tailwind font sizes
-- [ ] 7.4 Remove unused summary fields (topSongs, maxSongComments, topCommenters, maxPlayerComments)
+- [x] 7.1 Remove "Most commented" and "Most active" sections from summary rendering
+- [x] 7.2 Add word frequency computation from allComments (tokenize, lowercase, filter stopwords)
+- [x] 7.3 Render weighted word cloud as styled `<span>` elements with scaled Tailwind font sizes
+- [x] 7.4 Remove unused summary fields (topSongs, maxSongComments, topCommenters, maxPlayerComments)

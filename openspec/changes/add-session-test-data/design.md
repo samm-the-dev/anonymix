@@ -15,9 +15,9 @@ The completed session view shows summary stats: tapes completed, total songs, to
 
 ## Decisions
 
-### 1. New JSON data file + append to seed.sql (same pattern as existing)
+### 1. Append session test data directly to seed.sql
 
-Follow the existing convention: source of truth in `supabase/seed-data/summer-mixtape-session.json`, SQL inserts appended to `seed.sql`.
+For this change, the session test data is added directly to `supabase/seed.sql`; no separate JSON source file is introduced.
 
 ### 2. Player engagement tiers
 

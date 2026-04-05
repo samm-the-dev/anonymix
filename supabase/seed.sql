@@ -168,27 +168,27 @@ insert into session_players (session_id, player_id) values
   ('b0b0b0b0-cafe-4000-8000-000000000001', 'a1b2c3d4-4444-4000-8000-000000000004');
 
 -- Tapes: 4 results + 1 skipped
-insert into tapes (id, session_id, title, prompt, status, deadline, submit_window_hours, comment_window_hours, created_at) values
+insert into tapes (id, session_id, title, prompt, status, deadline, submit_window_hours, comment_window_hours, created_at, completed_at) values
   ('a0a0a0a0-0001-4000-8000-000000000001', 'b0b0b0b0-cafe-4000-8000-000000000001',
    'opening track', 'songs that should start every playlist',
    'results', '2026-03-27T12:00:00+00:00', 48, 120,
-   '2026-03-25T12:05:00+00:00'),
+   '2026-03-25T12:05:00+00:00', '2026-03-27T12:00:00+00:00'),
   ('a0a0a0a0-0002-4000-8000-000000000002', 'b0b0b0b0-cafe-4000-8000-000000000001',
    'guilty pleasures', 'songs you''d never admit to loving',
    'results', '2026-03-28T12:00:00+00:00', 48, 120,
-   '2026-03-25T12:10:00+00:00'),
+   '2026-03-25T12:10:00+00:00', '2026-03-28T12:00:00+00:00'),
   ('a0a0a0a0-0003-4000-8000-000000000003', 'b0b0b0b0-cafe-4000-8000-000000000001',
    'main character energy', 'songs that make you feel unstoppable',
    'results', '2026-03-29T12:00:00+00:00', 48, 120,
-   '2026-03-25T12:15:00+00:00'),
+   '2026-03-25T12:15:00+00:00', '2026-03-29T12:00:00+00:00'),
   ('a0a0a0a0-0004-4000-8000-000000000004', 'b0b0b0b0-cafe-4000-8000-000000000001',
    'the closer', 'perfect last song of the night',
    'results', '2026-03-30T12:00:00+00:00', 48, 120,
-   '2026-03-25T12:20:00+00:00'),
+   '2026-03-25T12:20:00+00:00', '2026-03-30T12:00:00+00:00'),
   ('a0a0a0a0-0005-4000-8000-000000000005', 'b0b0b0b0-cafe-4000-8000-000000000001',
    'bonus round', 'wildcard — anything goes',
    'skipped', null, 48, 120,
-   '2026-03-25T12:25:00+00:00');
+   '2026-03-25T12:25:00+00:00', '2026-03-31T20:00:00+00:00');
 
 -- Submissions
 -- Tape 1 "opening track": Sam, Jules, Mika, Dani (4 submissions)
