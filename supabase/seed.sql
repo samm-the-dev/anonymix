@@ -2,27 +2,52 @@
 -- Source: supabase/seed-data/hello-world-session.json
 
 -- Auth user for dev/preview (magic link, pre-confirmed)
-insert into auth.users (id, instance_id, email, encrypted_password, email_confirmed_at, aud, role, raw_app_meta_data, raw_user_meta_data, created_at, updated_at, confirmation_token)
+-- Matches the shape GoTrue expects so signInWithOtp works against seeded user
+insert into auth.users (
+  id, instance_id, email, encrypted_password,
+  email_confirmed_at, confirmed_at, aud, role,
+  raw_app_meta_data, raw_user_meta_data,
+  created_at, updated_at,
+  confirmation_token, recovery_token,
+  email_change_token_new, email_change_token_current,
+  email_change, email_change_confirm_status,
+  phone_change, phone_change_token,
+  reauthentication_token,
+  is_sso_user, is_anonymous
+)
 values (
   '00000000-0000-0000-0000-000000000099',
   '00000000-0000-0000-0000-000000000000',
   'smarsh09@gmail.com',
   crypt('testpassword', gen_salt('bf')),
-  now(),
-  'authenticated',
-  'authenticated',
+  now(), now(),
+  'authenticated', 'authenticated',
   '{"provider":"email","providers":["email"]}',
-  '{}',
-  now(),
-  now(),
-  ''
+  jsonb_build_object(
+    'sub', '00000000-0000-0000-0000-000000000099',
+    'email', 'smarsh09@gmail.com',
+    'email_verified', true,
+    'phone_verified', false
+  ),
+  now(), now(),
+  '', '',
+  '', '',
+  '', 0,
+  '', '',
+  '',
+  false, false
 );
 
 insert into auth.identities (id, user_id, identity_data, provider, provider_id, last_sign_in_at, created_at, updated_at)
 values (
   '00000000-0000-0000-0000-000000000099',
   '00000000-0000-0000-0000-000000000099',
-  jsonb_build_object('sub', '00000000-0000-0000-0000-000000000099', 'email', 'smarsh09@gmail.com'),
+  jsonb_build_object(
+    'sub', '00000000-0000-0000-0000-000000000099',
+    'email', 'smarsh09@gmail.com',
+    'email_verified', true,
+    'phone_verified', false
+  ),
   'email',
   '00000000-0000-0000-0000-000000000099',
   now(),
