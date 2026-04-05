@@ -14,7 +14,7 @@ create policy "insert submissions" on submissions
     and is_session_member((select session_id from tapes where id = tape_id))
   );
 
--- Replace update policy
+-- Replace update policy (using + with check to prevent tape_id reassignment across sessions)
 drop policy "update own submissions" on submissions;
 create policy "update own submissions" on submissions
   for update using (
@@ -24,4 +24,13 @@ create policy "update own submissions" on submissions
       where tapes.id = tape_id
         and tapes.status = 'submitting'
     )
+    and is_session_member((select session_id from tapes where id = tape_id))
+  ) with check (
+    player_id = current_player_id()
+    and exists (
+      select 1 from tapes
+      where tapes.id = tape_id
+        and tapes.status = 'submitting'
+    )
+    and is_session_member((select session_id from tapes where id = tape_id))
   );
