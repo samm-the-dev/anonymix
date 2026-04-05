@@ -356,6 +356,7 @@ export function SessionViewPage() {
             <Collapsible.Content className="overflow-hidden data-[state=closed]:animate-collapsible-up data-[state=open]:animate-collapsible-down">
               <div className="px-4 pb-3">
                 {/* Totals */}
+                <p className="mb-1 text-[10px] uppercase tracking-wide text-muted-foreground">Stats</p>
                 <div className="flex gap-4 text-xs text-muted-foreground">
                   <span>{summary.tapesCompleted} tape{summary.tapesCompleted !== 1 ? 's' : ''}</span>
                   <span>{summary.totalSongs} song{summary.totalSongs !== 1 ? 's' : ''}</span>
