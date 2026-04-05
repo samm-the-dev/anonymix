@@ -15,6 +15,9 @@ import { computeExtendedDeadline } from '@/lib/extendDeadline';
 import * as DropdownMenu from '@radix-ui/react-dropdown-menu';
 import * as AlertDialog from '@radix-ui/react-alert-dialog';
 
+/** Postgres error code for RLS policy violation */
+const POSTGRES_INSUFFICIENT_PRIVILEGE = '42501';
+
 interface TapeData {
   id: string;
   title: string;
@@ -274,8 +277,8 @@ export function SessionViewPage() {
       toast.success('Song submitted!');
 
     } catch (err) {
-      const pgError = err && typeof err === 'object' && 'code' in err ? (err as { code?: string }).code : null;
-      if (pgError === '42501') {
+      const code = err && typeof err === 'object' && 'code' in err ? (err as { code: string }).code : '';
+      if (code === POSTGRES_INSUFFICIENT_PRIVILEGE) {
         toast.error('This tape is no longer accepting submissions');
       } else {
         toast.error(err instanceof Error ? err.message : 'Failed to submit song');
