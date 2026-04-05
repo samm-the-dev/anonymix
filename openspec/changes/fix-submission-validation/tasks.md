@@ -10,5 +10,5 @@
 
 ## 3. Verify
 
-- [ ] 3.1 Test locally: submit to a `submitting` tape succeeds; manually set tape to `playlist_ready` and verify insert is rejected by RLS
-- [ ] 3.2 Open draft PR to create Supabase preview branch, run `npm run env:local`, verify against preview DB
+- [x] 3.1 Test locally: submit to a `submitting` tape succeeds; manually set tape to `playlist_ready` and verify insert is rejected by RLS
+- [x] 3.2 Open draft PR to create Supabase preview branch, run `npm run env:local`, verify against preview DB
