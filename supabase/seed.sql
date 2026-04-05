@@ -5,7 +5,7 @@
 -- Matches the shape GoTrue expects so signInWithOtp works against seeded user
 insert into auth.users (
   id, instance_id, email, encrypted_password,
-  email_confirmed_at, confirmed_at, aud, role,
+  email_confirmed_at, aud, role,
   raw_app_meta_data, raw_user_meta_data,
   created_at, updated_at,
   confirmation_token, recovery_token,
@@ -20,7 +20,7 @@ values (
   '00000000-0000-0000-0000-000000000000',
   'smarsh09@gmail.com',
   crypt('testpassword', gen_salt('bf')),
-  now(), now(),
+  now(),
   'authenticated', 'authenticated',
   '{"provider":"email","providers":["email"]}',
   jsonb_build_object(
